@@ -13,6 +13,10 @@ export default function LoginPage() {
     setLoading(true);
     try {
       const supabase = getSupabaseBrowserClient();
+      if (!supabase) {
+        throw new Error('Unable to initialize authentication client');
+      }
+
       const { error } = await supabase.auth.signInWithOtp({ email });
       if (error) throw error;
       toast.success('Magic link sent to your email');
