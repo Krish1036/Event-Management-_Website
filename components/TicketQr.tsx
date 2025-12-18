@@ -7,7 +7,7 @@ const SIZE = 180;
 
 export function TicketQr({ registrationId }: { registrationId: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
-  const qrRef = useRef<QRCode | null>(null);
+  const qrRef = useRef<any | null>(null);
 
   useEffect(() => {
     if (!ref.current) return;
