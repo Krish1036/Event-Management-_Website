@@ -31,8 +31,7 @@ export default function LoginPage() {
     <div className="mx-auto flex max-w-md flex-col px-4 py-10">
       <h1 className="mb-4 text-2xl font-semibold tracking-tight">Login</h1>
       <p className="mb-6 text-sm text-slate-300">
-        Sign in using your university email. We will send you a one-time login
-        link.
+        Sign in with your email. We will send you a one-time login link.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">
         <label className="block text-xs font-medium text-slate-200">
