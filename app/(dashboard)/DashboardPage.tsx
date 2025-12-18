@@ -52,7 +52,7 @@ export default async function DashboardPage() {
   const { user, profile, registrations } = await getParticipantDashboard();
 
   if (!user) {
-    redirect('/auth/login');
+    redirect('/login');
   }
 
   if (profile?.role === 'organizer' || profile?.role === 'admin') {
