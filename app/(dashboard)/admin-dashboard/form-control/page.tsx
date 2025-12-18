@@ -31,11 +31,27 @@ async function getEventsWithFormFields() {
 
   const { data: events } = await supabase
     .from('events')
-    .select('id,title,registration_form_fields,status,created_by')
+    .select('id,title,status,created_by')
     .eq('status', 'approved')
     .order('title', { ascending: true });
 
-  return events ?? [];
+  // Get form fields for each event
+  const eventsWithFields = await Promise.all(
+    (events ?? []).map(async (event: any) => {
+      const { data: formFields } = await supabase
+        .from('event_form_fields')
+        .select('id,label,field_type,required,options')
+        .eq('event_id', event.id)
+        .order('created_at');
+
+      return {
+        ...event,
+        registration_form_fields: formFields || []
+      };
+    })
+  );
+
+  return eventsWithFields;
 }
 
 async function handleFormFieldAction(formData: FormData) {
@@ -70,7 +86,7 @@ async function handleFormFieldAction(formData: FormData) {
 
   const { data: event } = await supabase
     .from('events')
-    .select('id,registration_form_fields,created_by')
+    .select('id,created_by')
     .eq('id', eventId)
     .single();
 
@@ -79,46 +95,66 @@ async function handleFormFieldAction(formData: FormData) {
   }
 
   let logAction = '';
-  let updatedFields = event.registration_form_fields || [];
 
   if (action === 'disable_field' && fieldId) {
-    // Disable unsafe field
-    updatedFields = updatedFields.map((field: any) => 
-      field.id === fieldId 
-        ? { ...field, disabled: true, disabled_by: user.id, disabled_at: new Date().toISOString() }
-        : field
-    );
+    // Disable unsafe field - update event_form_fields table
+    await supabase
+      .from('event_form_fields')
+      .update({ 
+        disabled: true, 
+        disabled_by: user.id, 
+        disabled_at: new Date().toISOString() 
+      })
+      .eq('id', fieldId)
+      .eq('event_id', eventId);
+    
     logAction = 'FORM_FIELD_DISABLE';
   } else if (action === 'enable_field' && fieldId) {
     // Enable previously disabled field
-    updatedFields = updatedFields.map((field: any) => 
-      field.id === fieldId 
-        ? { ...field, disabled: false, disabled_by: null, disabled_at: null }
-        : field
-    );
+    await supabase
+      .from('event_form_fields')
+      .update({ 
+        disabled: false, 
+        disabled_by: null, 
+        disabled_at: null 
+      })
+      .eq('id', fieldId)
+      .eq('event_id', eventId);
+    
     logAction = 'FORM_FIELD_ENABLE';
   } else if (action === 'override_field_required' && fieldId) {
     // Override field to make it required (safety)
-    updatedFields = updatedFields.map((field: any) => 
-      field.id === fieldId 
-        ? { ...field, required: true, overridden_by: user.id, overridden_at: new Date().toISOString() }
-        : field
-    );
+    await supabase
+      .from('event_form_fields')
+      .update({ 
+        required: true, 
+        overridden_by: user.id, 
+        overridden_at: new Date().toISOString() 
+      })
+      .eq('id', fieldId)
+      .eq('event_id', eventId);
+    
     logAction = 'FORM_FIELD_OVERRIDE_REQUIRED';
   } else if (action === 'remove_field_override' && fieldId) {
-    // Remove override
-    updatedFields = updatedFields.map((field: any) => 
-      field.id === fieldId 
-        ? { ...field, required: field.original_required || false, overridden_by: null, overridden_at: null }
-        : field
-    );
+    // Remove override - restore original required status
+    const { data: field } = await supabase
+      .from('event_form_fields')
+      .select('original_required')
+      .eq('id', fieldId)
+      .single();
+    
+    await supabase
+      .from('event_form_fields')
+      .update({ 
+        required: field?.original_required || false, 
+        overridden_by: null, 
+        overridden_at: null 
+      })
+      .eq('id', fieldId)
+      .eq('event_id', eventId);
+    
     logAction = 'FORM_FIELD_REMOVE_OVERRIDE';
   }
-
-  await supabase
-    .from('events')
-    .update({ registration_form_fields: updatedFields })
-    .eq('id', eventId);
 
   await supabase.from('admin_logs').insert({
     admin_id: user.id,
@@ -126,8 +162,7 @@ async function handleFormFieldAction(formData: FormData) {
     details: {
       event_id: eventId,
       field_id: fieldId,
-      previous_fields: event.registration_form_fields,
-      updated_fields: updatedFields
+      action: action
     }
   });
 
@@ -206,13 +241,15 @@ export default async function AdminFormControlPage({
                       <div className="flex items-center gap-2">
                         <h4 className="text-sm font-semibold text-white">{field.label}</h4>
                         <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${
-                          field.type === 'text' ? 'bg-blue-700/30 text-blue-300' :
-                          field.type === 'email' ? 'bg-green-700/30 text-green-300' :
-                          field.type === 'phone' ? 'bg-purple-700/30 text-purple-300' :
-                          field.type === 'select' ? 'bg-amber-700/30 text-amber-300' :
+                          field.field_type === 'text' ? 'bg-blue-700/30 text-blue-300' :
+                          field.field_type === 'email' ? 'bg-green-700/30 text-green-300' :
+                          field.field_type === 'phone' ? 'bg-purple-700/30 text-purple-300' :
+                          field.field_type === 'number' ? 'bg-indigo-700/30 text-indigo-300' :
+                          field.field_type === 'select' ? 'bg-amber-700/30 text-amber-300' :
+                          field.field_type === 'file' ? 'bg-pink-700/30 text-pink-300' :
                           'bg-slate-700 text-slate-300'
                         }`}>
-                          {field.type}
+                          {field.field_type}
                         </span>
                         {field.required && (
                           <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-red-700/30 text-red-300">
@@ -231,7 +268,7 @@ export default async function AdminFormControlPage({
                         )}
                       </div>
                       
-                      <p className="text-xs text-slate-300">{field.placeholder || 'No placeholder'}</p>
+                      <p className="text-xs text-slate-300">No placeholder</p>
                       
                       {field.options && field.options.length > 0 && (
                         <div className="text-xs text-slate-400">
