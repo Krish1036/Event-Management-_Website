@@ -1,17 +1,29 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { toast } from "sonner";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
+export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const router = useRouter();
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
+
+    if (password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+
     setLoading(true);
     try {
       const supabase = getSupabaseBrowserClient();
@@ -19,15 +31,16 @@ export default function LoginPage() {
         throw new Error("Unable to initialize authentication client");
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
+      const { error } = await supabase.auth.updateUser({
         password,
       });
 
       if (error) throw error;
-      toast.success("Logged in successfully");
+
+      toast.success("Password updated successfully. You can now log in.");
+      router.push("/login");
     } catch (err: any) {
-      toast.error(err.message ?? "Unable to log in");
+      toast.error(err.message ?? "Unable to update password");
     } finally {
       setLoading(false);
     }
@@ -35,59 +48,40 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-10">
-      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Login</h1>
+      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Reset password</h1>
       <p className="mb-6 text-sm text-slate-300">
-        Sign in with your email and password.
+        Choose a new password for your account.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">
         <label className="block text-xs font-medium text-slate-200">
-          Email
-          <input
-            type="email"
-            required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
-          />
-        </label>
-        <label className="block text-xs font-medium text-slate-200">
-          Password
+          New password
           <input
             type="password"
             required
+            minLength={6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
           />
         </label>
-
-        <div className="flex justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-xs text-sky-400 hover:text-sky-300"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
+        <label className="block text-xs font-medium text-slate-200">
+          Confirm new password
+          <input
+            type="password"
+            required
+            minLength={6}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
+          />
+        </label>
         <button
           type="submit"
           disabled={loading}
           className="inline-flex w-full items-center justify-center rounded bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-500 disabled:opacity-60"
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Updating password..." : "Update password"}
         </button>
-
-        <div className="my-2 text-center text-[11px] text-slate-500">
-          ------------- OR -------------
-        </div>
-
-        <Link
-          href="/signup"
-          className="inline-flex w-full items-center justify-center rounded border border-slate-700 px-3 py-2 text-xs font-medium text-slate-100 hover:border-slate-500"
-        >
-          Sign up
-        </Link>
       </form>
     </div>
   );

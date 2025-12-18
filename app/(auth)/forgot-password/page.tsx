@@ -1,13 +1,11 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import { toast } from "sonner";
 
-export default function LoginPage() {
+export default function ForgotPasswordPage() {
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -19,15 +17,16 @@ export default function LoginPage() {
         throw new Error("Unable to initialize authentication client");
       }
 
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
+      const redirectTo = `${window.location.origin}/reset-password`;
+
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo,
       });
 
       if (error) throw error;
-      toast.success("Logged in successfully");
+      toast.success("Password reset link sent to your email");
     } catch (err: any) {
-      toast.error(err.message ?? "Unable to log in");
+      toast.error(err.message ?? "Unable to send reset link");
     } finally {
       setLoading(false);
     }
@@ -35,9 +34,9 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-10">
-      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Login</h1>
+      <h1 className="mb-4 text-2xl font-semibold tracking-tight">Forgot password</h1>
       <p className="mb-6 text-sm text-slate-300">
-        Sign in with your email and password.
+        Enter the email associated with your account and we'll send you a link to reset your password.
       </p>
       <form onSubmit={handleSubmit} className="space-y-4 text-sm">
         <label className="block text-xs font-medium text-slate-200">
@@ -50,44 +49,13 @@ export default function LoginPage() {
             className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
           />
         </label>
-        <label className="block text-xs font-medium text-slate-200">
-          Password
-          <input
-            type="password"
-            required
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="mt-1 w-full rounded border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:border-sky-500 focus:outline-none"
-          />
-        </label>
-
-        <div className="flex justify-end">
-          <Link
-            href="/forgot-password"
-            className="text-xs text-sky-400 hover:text-sky-300"
-          >
-            Forgot password?
-          </Link>
-        </div>
-
         <button
           type="submit"
           disabled={loading}
           className="inline-flex w-full items-center justify-center rounded bg-sky-600 px-3 py-2 text-xs font-medium text-white hover:bg-sky-500 disabled:opacity-60"
         >
-          {loading ? "Logging in..." : "Login"}
+          {loading ? "Sending link..." : "Send reset link"}
         </button>
-
-        <div className="my-2 text-center text-[11px] text-slate-500">
-          ------------- OR -------------
-        </div>
-
-        <Link
-          href="/signup"
-          className="inline-flex w-full items-center justify-center rounded border border-slate-700 px-3 py-2 text-xs font-medium text-slate-100 hover:border-slate-500"
-        >
-          Sign up
-        </Link>
       </form>
     </div>
   );
