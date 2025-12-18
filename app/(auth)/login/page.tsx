@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from 'react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');

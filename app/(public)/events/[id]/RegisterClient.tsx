@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from 'react';
-import toast from 'react-hot-toast';
+import { toast } from 'sonner';
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 
