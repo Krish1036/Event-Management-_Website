@@ -1,5 +1,5 @@
 import { cookies } from 'next/headers';
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from '@supabase/ssr';
 import type { SupabaseClient } from '@supabase/supabase-js';
 
 export function getSupabaseServerClient(): SupabaseClient {
