@@ -87,7 +87,7 @@ async function getAttendanceData() {
   
   // Add present counts
   for (const a of attendance ?? []) {
-    const eventId = a.event_id as string;
+    const eventId = a.registration?.[0]?.event_id as string;
     const stats = eventStats.get(eventId) || { total: 0, present: 0, absent: 0 };
     stats.present += 1;
     eventStats.set(eventId, stats);
