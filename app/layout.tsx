@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import { SupabaseProvider } from '@/lib/supabase-provider';
 import Link from 'next/link';
+import { UserMenu } from '@/components/UserMenu';
 
 export const metadata: Metadata = {
   title: 'University Event Management',
@@ -27,12 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
                   <Link href="/dashboard" className="hover:text-white">
                     Dashboard
                   </Link>
-                  <Link href="/signup" className="rounded border border-slate-700 px-3 py-1 text-xs hover:border-slate-500">
-                    Sign Up
-                  </Link>
-                  <Link href="/login" className="rounded border border-slate-700 px-3 py-1 text-xs hover:border-slate-500">
-                    Login
-                  </Link>
+                  <UserMenu />
                 </nav>
               </div>
             </header>
