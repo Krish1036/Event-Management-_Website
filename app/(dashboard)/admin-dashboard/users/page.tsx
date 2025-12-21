@@ -32,20 +32,34 @@ export default function AdminUsersPage() {
     try {
       const supabase = getSupabaseBrowserClient();
       
-      // Check if user is admin using the bypass function
+      // Check if user is logged in
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push('/admin');
         return;
       }
 
-      // Use the bypass function to check admin status and get user profile
-      const { data: allUsers } = await supabase
-        .rpc('admin_bypass_profiles');
-
-      // Find current user in the bypass results to check if admin
-      const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
-      if (!currentUserProfile || currentUserProfile.role !== 'admin') {
+      // Get user email to check if admin
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData?.user?.email;
+      
+      // Email check first: If the user's email is in the hardcoded list, they're admin
+      const adminEmails = ['krshthakore@gmail.com', 'admin@university.edu']; // Update with your admin emails
+      let isAdmin = false;
+      
+      if (userEmail && adminEmails.includes(userEmail)) {
+        isAdmin = true;
+      } else {
+        // Role check second: If not in email list, checks if they have admin role in profiles
+        // Use bypass function to avoid RLS recursion
+        const { data: allUsers } = await supabase
+          .rpc('admin_bypass_profiles');
+        
+        const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
+        isAdmin = currentUserProfile?.role === 'admin';
+      }
+      
+      if (!isAdmin) {
         router.push('/');
         return;
       }
@@ -118,15 +132,34 @@ export default function AdminUsersPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      // Use bypass function to check admin status
-      const { data: allUsers } = await supabase
-        .rpc('admin_bypass_profiles');
-
-      const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
-      if (!currentUserProfile || currentUserProfile.role !== 'admin') return;
+      // Get user email to check if admin
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData?.user?.email;
+      
+      // Email check first: If the user's email is in the hardcoded list, they're admin
+      const adminEmails = ['krshthakore@gmail.com', 'admin@university.edu']; // Update with your admin emails
+      let isAdmin = false;
+      
+      if (userEmail && adminEmails.includes(userEmail)) {
+        isAdmin = true;
+      } else {
+        // Role check second: If not in email list, checks if they have admin role in profiles
+        // Use bypass function to avoid RLS recursion
+        const { data: allUsers } = await supabase
+          .rpc('admin_bypass_profiles');
+        
+        const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
+        isAdmin = currentUserProfile?.role === 'admin';
+      }
+      
+      if (!isAdmin) return;
 
       // Prevent self-demotion
       if (targetUserId === user.id) return;
+
+      // Get target user profile using bypass function
+      const { data: allUsers } = await supabase
+        .rpc('admin_bypass_profiles');
 
       const targetProfile = allUsers?.find((u: any) => u.id === targetUserId);
       if (!targetProfile) return;
