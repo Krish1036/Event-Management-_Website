@@ -44,6 +44,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
           <nav className="flex-1 space-y-1 text-sm">
             <AdminNavItem href="/admin-dashboard" label="Dashboard (Overview)" />
             <AdminNavItem href="/admin-dashboard/events" label="Events" />
+            <AdminNavItem href="/admin-dashboard/create-event" label="Create Event" />
             <AdminNavItem href="/admin-dashboard/registrations" label="Registrations" />
             <AdminNavItem href="/admin-dashboard/attendance" label="Attendance" />
             <AdminNavItem href="/admin-dashboard/payments" label="Payments" />

@@ -31,7 +31,7 @@ async function getAdminOverviewMetrics() {
 
   const [{ count: usersCount }, { data: events }, { count: registrationsCount }, { count: attendanceTodayCount }] =
     await Promise.all([
-      supabase.from('profiles').select('*', { count: 'exact', head: true }),
+      supabase.rpc('get_total_users_count'),
       supabase
         .from('events')
         .select('id,status,event_date,capacity,is_paid')

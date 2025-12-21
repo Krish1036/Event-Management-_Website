@@ -216,9 +216,14 @@ async function handleEventAction(formData: FormData) {
   redirect('/admin-dashboard/events');
 }
 
-export default async function AdminEventsPage() {
+export default async function AdminEventsPage({
+  searchParams
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   await requireAdmin();
   const events = await getEventsWithUsage();
+  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : undefined;
 
   return (
     <div className="space-y-6">
@@ -233,10 +238,14 @@ export default async function AdminEventsPage() {
         <p className="text-sm text-slate-400">No events found.</p>
       ) : (
         <div className="space-y-3 text-sm">
-          {events.map((event: any) => (
+          {events.map((event: any) => {
+            const isHighlighted = highlightEventId === event.id;
+            return (
             <div
               key={event.id}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+              className={`rounded-xl border bg-slate-900/60 p-4 ${
+                isHighlighted ? 'border-sky-500 shadow-[0_0_0_1px_rgba(56,189,248,0.6)]' : 'border-slate-800'
+              }`}
             >
               <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-1">
@@ -245,6 +254,11 @@ export default async function AdminEventsPage() {
                     <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-200 bg-slate-800">
                       {event.status}
                     </span>
+                    {isHighlighted && (
+                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-sky-50 bg-sky-600/90">
+                        New
+                      </span>
+                    )}
                     <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-200 bg-slate-800/70">
                       {event.is_registration_open ? 'Registrations Open' : 'Registrations Closed'}
                     </span>

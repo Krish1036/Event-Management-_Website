@@ -1,14 +1,1 @@
-{
-  "/_not-found/page": "app/_not-found/page.js",
-  "/(auth)/login/page": "app/(auth)/login/page.js",
-  "/(auth)/logout/route": "app/(auth)/logout/route.js",
-  "/api/register-event-test/route": "app/api/register-event-test/route.js",
-  "/api/check-in/route": "app/api/check-in/route.js",
-  "/api/register-event/route": "app/api/register-event/route.js",
-  "/(public)/events/page": "app/(public)/events/page.js",
-  "/(dashboard)/dashboard/page": "app/(dashboard)/dashboard/page.js",
-  "/(public)/events/[id]/page": "app/(public)/events/[id]/page.js",
-  "/(dashboard)/page": "app/(dashboard)/page.js",
-  "/(public)/tickets/[registrationId]/page": "app/(public)/tickets/[registrationId]/page.js",
-  "/(public)/page": "app/(public)/page.js"
-}
+{}

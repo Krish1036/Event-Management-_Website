@@ -413,7 +413,7 @@ export default async function AdminAttendancePage() {
                         value="checkin"
                         className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
                       >
-                        Check in a
+                        Check in
                       </button>
                     </form>
                   </div>
