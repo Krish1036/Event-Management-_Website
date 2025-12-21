@@ -51,9 +51,9 @@ export default function AdminUsersPage() {
         isAdmin = true;
       } else {
         // Role check second: If not in email list, checks if they have admin role in profiles
-        // Use bypass function to avoid RLS recursion
+        // Use the new working bypass function to avoid RLS recursion
         const { data: allUsers } = await supabase
-          .rpc('admin_bypass_profiles');
+          .rpc('get_all_profiles_for_admin');
         
         const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
         isAdmin = currentUserProfile?.role === 'admin';
@@ -64,9 +64,9 @@ export default function AdminUsersPage() {
         return;
       }
 
-      // Use the bypass function to get all users with stats
+      // Use the new working bypass function to get all users with stats
       const { data: usersData } = await supabase
-        .rpc('admin_bypass_profiles');
+        .rpc('get_all_profiles_for_admin');
 
       const { data: events } = await supabase
         .from('events')
@@ -144,9 +144,9 @@ export default function AdminUsersPage() {
         isAdmin = true;
       } else {
         // Role check second: If not in email list, checks if they have admin role in profiles
-        // Use bypass function to avoid RLS recursion
+        // Use the new working bypass function to avoid RLS recursion
         const { data: allUsers } = await supabase
-          .rpc('admin_bypass_profiles');
+          .rpc('get_all_profiles_for_admin');
         
         const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
         isAdmin = currentUserProfile?.role === 'admin';
@@ -157,9 +157,9 @@ export default function AdminUsersPage() {
       // Prevent self-demotion
       if (targetUserId === user.id) return;
 
-      // Get target user profile using bypass function
+      // Get target user profile using the new working bypass function
       const { data: allUsers } = await supabase
-        .rpc('admin_bypass_profiles');
+        .rpc('get_all_profiles_for_admin');
 
       const targetProfile = allUsers?.find((u: any) => u.id === targetUserId);
       if (!targetProfile) return;
