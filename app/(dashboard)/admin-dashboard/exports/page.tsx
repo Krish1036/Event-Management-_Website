@@ -1,6 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
-import { headers } from 'next/headers';
 
 export const revalidate = 0;
 
@@ -301,14 +300,13 @@ async function handleExport(formData: FormData) {
     }
   });
 
-  // Return CSV response
-  const headersList = headers();
-  headersList.set('Content-Type', 'text/csv; charset=utf-8');
-  headersList.set('Content-Disposition', `attachment; filename="${filename}"`);
-  
+  // Return CSV response using NextResponse
   return new Response(csvData, {
     status: 200,
-    headers: headersList
+    headers: {
+      'Content-Type': 'text/csv; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`
+    }
   });
 }
 
