@@ -41,7 +41,7 @@ async function getSuspiciousPayments() {
     .order('created_at', { ascending: false });
 
   return (data ?? []).filter(
-    (p) => !p.registration || p.registration?.status !== 'CONFIRMED'
+    (p: any) => !p.registration || p.registration.length === 0 || p.registration[0]?.status !== 'CONFIRMED'
   );
 }
 
