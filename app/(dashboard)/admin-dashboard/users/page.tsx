@@ -44,9 +44,13 @@ async function getUsersWithStats() {
 
   const { data: attendance } = await supabase
     .from('attendance')
-    .select('id,registration_id')
-    .innerJoin('registrations', 'attendance.registration_id = registrations.id')
-    .select('registrations!inner(user_id)');
+    .select(`
+      id,
+      registration_id,
+      registrations!inner(
+        user_id
+      )
+    `);
 
   const userStats = new Map<string, { eventsCreated: number; registrationsCount: number; attendanceCount: number }>();
 
