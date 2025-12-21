@@ -32,25 +32,25 @@ export default function AdminUsersPage() {
     try {
       const supabase = getSupabaseBrowserClient();
       
-      // Check if user is admin
+      // Check if user is admin using the bypass function
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         router.push('/admin');
         return;
       }
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      // Use the bypass function to check admin status and get user profile
+      const { data: allUsers } = await supabase
+        .rpc('admin_bypass_profiles');
 
-      if (!profile || profile.role !== 'admin') {
+      // Find current user in the bypass results to check if admin
+      const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
+      if (!currentUserProfile || currentUserProfile.role !== 'admin') {
         router.push('/');
         return;
       }
 
-      // Fetch all users with stats
+      // Use the bypass function to get all users with stats
       const { data: usersData } = await supabase
         .rpc('admin_bypass_profiles');
 
@@ -118,23 +118,17 @@ export default function AdminUsersPage() {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', user.id)
-        .single();
+      // Use bypass function to check admin status
+      const { data: allUsers } = await supabase
+        .rpc('admin_bypass_profiles');
 
-      if (!profile || profile.role !== 'admin') return;
+      const currentUserProfile = allUsers?.find((u: any) => u.id === user.id);
+      if (!currentUserProfile || currentUserProfile.role !== 'admin') return;
 
       // Prevent self-demotion
       if (targetUserId === user.id) return;
 
-      const { data: targetProfile } = await supabase
-        .from('profiles')
-        .select('id,role')
-        .eq('id', targetUserId)
-        .single();
-
+      const targetProfile = allUsers?.find((u: any) => u.id === targetUserId);
       if (!targetProfile) return;
 
       let newRole: 'student' | 'organizer' | 'admin' | null = null;
