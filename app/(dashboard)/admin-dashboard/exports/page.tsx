@@ -340,6 +340,7 @@ export default async function AdminExportsPage() {
           <li>Special characters are properly escaped for Excel compatibility</li>
           <li>Exports are logged in audit logs for compliance</li>
           <li>Filenames include date: {`export-type-YYYY-MM-DD.csv`}</li>
+          <li>Filenames include date: {`export-type-YYYY-MM-DD.csv`}</li>
         </ul>
       </div>
     </div>
