@@ -235,80 +235,7 @@ async function exportUsers() {
   return generateCSV(csvData, headers);
 }
 
-async function handleExport(formData: FormData) {
-  'use server';
 
-  const exportType = formData.get('exportType') as string | null;
-
-  if (!exportType) {
-    redirect('/admin-dashboard/exports');
-  }
-
-  const supabase = getSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/admin');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin') {
-    redirect('/');
-  }
-
-  let csvData = '';
-  let filename = '';
-
-  switch (exportType) {
-    case 'registrations':
-      csvData = await exportRegistrations();
-      filename = `registrations-${new Date().toISOString().split('T')[0]}.csv`;
-      break;
-    case 'attendance':
-      csvData = await exportAttendance();
-      filename = `attendance-${new Date().toISOString().split('T')[0]}.csv`;
-      break;
-    case 'manual_registrations':
-      csvData = await exportManualRegistrations();
-      filename = `manual-registrations-${new Date().toISOString().split('T')[0]}.csv`;
-      break;
-    case 'payments':
-      csvData = await exportPayments();
-      filename = `payments-${new Date().toISOString().split('T')[0]}.csv`;
-      break;
-    case 'users':
-      csvData = await exportUsers();
-      filename = `users-${new Date().toISOString().split('T')[0]}.csv`;
-      break;
-  }
-
-  // Log the export action
-  await supabase.from('admin_logs').insert({
-    admin_id: user.id,
-    action: 'EXPORT_DATA',
-    details: {
-      export_type: exportType,
-      filename,
-      record_count: csvData.split('\n').length - 1 // Subtract header row
-    }
-  });
-
-  // Return CSV response using NextResponse
-  return new Response(csvData, {
-    status: 200,
-    headers: {
-      'Content-Type': 'text/csv; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${filename}"`
-    }
-  });
-}
 
 export default async function AdminExportsPage() {
   await requireAdmin();
@@ -323,7 +250,7 @@ export default async function AdminExportsPage() {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <form action={handleExport} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/admin/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <input type="hidden" name="exportType" value="registrations" />
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-white">Registrations</h2>
@@ -339,7 +266,7 @@ export default async function AdminExportsPage() {
           </div>
         </form>
 
-        <form action={handleExport} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/admin/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <input type="hidden" name="exportType" value="attendance" />
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-white">Attendance</h2>
@@ -355,7 +282,7 @@ export default async function AdminExportsPage() {
           </div>
         </form>
 
-        <form action={handleExport} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/admin/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <input type="hidden" name="exportType" value="manual_registrations" />
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-white">Manual Registrations</h2>
@@ -371,7 +298,7 @@ export default async function AdminExportsPage() {
           </div>
         </form>
 
-        <form action={handleExport} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/admin/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <input type="hidden" name="exportType" value="payments" />
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-white">Payments</h2>
@@ -387,7 +314,7 @@ export default async function AdminExportsPage() {
           </div>
         </form>
 
-        <form action={handleExport} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/admin/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
           <input type="hidden" name="exportType" value="users" />
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-white">Users</h2>
