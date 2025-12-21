@@ -83,11 +83,11 @@ async function exportRegistrations() {
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
     'Event Title': reg.event?.title || '',
-    'Event Date': reg.event?.event_date ? new Date(reg.event.event_date).toLocaleDateString() : '',
+    'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
     'Event Price': reg.event?.price || 0,
     'Status': reg.status,
     'Entry Code': reg.entry_code,
-    'Created At': new Date(reg.created_at).toLocaleString()
+    'Created At': String(new Date(reg.created_at).toLocaleString())
   }));
 
   return generateCSV(csvData, headers);
@@ -121,9 +121,9 @@ async function exportAttendance() {
     'User Name': att.user?.full_name || '',
     'User Email': att.user?.email || '',
     'Event Title': att.event?.title || '',
-    'Event Date': att.event?.event_date ? new Date(att.event.event_date).toLocaleDateString() : '',
+    'Event Date': att.event?.event_date ? String(new Date(att.event.event_date).toLocaleDateString()) : '',
     'Entry Code': att.registration?.entry_code || '',
-    'Checked In At': new Date(att.checked_in_at).toLocaleString()
+    'Checked In At': String(new Date(att.checked_in_at).toLocaleString())
   }));
 
   return generateCSV(csvData, headers);
@@ -158,10 +158,10 @@ async function exportManualRegistrations() {
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
     'Event Title': reg.event?.title || '',
-    'Event Date': reg.event?.event_date ? new Date(reg.event.event_date).toLocaleDateString() : '',
+    'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
     'Status': reg.status,
     'Entry Code': reg.entry_code,
-    'Created At': new Date(reg.created_at).toLocaleString()
+    'Created At': String(new Date(reg.created_at).toLocaleString())
   }));
 
   return generateCSV(csvData, headers);
@@ -197,12 +197,12 @@ async function exportPayments() {
     'User Name': payment.user?.full_name || '',
     'User Email': payment.user?.email || '',
     'Event Title': payment.event?.title || '',
-    'Event Date': payment.event?.event_date ? new Date(payment.event.event_date).toLocaleDateString() : '',
+    'Event Date': payment.event?.event_date ? String(new Date(payment.event.event_date).toLocaleDateString()) : '',
     'Amount': payment.amount,
     'Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
     'Razorpay Payment ID': payment.razorpay_payment_id || '',
-    'Created At': new Date(payment.created_at).toLocaleString()
+    'Created At': String(new Date(payment.created_at).toLocaleString())
   }));
 
   return generateCSV(csvData, headers);
@@ -229,7 +229,7 @@ async function exportUsers() {
     'Full Name': user.full_name || '',
     'Email': user.email,
     'Role': user.role,
-    'Created At': new Date(user.created_at).toLocaleString()
+    'Created At': String(new Date(user.created_at).toLocaleString())
   }));
 
   return generateCSV(csvData, headers);
