@@ -19,13 +19,13 @@ export function OrganizerSection({ organizers }: { organizers: Organizer[] }) {
         <Label htmlFor="organizer">Assign Organizer (Optional)</Label>
         <Select
           value={state.data.assigned_organizer || ''}
-          onValueChange={(value: string) => updateField('assigned_organizer', value || null)}
+          onValueChange={(value: string) => updateField('assigned_organizer', value === '__admin' ? null : value || null)}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select an organizer (optional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Created by Admin</SelectItem>
+            <SelectItem value="__admin">Created by Admin</SelectItem>
             {organizers.map((organizer) => (
               <SelectItem key={organizer.id} value={organizer.id}>
                 {organizer.full_name} ({organizer.email})
