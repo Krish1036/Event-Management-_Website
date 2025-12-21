@@ -1,4 +1,3 @@
-import React from 'react';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 
@@ -227,7 +226,8 @@ export default async function AdminEventsPage({
   const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : undefined;
 
   return (
-    <div className="space-y-6">
+    <>
+      <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-white">Events</h1>
         <p className="mt-1 text-sm text-slate-400">
@@ -419,6 +419,7 @@ export default async function AdminEventsPage({
           ))}
         </div>
       )}
-    </div>
+      </div>
+    </>
   );
 }
