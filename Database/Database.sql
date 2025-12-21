@@ -33,6 +33,7 @@ create table events (
   is_paid boolean generated always as (price > 0) stored,
 
   created_by uuid references profiles(id),
+  assigned_organizer uuid references profiles(id),
   status text check (status in ('draft','approved','cancelled')) default 'draft',
 
   created_at timestamptz default now()
@@ -393,6 +394,7 @@ create policy "Organizer & admin manage events"
 on events for all
 using (
   created_by = auth.uid()
+  or assigned_organizer = auth.uid()
   or is_admin_by_email()
 );
 
