@@ -191,7 +191,7 @@ async function handleManualFix(formData: FormData) {
         .insert({
           email: offlineUserEmail,
           full_name: offlineUserName,
-          role: 'admin'
+          role: 'student'
         })
         .select('id,full_name')
         .single();
@@ -310,14 +310,20 @@ export default async function AdminManualFixesPage() {
                       name="action"
                       value="fix_payment_success_but_registration_missing"
                       className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
-                      onClick={(e) => {
-                        if (!confirm(`Fix registration for ${payment.user?.full_name || payment.user?.email}?\n\nThis will create a manual registration and attach payment reference.`)) {
-                          e.preventDefault();
-                        }
-                      }}
                     >
                       Fix Registration
                     </button>
+                    <script
+                      dangerouslySetInnerHTML={{
+                        __html: `
+                          document.querySelector('[name="action"][value="fix_payment_success_but_registration_missing"]').addEventListener('click', function(e) {
+                            if (!confirm('Fix registration for ${payment.user?.full_name || payment.user?.email}?\\n\\nThis will create a manual registration and attach payment reference.')) {
+                              e.preventDefault();
+                            }
+                          });
+                        `,
+                      }}
+                    />
                   </form>
                 </div>
               </div>
@@ -368,14 +374,20 @@ export default async function AdminManualFixesPage() {
             name="action"
             value="add_user_manually"
             className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-600"
-            onClick={(e) => {
-              if (!confirm('Add user manually?\n\nThis will create a manual registration for a user who paid but internet failed.')) {
-                e.preventDefault();
-              }
-            }}
           >
             Add User Manually
           </button>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                document.querySelector('[name="action"][value="add_user_manually"]').addEventListener('click', function(e) {
+                  if (!confirm('Add user manually?\\n\\nThis will create a manual registration for a user who paid but internet failed.')) {
+                    e.preventDefault();
+                  }
+                });
+              `,
+            }}
+          />
         </form>
       </div>
 
@@ -434,14 +446,20 @@ export default async function AdminManualFixesPage() {
             name="action"
             value="add_offline_registration"
             className="rounded-md bg-amber-700 px-4 py-2 text-xs font-medium text-amber-50 hover:bg-amber-600"
-            onClick={(e) => {
-              if (!confirm('Add offline registration?\n\nThis will create a new user profile and manual registration for offline participants.')) {
-                e.preventDefault();
-              }
-            }}
           >
             Add Offline Registration
           </button>
+          <script
+            dangerouslySetInnerHTML={{
+              __html: `
+                document.querySelector('[name="action"][value="add_offline_registration"]').addEventListener('click', function(e) {
+                  if (!confirm('Add offline registration?\\n\\nThis will create a new user profile and manual registration for offline participants.')) {
+                    e.preventDefault();
+                  }
+                });
+              `,
+            }}
+          />
         </form>
       </div>
 
