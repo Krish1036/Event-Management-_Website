@@ -191,7 +191,7 @@ async function handleManualFix(formData: FormData) {
         .insert({
           email: offlineUserEmail,
           full_name: offlineUserName,
-          role: 'student'
+          role: 'admin'
         })
         .select('id,full_name')
         .single();
