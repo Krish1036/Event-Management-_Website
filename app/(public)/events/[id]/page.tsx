@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { RegisterClient } from './RegisterClient';
+import { EventRegistrationSection } from './EventRegistrationSection';
 import { redirect } from 'next/navigation';
 
 export const revalidate = 0;
@@ -86,12 +87,11 @@ export default async function EventDetailPage({ params }: { params: { id: string
             >
               {registrationOpen ? 'Registration open' : 'Registration closed'}
             </span>
-            {registrationOpen && isLoggedIn && (
-              <RegisterClient eventId={event.id as string} />
-            )}
-            {registrationOpen && !isLoggedIn && (
-              <p className="text-[11px] text-slate-400">Login to register for this event.</p>
-            )}
+            <EventRegistrationSection 
+              eventId={event.id as string} 
+              registrationOpen={registrationOpen} 
+              isLoggedIn={isLoggedIn} 
+            />
           </div>
         </div>
       </div>
