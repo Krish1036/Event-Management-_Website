@@ -65,9 +65,9 @@ async function getRegistrations(search: string | null, eventId: string | null, s
   }
 
   if (search && search.trim().length > 0) {
-    // Search by entry code, user name, or email
+    // Search by entry code, user full name, or email using the underlying profiles table
     query = query.or(
-      `entry_code.ilike.%${search}%,user.full_name.ilike.%${search}%,user.email.ilike.%${search}%`
+      `entry_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`
     ) as any;
   }
 

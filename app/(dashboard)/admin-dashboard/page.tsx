@@ -29,7 +29,7 @@ async function requireAdmin() {
 async function getAdminOverviewMetrics() {
   const supabase = getSupabaseServerClient();
 
-  const [{ count: usersCount }, { data: events }, { count: registrationsCount }, { count: attendanceTodayCount }] =
+  const [{ data: usersCount }, { data: events }, { count: registrationsCount }, { count: attendanceTodayCount }] =
     await Promise.all([
       supabase.rpc('get_total_users_count'),
       supabase
