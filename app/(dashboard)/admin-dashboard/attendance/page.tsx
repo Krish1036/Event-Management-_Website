@@ -87,11 +87,12 @@ async function getAttendanceData() {
   
   // Add present counts
   for (const a of attendance ?? []) {
-    // registration may be returned as an array (from the join) or an object; handle both and fall back to attendance.event.id
+    // registration may be returned as an array (from the join) or an object; handle both and fall back to attendance.event
     const reg: any = a.registration;
-    const eventId = (Array.isArray(reg)
-      ? (reg[0]?.event_id as string | undefined)
-      : (reg?.event_id as string | undefined)) ?? (a.event?.id as string | undefined);
+    const eventFromReg = Array.isArray(reg) ? reg[0]?.event_id : reg?.event_id;
+    const eventFromA: any = a.event;
+    const eventFromAId = Array.isArray(eventFromA) ? eventFromA[0]?.id : eventFromA?.id;
+    const eventId = (eventFromReg ?? eventFromAId) as string | undefined;
     if (!eventId) continue;
     const stats = eventStats.get(eventId) || { total: 0, present: 0, absent: 0 };
     stats.present += 1;
