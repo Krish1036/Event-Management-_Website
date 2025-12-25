@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { ViewTicketButton } from './ViewTicketButton';
 
 export const revalidate = 0;
 
@@ -335,13 +336,6 @@ export default async function AdminRegistrationsPage({
                           Cancel
                         </button>
                       )}
-                      <button
-                        type="button"
-                        className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
-                        onClick={() => alert(`Ticket view for ${reg.user?.full_name} - Entry Code: ${reg.entry_code}\n\nEvent: ${reg.event?.title}\nStatus: ${reg.status}\nEmail: ${reg.user?.email}\nRegistered: ${new Date(reg.created_at).toLocaleString()}\n${reg.event?.is_paid ? `Price: ₹${reg.event.price}` : 'Free event'}`)}
-                      >
-                        View Ticket
-                      </button>
                       {reg.status === 'PENDING' && (
                         <button
                           type="submit"
@@ -354,6 +348,7 @@ export default async function AdminRegistrationsPage({
                       )}
                     </div>
                   </form>
+                  <ViewTicketButton registration={reg} />
                 </div>
               </div>
             </div>
