@@ -88,7 +88,7 @@ async function getAttendanceData() {
   // Add present counts
   for (const a of attendance ?? []) {
     // registration may be returned as an array (from the join) or an object; handle both and fall back to attendance.event.id
-    const reg = a.registration;
+    const reg: any = a.registration;
     const eventId = (Array.isArray(reg)
       ? (reg[0]?.event_id as string | undefined)
       : (reg?.event_id as string | undefined)) ?? (a.event?.id as string | undefined);
