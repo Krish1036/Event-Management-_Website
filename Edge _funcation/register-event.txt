@@ -19,12 +19,36 @@ serve(async (req) => {
   const { data } = await supabaseUser.auth.getUser();
   if (!data.user) return new Response("Invalid user", { status: 401 });
 
-  const { event_id } = await req.json();
+  const { event_id, answers } = await req.json();
 
   const supabaseAdmin = createClient(
     Deno.env.get("SUPABASE_URL")!,
     Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
   );
+
+  const { data: fields, error: fieldsError } = await supabaseAdmin
+    .from("event_form_fields")
+    .select("id,required,field_type,options,disabled")
+    .eq("event_id", event_id);
+
+  if (fieldsError) return new Response(fieldsError.message, { status: 400 });
+
+  const activeFields = (fields || []).filter((f: any) => !f.disabled);
+
+  const safeAnswers = Array.isArray(answers) ? answers : [];
+
+  for (const field of activeFields) {
+    if (!field.required) continue;
+    const answer = safeAnswers.find((a: any) => a.field_id === field.id);
+    if (!answer || typeof answer.value !== "string" || !answer.value.trim()) {
+      return new Response("Missing required field response", { status: 400 });
+    }
+    if (field.field_type === "select" && Array.isArray(field.options) && field.options.length > 0) {
+      if (!field.options.includes(answer.value)) {
+        return new Response("Invalid option selected", { status: 400 });
+      }
+    }
+  }
 
   const { data: registration_id, error } =
     await supabaseAdmin.rpc("register_for_event", {
@@ -33,6 +57,18 @@ serve(async (req) => {
     });
 
   if (error) return new Response(error.message, { status: 400 });
+
+  if (safeAnswers.length > 0) {
+    const payload = safeAnswers.map((a: any) => ({
+      registration_id,
+      field_id: a.field_id,
+      value: a.value,
+    }));
+    const { error: responsesError } = await supabaseAdmin
+      .from("registration_responses")
+      .insert(payload);
+    if (responsesError) return new Response(responsesError.message, { status: 400 });
+  }
 
   const { data: event } = await supabaseAdmin
     .from("events")

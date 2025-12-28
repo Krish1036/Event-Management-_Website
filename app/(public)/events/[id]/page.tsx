@@ -20,6 +20,15 @@ async function getEventWithCapacity(id: string) {
     return null;
   }
 
+  const { data: formFields } = await supabase
+    .from('event_form_fields')
+    .select('id,label,field_type,required,options,disabled')
+    .eq('event_id', id)
+    .order('created_at');
+
+  const activeFormFields = (formFields || []).filter((field: any) => !field.disabled);
+  const serializedFormFields = JSON.parse(JSON.stringify(activeFormFields));
+
   const { count } = await supabase
     .from('registrations')
     .select('id', { count: 'exact', head: true })
@@ -29,7 +38,7 @@ async function getEventWithCapacity(id: string) {
   const used = count ?? 0;
   const remaining = Math.max(0, (event.capacity as number) - used);
 
-  return { event, remaining, used };
+  return { event, remaining, used, registration_form_fields: serializedFormFields };
 }
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
@@ -38,7 +47,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
     redirect('/events');
   }
 
-  const { event, remaining, used } = result as any;
+  const { event, remaining, used, registration_form_fields } = result as any;
 
   const supabase = getSupabaseServerClient();
   const {
@@ -90,7 +99,8 @@ export default async function EventDetailPage({ params }: { params: { id: string
             <EventRegistrationSection 
               eventId={event.id as string} 
               registrationOpen={registrationOpen} 
-              isLoggedIn={isLoggedIn} 
+              isLoggedIn={isLoggedIn}
+              registrationFormFields={registration_form_fields}
             />
           </div>
         </div>

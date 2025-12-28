@@ -49,6 +49,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
             <AdminNavItem href="/admin-dashboard/attendance" label="Attendance" />
             <AdminNavItem href="/admin-dashboard/payments" label="Payments" />
             <AdminNavItem href="/admin-dashboard/users" label="Users" />
+            <AdminNavItem href="/admin-dashboard/form-control" label="Form Control" />
             <AdminNavItem href="/admin-dashboard/manual-fixes" label="Manual Fixes" />
             <AdminNavItem href="/admin-dashboard/logs" label="Logs / Audit" />
             <AdminNavItem href="/admin-dashboard/exports" label="Exports" />

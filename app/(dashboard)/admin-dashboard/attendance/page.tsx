@@ -31,12 +31,7 @@ async function getAttendanceData() {
 
   const { data: attendance } = await supabase
     .from('attendance')
-    .select(
-      `id,checked_in_at,registration_id,
-       registration:registrations(id,status,entry_code,event_id,user_id),
-       event:events(id,title,event_date),
-       user:profiles(id,full_name)`
-    )
+    .select('id,checked_in_at,registration_id')
     .order('checked_in_at', { ascending: false });
 
   const { data: allRegistrations } = await supabase
@@ -49,20 +44,28 @@ async function getAttendanceData() {
     .eq('status', 'CONFIRMED')
     .order('created_at', { ascending: false });
 
-  const attendanceMap = new Map<string, any>();
+  const attendanceMap = new Map<string, { id: string; checked_in_at: string }>();
   for (const a of attendance ?? []) {
-    attendanceMap.set(a.registration_id as string, a);
+    attendanceMap.set(a.registration_id as string, {
+      id: a.id as string,
+      checked_in_at: a.checked_in_at as string
+    });
   }
 
-  const attendanceList = (attendance ?? []).map((a: any) => ({
-    id: a.id,
-    checkedInAt: a.checked_in_at,
-    registrationId: a.registration_id,
-    event: a.event,
-    user: a.user,
-    entryCode: a.registration?.entry_code,
-    registrationStatus: a.registration?.status
-  }));
+  const attendanceList = (allRegistrations ?? [])
+    .filter((r: any) => attendanceMap.has(r.id as string))
+    .map((r: any) => {
+      const att = attendanceMap.get(r.id as string)!;
+      return {
+        id: att.id,
+        checkedInAt: att.checked_in_at,
+        registrationId: r.id,
+        event: r.event,
+        user: r.user,
+        entryCode: r.entry_code,
+        registrationStatus: r.status
+      };
+    });
 
   const notCheckedIn = (allRegistrations ?? [])
     .filter((r) => !attendanceMap.has(r.id as string))
@@ -76,29 +79,24 @@ async function getAttendanceData() {
 
   // Calculate attendance statistics per event
   const eventStats = new Map<string, { total: number; present: number; absent: number }>();
-  
-  // Initialize with all events
+
+  // Initialize totals per event from all confirmed registrations
   for (const reg of allRegistrations ?? []) {
     const eventId = reg.event_id as string;
     const stats = eventStats.get(eventId) || { total: 0, present: 0, absent: 0 };
     stats.total += 1;
     eventStats.set(eventId, stats);
   }
-  
-  // Add present counts
-  for (const a of attendance ?? []) {
-    // registration may be returned as an array (from the join) or an object; handle both and fall back to attendance.event
-    const reg: any = a.registration;
-    const eventFromReg = Array.isArray(reg) ? reg[0]?.event_id : reg?.event_id;
-    const eventFromA: any = a.event;
-    const eventFromAId = Array.isArray(eventFromA) ? eventFromA[0]?.id : eventFromA?.id;
-    const eventId = (eventFromReg ?? eventFromAId) as string | undefined;
-    if (!eventId) continue;
+
+  // Add present counts based on attendanceMap
+  for (const reg of allRegistrations ?? []) {
+    const eventId = reg.event_id as string;
+    if (!attendanceMap.has(reg.id as string)) continue;
     const stats = eventStats.get(eventId) || { total: 0, present: 0, absent: 0 };
     stats.present += 1;
     eventStats.set(eventId, stats);
   }
-  
+
   // Calculate absent
   for (const [eventId, stats] of eventStats.entries()) {
     stats.absent = stats.total - stats.present;

@@ -60,6 +60,104 @@ async function exportRegistrations(supabase: any) {
   return generateCSV(csvData, headers);
 }
 
+async function exportEventDetailed(supabase: any, eventId: string) {
+  const { data } = await supabase
+    .from('registrations')
+    .select(`
+      id,status,entry_code,created_at,event_id,
+      user:profiles(id,full_name,email),
+      event:events(id,title,event_date,is_paid,price),
+      responses:registration_responses(
+        value,
+        field:event_form_fields(label,field_type,required)
+      )
+    `)
+    .eq('event_id', eventId)
+    .order('created_at', { ascending: false });
+
+  const registrations = data ?? [];
+
+  // Collect all distinct field labels for this event so we can make one column per field
+  const fieldLabelSet = new Set<string>();
+  for (const reg of registrations) {
+    for (const resp of reg.responses ?? []) {
+      const label = resp.field?.label as string | undefined;
+      if (label) {
+        fieldLabelSet.add(label);
+      }
+    }
+  }
+
+  const fieldLabels = Array.from(fieldLabelSet).sort();
+
+  const baseHeaders = [
+    'Registration ID',
+    'User Name',
+    'User Email',
+    'Event ID',
+    'Event Title',
+    'Event Date',
+    'Event Price',
+    'Event Is Paid',
+    'Status',
+    'Entry Code',
+    'Created At'
+  ];
+
+  const headers = [...baseHeaders, ...fieldLabels];
+
+  const rows: any[] = [];
+
+  for (const reg of registrations) {
+    const row: any = {
+      'Registration ID': reg.id,
+      'User Name': reg.user?.full_name || '',
+      'User Email': reg.user?.email || '',
+      'Event ID': reg.event?.id || reg.event_id,
+      'Event Title': reg.event?.title || '',
+      'Event Date': reg.event?.event_date
+        ? String(new Date(reg.event.event_date).toLocaleDateString())
+        : '',
+      'Event Price': reg.event?.price ?? '',
+      'Event Is Paid': reg.event?.is_paid ?? '',
+      Status: reg.status,
+      'Entry Code': reg.entry_code,
+      'Created At': String(new Date(reg.created_at).toLocaleString())
+    };
+
+    // Initialise all custom field columns as empty strings
+    for (const label of fieldLabels) {
+      row[label] = '';
+    }
+
+    // Fill in responses: if multiple responses for same label, join them with '; '
+    const responses = reg.responses ?? [];
+    const valueByLabel: Record<string, string> = {};
+
+    for (const resp of responses) {
+      const label = resp.field?.label as string | undefined;
+      if (!label) continue;
+
+      const value = resp.value ?? '';
+      if (valueByLabel[label]) {
+        valueByLabel[label] = `${valueByLabel[label]}; ${value}`;
+      } else {
+        valueByLabel[label] = value;
+      }
+    }
+
+    for (const label of Object.keys(valueByLabel)) {
+      if (fieldLabelSet.has(label)) {
+        row[label] = valueByLabel[label];
+      }
+    }
+
+    rows.push(row);
+  }
+
+  return generateCSV(rows, headers);
+}
+
 async function exportAttendance(supabase: any) {
   const { data } = await supabase
     .from('attendance')
@@ -197,6 +295,7 @@ async function exportUsers(supabase: any) {
 export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const exportType = formData.get('exportType') as string | null;
+  const eventId = formData.get('eventId') as string | null;
 
   if (!exportType) {
     return new Response('Missing exportType', { status: 400 });
@@ -244,6 +343,13 @@ export async function POST(req: NextRequest) {
     case 'users':
       csvData = await exportUsers(supabase);
       filename = `users-${new Date().toISOString().split('T')[0]}.csv`;
+      break;
+    case 'event_detailed':
+      if (!eventId) {
+        return new Response('Missing eventId', { status: 400 });
+      }
+      csvData = await exportEventDetailed(supabase, eventId);
+      filename = `event-${eventId}-detailed-${new Date().toISOString().split('T')[0]}.csv`;
       break;
   }
 
