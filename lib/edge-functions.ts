@@ -37,8 +37,13 @@ async function authorizedPost(path: string, body: unknown) {
   return res.json();
 }
 
-export async function registerForEvent(eventId: string) {
-  return authorizedPost('/register-event', { event_id: eventId });
+interface RegistrationAnswer {
+  field_id: string;
+  value: string;
+}
+
+export async function registerForEvent(eventId: string, answers: RegistrationAnswer[] = []) {
+  return authorizedPost('/register-event', { event_id: eventId, answers });
 }
 
 export async function checkIn(opts: { registration_id?: string; entry_code?: string }) {

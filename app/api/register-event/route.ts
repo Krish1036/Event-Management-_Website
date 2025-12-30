@@ -30,9 +30,10 @@ export async function POST(request: NextRequest) {
   if (!eventId) {
     return NextResponse.json({ success: false, error: 'Missing event_id' }, { status: 400 });
   }
+  const answers = Array.isArray(body?.answers) ? body.answers : [];
 
   try {
-    const data = await registerForEvent(eventId);
+    const data = await registerForEvent(eventId, answers);
     return NextResponse.json({ success: true, ...data });
   } catch (error: any) {
     console.error('register-event failed', error);

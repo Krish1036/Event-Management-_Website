@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useReducer, ReactNode } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
 
 // Types
 export interface FormField {
@@ -197,8 +197,20 @@ interface EventContextType {
 
 const EventContext = createContext<EventContextType | undefined>(undefined);
 
-export function CreateEventProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(eventReducer, initialState);
+export function CreateEventProvider({
+  children,
+  initialData
+}: {
+  children: ReactNode;
+  initialData?: Partial<EventData>;
+}) {
+  const [state, dispatch] = useReducer(eventReducer, {
+    ...initialState,
+    data: {
+      ...initialState.data,
+      ...(initialData || {}),
+    },
+  });
 
   const updateField = (field: keyof EventData, value: any) => {
     dispatch({ type: 'UPDATE_FIELD', field, value });
