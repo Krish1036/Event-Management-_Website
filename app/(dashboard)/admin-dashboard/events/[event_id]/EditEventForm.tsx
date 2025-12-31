@@ -22,8 +22,9 @@ interface Event {
   title: string;
   description: string;
   category: string;
-  start_date: string;
-  end_date: string;
+  event_date?: string;
+  start_date?: string;
+  end_date?: string;
   start_time: string;
   end_time: string;
   location: string;
@@ -47,12 +48,17 @@ function EditEventFormContent({ initialData }: EditEventFormProps) {
   const router = useRouter();
   const [organizers, setOrganizers] = useState<any[]>([]);
 
+  const extractDate = (value?: string) => {
+    if (!value) return '';
+    return value.includes('T') ? value.split('T')[0] : value;
+  };
+
   // Map initial event data to form data structure
   const mapInitialData = (event: Event): Partial<EventData> => ({
     title: event.title,
     description: event.description,
     location: event.location,
-    event_date: event.start_date.split('T')[0], // Extract date part
+    event_date: extractDate(event.event_date || event.start_date),
     start_time: event.start_time,
     end_time: event.end_time,
     total_capacity: event.max_participants,
@@ -343,7 +349,9 @@ export default function EditEventForm({ initialData }: EditEventFormProps) {
     title: initialData.title,
     description: initialData.description,
     location: initialData.location,
-    event_date: initialData.start_date.split('T')[0],
+    event_date: (initialData.event_date || initialData.start_date || '').includes('T')
+      ? (initialData.event_date || initialData.start_date || '').split('T')[0]
+      : (initialData.event_date || initialData.start_date || ''),
     start_time: initialData.start_time,
     end_time: initialData.end_time,
     total_capacity: initialData.max_participants,
