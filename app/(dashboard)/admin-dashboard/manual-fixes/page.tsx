@@ -57,6 +57,8 @@ async function handleManualFix(formData: FormData) {
   const offlineUserName = formData.get('offlineUserName') as string | null;
   const offlineUserEmail = formData.get('offlineUserEmail') as string | null;
 
+  let redirectStatus: string | null = null;
+
   if (!action) {
     redirect('/admin-dashboard/manual-fixes');
   }
@@ -126,6 +128,8 @@ async function handleManualFix(formData: FormData) {
             entry_code: entryCode
           }
         });
+
+        redirectStatus = 'payment_fix_success';
       }
     }
   } else if (action === 'add_user_manually' && userEmail && eventId) {
@@ -172,6 +176,8 @@ async function handleManualFix(formData: FormData) {
             entry_code: entryCode
           }
         });
+
+        redirectStatus = 'manual_add_success';
       }
     }
   } else if (action === 'add_offline_registration' && offlineEventId && offlineUserName && offlineUserEmail) {
@@ -237,11 +243,18 @@ async function handleManualFix(formData: FormData) {
             entry_code: entryCode
           }
         });
+
+        redirectStatus = 'offline_add_success';
       }
     }
   }
 
-  redirect('/admin-dashboard/manual-fixes');
+  const basePath = '/admin-dashboard/manual-fixes';
+  if (redirectStatus) {
+    redirect(`${basePath}?status=${encodeURIComponent(redirectStatus)}`);
+  }
+
+  redirect(basePath);
 }
 
 async function getEvents() {
@@ -254,10 +267,16 @@ async function getEvents() {
   return data ?? [];
 }
 
-export default async function AdminManualFixesPage() {
+export default async function AdminManualFixesPage({
+  searchParams
+}: {
+  searchParams?: { [key: string]: string | string[] | undefined };
+}) {
   await requireAdmin();
   const suspiciousPayments = await getSuspiciousPayments();
   const events = await getEvents();
+
+  const statusParam = typeof searchParams?.status === 'string' ? searchParams.status : undefined;
 
   return (
     <div className="space-y-6">
@@ -267,6 +286,18 @@ export default async function AdminManualFixesPage() {
           Fix payment-success-but-registration-missing issues, add users manually, and generate entry codes.
         </p>
       </div>
+
+      {statusParam === 'manual_add_success' && (
+        <div className="rounded-md border border-emerald-700 bg-emerald-900/40 px-4 py-2 text-xs text-emerald-50">
+          User was registered to the selected event successfully.
+        </div>
+      )}
+
+      {statusParam === 'offline_add_success' && (
+        <div className="rounded-md border border-amber-700 bg-amber-900/40 px-4 py-2 text-xs text-amber-50">
+          Offline registration was created successfully.
+        </div>
+      )}
 
       {/* Suspicious payments section */}
       <div className="space-y-3">

@@ -1,46 +1,39 @@
-import 'server-only';
+import { createClient } from '@supabase/supabase-js';
+import { Database } from '@/types/supabase';
 
-import { getSupabaseServerClient } from '@/lib/supabase-server';
+export async function checkIn(ticketId: string, userId: string) {
+  const supabase = createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false
+      }
+    }
+  );
 
-const EDGE_BASE = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1`;
+  // Check if ticket exists and belongs to the user
+  const { data: ticket, error: ticketError } = await supabase
+    .from('tickets')
+    .select('*')
+    .eq('id', ticketId)
+    .eq('user_id', userId)
+    .single();
 
-async function authorizedPost(path: string, body: unknown) {
-  const supabase = getSupabaseServerClient();
-  const {
-    data: { session }
-  } = await supabase.auth.getSession();
-
-  const token = session?.access_token;
-  if (!token) {
-    throw new Error('Not authenticated');
+  if (ticketError || !ticket) {
+    throw new Error('Ticket not found or access denied');
   }
 
-  const res = await fetch(`${EDGE_BASE}${path}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`
-    },
-    body: JSON.stringify(body)
-  });
+  // Update check-in status
+  const { error: updateError } = await supabase
+    .from('tickets')
+    .update({ checked_in: true, checked_in_at: new Date().toISOString() })
+    .eq('id', ticketId);
 
-  if (!res.ok) {
-    const text = await res.text();
-    console.error('Edge function error', {
-      path,
-      status: res.status,
-      body: text
-    });
-    throw new Error(text || 'Edge function error');
+  if (updateError) {
+    throw new Error('Failed to update check-in status');
   }
 
-  return res.json();
-}
-
-export async function registerForEvent(eventId: string) {
-  return authorizedPost('/register-event', { event_id: eventId });
-}
-
-export async function checkIn(opts: { registration_id?: string; entry_code?: string }) {
-  return authorizedPost('/check-in', opts);
+  return { success: true };
 }

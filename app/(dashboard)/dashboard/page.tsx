@@ -48,6 +48,42 @@ async function getParticipantDashboard() {
   return { user, profile, registrations: enriched };
 }
 
+async function leaveEventAction(formData: FormData) {
+  'use server';
+
+  const registrationId = formData.get('registrationId') as string | null;
+  if (!registrationId) {
+    redirect('/dashboard');
+  }
+
+  const supabase = getSupabaseServerClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    redirect('/login');
+  }
+
+  const { data: registration } = await supabase
+    .from('registrations')
+    .select('id,user_id,status')
+    .eq('id', registrationId)
+    .single();
+
+  if (!registration || registration.user_id !== user.id || registration.status === 'CANCELLED') {
+    redirect('/dashboard');
+  }
+
+  await supabase
+    .from('registrations')
+    .update({ status: 'CANCELLED' })
+    .eq('id', registrationId)
+    .eq('user_id', user.id);
+
+  redirect('/dashboard');
+}
+
 export default async function DashboardPage() {
   const { user, profile, registrations } = await getParticipantDashboard();
 
@@ -106,6 +142,17 @@ export default async function DashboardPage() {
               >
                 View ticket
               </Link>
+              {r.status !== 'CANCELLED' && (
+                <form action={leaveEventAction}>
+                  <input type="hidden" name="registrationId" value={r.id} />
+                  <button
+                    type="submit"
+                    className="mt-1 inline-flex items-center rounded bg-red-900/40 px-3 py-1 text-[11px] font-medium text-red-200 hover:bg-red-900/60"
+                  >
+                    Leave event
+                  </button>
+                </form>
+              )}
             </div>
           </div>
         ))}

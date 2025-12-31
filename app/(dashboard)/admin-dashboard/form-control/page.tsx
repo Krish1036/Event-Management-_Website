@@ -298,11 +298,6 @@ export default async function AdminFormControlPage({
                             name="action"
                             value="enable_field"
                             className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-emerald-50 hover:bg-emerald-600"
-                            onClick={(e) => {
-                              if (!confirm(`Enable "${field.label}" field?\n\nThis will allow users to fill this field again.`)) {
-                                e.preventDefault();
-                              }
-                            }}
                           >
                             Enable Field
                           </button>
@@ -312,11 +307,6 @@ export default async function AdminFormControlPage({
                             name="action"
                             value="disable_field"
                             className="rounded-md bg-red-700 px-3 py-1 text-[11px] font-medium text-red-50 hover:bg-red-600"
-                            onClick={(e) => {
-                              if (!confirm(`Disable "${field.label}" field?\n\nThis will prevent users from filling this field.`)) {
-                                e.preventDefault();
-                              }
-                            }}
                           >
                             Disable Field
                           </button>
@@ -328,11 +318,6 @@ export default async function AdminFormControlPage({
                             name="action"
                             value="override_field_required"
                             className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
-                            onClick={(e) => {
-                              if (!confirm(`Make "${field.label}" required?\n\nThis will override the organizer's setting for safety.`)) {
-                                e.preventDefault();
-                              }
-                            }}
                           >
                             Make Required
                           </button>
@@ -344,11 +329,6 @@ export default async function AdminFormControlPage({
                             name="action"
                             value="remove_field_override"
                             className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
-                            onClick={(e) => {
-                              if (!confirm(`Remove override for "${field.label}"?\n\nThis will restore the original setting.`)) {
-                                e.preventDefault();
-                              }
-                            }}
                           >
                             Remove Override
                           </button>

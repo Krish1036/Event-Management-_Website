@@ -2,10 +2,19 @@
 
 import { RegisterClient } from './RegisterClient';
 
-export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn }: { 
+interface RegistrationFormField {
+  id: string;
+  label: string;
+  field_type: string;
+  required: boolean;
+  options?: string[] | null;
+}
+
+export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn, registrationFormFields }: { 
   eventId: string; 
   registrationOpen: boolean; 
   isLoggedIn: boolean;
+  registrationFormFields?: RegistrationFormField[];
 }) {
   if (!registrationOpen) return null;
   
@@ -15,5 +24,5 @@ export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn
     );
   }
   
-  return <RegisterClient eventId={eventId} />;
+  return <RegisterClient eventId={eventId} formFields={registrationFormFields || []} />;
 }

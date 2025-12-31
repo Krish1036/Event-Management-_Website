@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export const revalidate = 0;
 
@@ -193,6 +194,99 @@ async function handleEventAction(formData: FormData) {
   } else if (action === 'force_close_capacity') {
     updates.is_registration_open = false;
     logAction = 'EVENT_FORCE_CLOSE_CAPACITY';
+  } else if (action === 'clone_event') {
+    // Get the full event data including form fields
+    const { data: fullEvent } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
+
+    if (!fullEvent) {
+      redirect('/admin-dashboard/events');
+    }
+
+    // Get form fields for the event
+    const { data: formFields } = await supabase
+      .from('event_form_fields')
+      .select('*')
+      .eq('event_id', eventId);
+
+    // Create cloned event
+    const clonedEventData = {
+      title: `${fullEvent.title} (Copy)`,
+      description: fullEvent.description,
+      location: fullEvent.location,
+      event_date: new Date().toISOString().split('T')[0], // Set to today
+      start_time: fullEvent.start_time,
+      end_time: fullEvent.end_time,
+      capacity: fullEvent.capacity,
+      is_registration_open: false, // Start with registration closed
+      status: 'draft',
+      price: fullEvent.price,
+      visibility: 'hidden',
+      created_by: user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: clonedEvent, error: cloneError } = await supabase
+      .from('events')
+      .insert(clonedEventData)
+      .select()
+      .single();
+
+    if (cloneError || !clonedEvent) {
+      redirect('/admin-dashboard/events');
+    }
+
+    // Clone form fields if they exist
+    if (formFields && formFields.length > 0) {
+      const clonedFormFields = formFields.map(field => ({
+        event_id: clonedEvent.id,
+        label: field.label,
+        field_type: field.field_type,
+        required: field.required,
+        options: field.options,
+        disabled: false,
+        original_required: field.original_required,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+
+      await supabase
+        .from('event_form_fields')
+        .insert(clonedFormFields);
+    }
+
+    // Log clone action
+    await supabase.from('admin_logs').insert({
+      admin_id: user.id,
+      action: 'EVENT_CLONE',
+      details: {
+        original_event_id: eventId,
+        cloned_event_id: clonedEvent.id,
+        original_title: fullEvent.title,
+        cloned_title: clonedEventData.title
+      }
+    });
+
+    logAction = 'EVENT_CLONE';
+  } else if (action === 'delete') {
+    await supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId);
+
+    await supabase.from('admin_logs').insert({
+      admin_id: user.id,
+      action: 'EVENT_DELETE',
+      details: {
+        event_id: eventId
+      }
+    });
+
+    logAction = 'EVENT_DELETE';
   }
 
   if (Object.keys(updates).length > 0) {
@@ -205,7 +299,7 @@ async function handleEventAction(formData: FormData) {
       admin_id: user.id,
       action: logAction,
       details: {
-        event_id: eventId,
+        event_id: event.id,
         previous_status: event.status,
         previous_is_registration_open: event.is_registration_open,
         updates
@@ -223,7 +317,8 @@ export default async function AdminEventsPage({
 }) {
   await requireAdmin();
   const events = await getEventsWithUsage();
-  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : undefined;
+  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : 
+                          typeof searchParams?.updated_event === 'string' ? searchParams?.updated_event : undefined;
 
   return (
     <div className="space-y-6">
@@ -238,10 +333,101 @@ export default async function AdminEventsPage({
       ) : (
         <div className="space-y-3 text-sm">
           {events.map((event: any) => (
-            <div key={event.id} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-              <h2 className="text-sm font-semibold text-white">{event.title}</h2>
-              <p className="text-xs text-slate-300">{event.location || 'No location'}</p>
-            </div>
+            <details
+              key={event.id}
+              className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+            >
+              <summary className="cursor-pointer list-none">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-sm font-semibold text-white">{event.title}</h2>
+                    <p className="text-xs text-slate-300">
+                      {event.location || 'No location'} ·{' '}
+                      {new Date(event.event_date).toLocaleDateString()} · {event.start_time} -{' '}
+                      {event.end_time}
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end gap-1 text-[11px]">
+                    <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 font-medium uppercase tracking-wide text-slate-200">
+                      {event.status}
+                    </span>
+                    <span
+                      className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${
+                        event.is_registration_open
+                          ? 'bg-emerald-800/50 text-emerald-200'
+                          : 'bg-red-800/40 text-red-200'
+                      }`}
+                    >
+                      {event.is_registration_open ? 'Registrations Open' : 'Registrations Closed'}
+                    </span>
+                  </div>
+                </div>
+              </summary>
+              <div className="mt-4 space-y-3 text-xs">
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div>
+                    <p className="text-slate-400">Organizer</p>
+                    <p className="font-medium text-slate-100">{event.organizerName}</p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Capacity / Seats Left</p>
+                    <p className="font-medium text-slate-100">
+                      {event.capacity ?? 0} / {event.seatsLeft}
+                    </p>
+                  </div>
+                  <div>
+                    <p className="text-slate-400">Registrations</p>
+                    <p className="font-medium text-slate-100">
+                      {event.confirmedCount} confirmed, {event.pendingCount} pending
+                    </p>
+                  </div>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  <form action={handleEventAction} className="flex flex-wrap gap-2">
+                    <input type="hidden" name="eventId" value={event.id} />
+                    <Link
+                      href={`/admin-dashboard/events/${event.id}/edit`}
+                      className="rounded-md bg-blue-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-600 inline-block"
+                    >
+                      Edit Event
+                    </Link>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="clone_event"
+                      className="rounded-md bg-purple-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-purple-600"
+                    >
+                      Clone Event
+                    </button>
+                    <button
+                      type="submit"
+                      name="action"
+                      value={event.is_registration_open ? 'close_reg' : 'open_reg'}
+                      className="rounded-md bg-sky-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-sky-600"
+                    >
+                      {event.is_registration_open ? 'Close Registrations' : 'Open Registrations'}
+                    </button>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="cancel"
+                      className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
+                    >
+                      Cancel Event
+                    </button>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="delete"
+                      data-event-title={event.title}
+                      className="rounded-md bg-red-800 px-3 py-1 text-[11px] font-medium text-red-50 hover:bg-red-700"
+                    >
+                      Delete Event
+                    </button>
+                  </form>
+                </div>
+              </div>
+            </details>
           ))}
         </div>
       )}
