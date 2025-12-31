@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 export const revalidate = 0;
 
@@ -193,6 +194,87 @@ async function handleEventAction(formData: FormData) {
   } else if (action === 'force_close_capacity') {
     updates.is_registration_open = false;
     logAction = 'EVENT_FORCE_CLOSE_CAPACITY';
+<<<<<<< HEAD
+=======
+  } else if (action === 'clone_event') {
+    // Get the full event data including form fields
+    const { data: fullEvent } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', eventId)
+      .single();
+
+    if (!fullEvent) {
+      redirect('/admin-dashboard/events');
+    }
+
+    // Get form fields for the event
+    const { data: formFields } = await supabase
+      .from('event_form_fields')
+      .select('*')
+      .eq('event_id', eventId);
+
+    // Create cloned event
+    const clonedEventData = {
+      title: `${fullEvent.title} (Copy)`,
+      description: fullEvent.description,
+      location: fullEvent.location,
+      event_date: new Date().toISOString().split('T')[0], // Set to today
+      start_time: fullEvent.start_time,
+      end_time: fullEvent.end_time,
+      capacity: fullEvent.capacity,
+      is_registration_open: false, // Start with registration closed
+      status: 'draft',
+      price: fullEvent.price,
+      visibility: 'hidden',
+      created_by: user.id,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+
+    const { data: clonedEvent, error: cloneError } = await supabase
+      .from('events')
+      .insert(clonedEventData)
+      .select()
+      .single();
+
+    if (cloneError || !clonedEvent) {
+      redirect('/admin-dashboard/events');
+    }
+
+    // Clone form fields if they exist
+    if (formFields && formFields.length > 0) {
+      const clonedFormFields = formFields.map(field => ({
+        event_id: clonedEvent.id,
+        label: field.label,
+        field_type: field.field_type,
+        required: field.required,
+        options: field.options,
+        disabled: false,
+        original_required: field.original_required,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      }));
+
+      await supabase
+        .from('event_form_fields')
+        .insert(clonedFormFields);
+    }
+
+    // Log clone action
+    await supabase.from('admin_logs').insert({
+      admin_id: user.id,
+      action: 'EVENT_CLONE',
+      details: {
+        original_event_id: eventId,
+        cloned_event_id: clonedEvent.id,
+        original_title: fullEvent.title,
+        cloned_title: clonedEventData.title
+      }
+    });
+
+    logAction = 'EVENT_CLONE';
+>>>>>>> main
   } else if (action === 'delete') {
     await supabase
       .from('events')
@@ -238,7 +320,8 @@ export default async function AdminEventsPage({
 }) {
   await requireAdmin();
   const events = await getEventsWithUsage();
-  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : undefined;
+  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : 
+                          typeof searchParams?.updated_event === 'string' ? searchParams?.updated_event : undefined;
 
   return (
     <div className="space-y-6">
@@ -305,6 +388,23 @@ export default async function AdminEventsPage({
                 <div className="flex flex-wrap gap-2">
                   <form action={handleEventAction} className="flex flex-wrap gap-2">
                     <input type="hidden" name="eventId" value={event.id} />
+<<<<<<< HEAD
+=======
+                    <Link
+                      href={`/admin-dashboard/events/${event.id}/edit`}
+                      className="rounded-md bg-blue-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-600 inline-block"
+                    >
+                      Edit Event
+                    </Link>
+                    <button
+                      type="submit"
+                      name="action"
+                      value="clone_event"
+                      className="rounded-md bg-purple-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-purple-600"
+                    >
+                      Clone Event
+                    </button>
+>>>>>>> main
                     <button
                       type="submit"
                       name="action"
