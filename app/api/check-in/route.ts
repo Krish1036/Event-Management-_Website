@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
       registration_id: body.registration_id,
       entry_code: body.entry_code
     });
-    return NextResponse.json({ success: true, ...data });
+    return NextResponse.json({ ...data, success: true });
   } catch (error: any) {
     console.error('check-in failed', error);
     return NextResponse.json(
