@@ -59,7 +59,7 @@ export async function POST(request: NextRequest) {
     const {
       data: existingEvent,
       error: existingEventError
-    } = await supabase
+    } = await admin
       .from('events')
       .select(
         'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,price,visibility,assigned_organizer'
@@ -214,7 +214,7 @@ export async function POST(request: NextRequest) {
     const nowIso = new Date().toISOString();
 
     // Handle form field updates
-    const { data: existingFields, error: existingFieldsError } = await supabase
+    const { data: existingFields, error: existingFieldsError } = await admin
       .from('event_form_fields')
       .select(
         'id,label,field_type,required,options,disabled,disabled_by,disabled_at,original_required,overridden_by,overridden_at'
@@ -291,7 +291,7 @@ export async function POST(request: NextRequest) {
     }
 
     for (const item of fieldsToUpdate) {
-      const { error } = await supabase
+      const { error } = await admin
         .from('event_form_fields')
         .update(item.updatePayload)
         .eq('id', item.id);
