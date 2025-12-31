@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 
 interface IncomingFormField {
   id?: string;
@@ -32,6 +33,8 @@ export async function POST(request: NextRequest) {
     if (profileError || !profile || profile.role !== 'admin') {
       return NextResponse.json({ success: false, error: 'Not authorized' }, { status: 403 });
     }
+
+    const admin = getSupabaseAdminClient();
 
     let body: any;
     try {
@@ -69,7 +72,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Capacity safeguard: count confirmed registrations
-    const { count: confirmedCount } = await supabase
+    const { count: confirmedCount } = await admin
       .from('registrations')
       .select('id', { count: 'exact', head: true })
       .eq('event_id', eventId)
@@ -306,7 +309,7 @@ export async function POST(request: NextRequest) {
       if (incomingById.has(id)) continue;
 
       if (!existing.disabled) {
-        const { error } = await supabase
+        const { error } = await admin
           .from('event_form_fields')
           .update({ disabled: true, disabled_by: user.id, disabled_at: nowIso })
           .eq('id', id);
@@ -348,7 +351,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (newFieldsToInsert.length > 0) {
-      const { error } = await supabase
+      const { error } = await admin
         .from('event_form_fields')
         .insert(newFieldsToInsert);
       if (error) {
@@ -367,7 +370,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Finally, update the event row
-    const { data: updatedEvent, error: updateError } = await supabase
+    const { data: updatedEvent, error: updateError } = await admin
       .from('events')
       .update(updatedEventPayload)
       .eq('id', eventId)
@@ -382,7 +385,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Log admin action
-    const { error: logError } = await supabase.from('admin_logs').insert({
+    const { error: logError } = await admin.from('admin_logs').insert({
       admin_id: user.id,
       action: 'UPDATE_EVENT',
       details: {
