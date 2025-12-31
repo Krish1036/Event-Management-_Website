@@ -62,7 +62,7 @@ export async function POST(request: NextRequest) {
     } = await admin
       .from('events')
       .select(
-        'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,price,visibility,assigned_organizer'
+        'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,price,assigned_organizer'
       )
       .eq('id', eventId)
       .single();
@@ -174,9 +174,6 @@ export async function POST(request: NextRequest) {
       nextStatus = 'approved';
     }
 
-    const visibility: 'public' | 'hidden' =
-      eventInput.visibility === 'hidden' ? 'hidden' : 'public';
-
     const updatedEventPayload: Record<string, any> = {
       title: eventInput.title ?? existingEvent.title,
       description: eventInput.description ?? existingEvent.description,
@@ -188,7 +185,6 @@ export async function POST(request: NextRequest) {
       is_registration_open: registrationStatus === 'open',
       price,
       status: nextStatus,
-      visibility,
       assigned_organizer:
         typeof eventInput.assigned_organizer !== 'undefined'
           ? eventInput.assigned_organizer

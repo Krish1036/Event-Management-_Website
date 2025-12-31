@@ -29,7 +29,7 @@ interface Event {
   price: number;
   image_url?: string;
   status: 'approved' | 'draft' | 'cancelled';
-  visibility: 'public' | 'hidden';
+  visibility?: 'public' | 'hidden';
   registration_deadline?: string;
   assigned_organizer: string | null;
   created_at: string;
@@ -68,7 +68,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
     price: event.price,
     currency: 'INR', // Default
     form_fields: event.form_fields || [],
-    visibility: event.visibility,
+    visibility: event.visibility ?? 'public',
     save_mode: event.status === 'approved' ? 'publish' : 'draft',
     assigned_organizer: event.assigned_organizer,
   });
@@ -356,7 +356,7 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     price: initialData.price,
     currency: 'INR',
     form_fields: initialData.form_fields || [],
-    visibility: initialData.visibility,
+    visibility: initialData.visibility ?? 'public',
     save_mode: initialData.status === 'approved' ? 'publish' as const : 'draft' as const,
     assigned_organizer: initialData.assigned_organizer ?? null,
   };

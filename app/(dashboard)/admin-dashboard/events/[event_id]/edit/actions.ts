@@ -274,7 +274,6 @@ export async function updateEventAction(params: {
       is_registration_open: !!params.event.is_registration_open,
       price: Number(params.event.price ?? 0),
       status: params.event.status,
-      visibility: params.event.visibility,
       assigned_organizer: params.event.assigned_organizer,
       updated_at: nowIso
     })

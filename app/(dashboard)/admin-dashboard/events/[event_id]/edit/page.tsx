@@ -19,7 +19,7 @@ interface Event {
   price: number;
   image_url?: string;
   status: 'approved' | 'draft' | 'cancelled';
-  visibility: 'public' | 'hidden';
+  visibility?: 'public' | 'hidden';
   registration_deadline?: string;
   assigned_organizer: string | null;
   created_at: string;
@@ -112,7 +112,7 @@ export default async function EditEventPage({
 
   const { data: event, error } = await admin
     .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,visibility,assigned_organizer,created_at,updated_at')
+    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at,updated_at')
     .eq('id', eventId)
     .single();
 
@@ -184,7 +184,8 @@ export default async function EditEventPage({
 
   const initialData = {
     ...(event as any),
-    form_fields: formFields ?? []
+    form_fields: formFields ?? [],
+    visibility: 'public'
   };
 
   console.log(logPrefix, 'render', {
