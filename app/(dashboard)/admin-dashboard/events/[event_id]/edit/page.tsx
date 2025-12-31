@@ -23,7 +23,6 @@ interface Event {
   registration_deadline?: string;
   assigned_organizer: string | null;
   created_at: string;
-  updated_at: string;
   form_fields?: any[];
 }
 
@@ -112,7 +111,7 @@ export default async function EditEventPage({
 
   const { data: event, error } = await admin
     .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at,updated_at')
+    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at')
     .eq('id', eventId)
     .single();
 

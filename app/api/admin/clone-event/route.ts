@@ -69,10 +69,8 @@ export async function POST(request: NextRequest) {
       is_registration_open: false, // Start with registration closed
       status: 'draft',
       price: fullEvent.price,
-      visibility: 'hidden',
       created_by: user.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      created_at: new Date().toISOString()
     };
 
     const { data: clonedEvent, error: cloneError } = await supabase
@@ -95,8 +93,7 @@ export async function POST(request: NextRequest) {
         options: field.options,
         disabled: false,
         original_required: field.original_required,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString()
+        created_at: new Date().toISOString()
       }));
 
       const { error: formFieldsCloneError } = await supabase

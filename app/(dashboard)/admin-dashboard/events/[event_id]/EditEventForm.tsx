@@ -33,7 +33,7 @@ interface Event {
   registration_deadline?: string;
   assigned_organizer: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at?: string;
   form_fields?: FormField[];
 }
 

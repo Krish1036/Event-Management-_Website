@@ -275,7 +275,6 @@ export async function updateEventAction(params: {
       price: Number(params.event.price ?? 0),
       status: params.event.status,
       assigned_organizer: params.event.assigned_organizer,
-      updated_at: nowIso
     })
     .eq('id', params.eventId)
     .select()
