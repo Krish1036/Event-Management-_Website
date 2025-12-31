@@ -78,10 +78,14 @@ function EditEventFormContent({ initialData }: EditEventFormProps) {
     const loadOrganizers = async () => {
       try {
         const supabase = getSupabaseBrowserClient();
-        const { data } = await supabase
-          .from('users')
+        const { data, error } = await supabase
+          .from('profiles')
           .select('id, email, full_name')
           .eq('role', 'organizer');
+
+        if (error) {
+          throw error;
+        }
         
         if (data) {
           setOrganizers(data);
