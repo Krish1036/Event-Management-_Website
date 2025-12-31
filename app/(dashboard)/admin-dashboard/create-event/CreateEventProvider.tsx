@@ -44,7 +44,7 @@ export interface EventData {
   save_mode: 'publish' | 'draft';
   
   // Section 6: Organizer Assignment
-  assigned_organizer?: string;
+  assigned_organizer?: string | null;
 }
 
 interface EventState {
@@ -83,7 +83,7 @@ const initialState: EventState = {
     form_fields: [],
     visibility: 'public',
     save_mode: 'publish',
-    assigned_organizer: undefined,
+    assigned_organizer: null,
   },
   errors: {},
   isSubmitting: false,

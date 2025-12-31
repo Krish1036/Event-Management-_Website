@@ -1,7 +1,6 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -12,129 +11,120 @@ import { FormBuilderSection } from '../../create-event/FormBuilderSection';
 import { VisibilitySection } from '../../create-event/VisibilitySection';
 import { OrganizerSection } from '../../create-event/OrganizerSection';
 import { CreateEventProvider, useCreateEvent, FormField, EventData } from '../../create-event/CreateEventProvider';
-import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Check, X, ArrowRight } from 'lucide-react';
+import { updateEventAction } from './edit/actions';
 
 interface Event {
   id: string;
   title: string;
   description: string;
-  category: string;
-  event_date?: string;
-  start_date?: string;
-  end_date?: string;
+  event_date: string;
   start_time: string;
   end_time: string;
   location: string;
-  max_participants: number;
+  capacity: number;
+  is_registration_open: boolean;
   price: number;
   image_url?: string;
-  status: 'draft' | 'published' | 'cancelled';
+  status: 'approved' | 'draft' | 'cancelled';
+  visibility: 'public' | 'hidden';
   registration_deadline?: string;
-  organizer_id: string;
+  assigned_organizer: string | null;
   created_at: string;
   updated_at: string;
   form_fields?: FormField[];
 }
 
+type Organizer = {
+  id: string;
+  full_name: string;
+  email: string;
+};
+
 interface EditEventFormProps {
   initialData: Event;
+  organizers: Organizer[];
 }
 
-function EditEventFormContent({ initialData }: EditEventFormProps) {
+function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
   const { state, setSubmitting, toggleConfirmation, validateForm } = useCreateEvent();
   const router = useRouter();
-  const [organizers, setOrganizers] = useState<any[]>([]);
-
-  const extractDate = (value?: string) => {
-    if (!value) return '';
-    return value.includes('T') ? value.split('T')[0] : value;
-  };
+  const logPrefix = '[EDIT_EVENT:client]';
 
   // Map initial event data to form data structure
   const mapInitialData = (event: Event): Partial<EventData> => ({
     title: event.title,
     description: event.description,
     location: event.location,
-    event_date: extractDate(event.event_date || event.start_date),
+    event_date: event.event_date,
     start_time: event.start_time,
     end_time: event.end_time,
-    total_capacity: event.max_participants,
-    registration_status: 'open', // Default, could be derived from event status
+    total_capacity: event.capacity,
+    registration_status: event.is_registration_open ? 'open' : 'closed',
     auto_close_when_full: true, // Default
     event_type: event.price > 0 ? 'paid' : 'free',
     price: event.price,
     currency: 'INR', // Default
     form_fields: event.form_fields || [],
-    visibility: event.status === 'published' ? 'public' : 'hidden',
-    save_mode: event.status === 'published' ? 'publish' : 'draft',
-    assigned_organizer: event.organizer_id,
+    visibility: event.visibility,
+    save_mode: event.status === 'approved' ? 'publish' : 'draft',
+    assigned_organizer: event.assigned_organizer,
   });
 
-  useEffect(() => {
-    // Load organizers for the organizer section
-    const loadOrganizers = async () => {
-      try {
-        const supabase = getSupabaseBrowserClient();
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('id, email, full_name')
-          .eq('role', 'organizer');
-
-        if (error) {
-          throw error;
-        }
-        
-        if (data) {
-          setOrganizers(data);
-        }
-      } catch (error) {
-        console.error('Failed to load organizers:', error);
-      }
-    };
-
-    loadOrganizers();
-  }, []);
-
   const handleSubmit = async () => {
-    if (!validateForm()) {
+    console.log(logPrefix, 'submit.clicked', { eventId: initialData.id });
+
+    const isValid = validateForm();
+    console.log(logPrefix, 'validateForm', {
+      isValid,
+      errorsCount: Object.keys(state.errors ?? {}).length
+    });
+
+    if (!isValid) {
       toast.error('Please fix all errors before submitting');
       return;
     }
 
     setSubmitting(true);
     try {
-      const response = await fetch(`/api/admin/update-event`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          eventId: initialData.id,
-          event: {
-            title: state.data.title,
-            description: state.data.description,
-            location: state.data.location,
-            event_date: state.data.event_date,
-            start_time: state.data.start_time,
-            end_time: state.data.end_time,
-            capacity: state.data.total_capacity,
-            is_registration_open: state.data.registration_status === 'open',
-            price: state.data.event_type === 'paid' ? state.data.price : 0,
-            status: state.data.save_mode === 'publish' ? 'approved' : 'draft',
-            visibility: state.data.visibility,
-            assigned_organizer: state.data.assigned_organizer || null,
-          },
-          form_fields: state.data.form_fields,
-        }),
+      console.log(logPrefix, 'submit.payload', {
+        eventId: initialData.id,
+        titleLen: (state.data.title ?? '').length,
+        event_date: state.data.event_date,
+        start_time: state.data.start_time,
+        end_time: state.data.end_time,
+        capacity: state.data.total_capacity,
+        status: state.data.save_mode,
+        visibility: state.data.visibility,
+        assigned_organizer: state.data.assigned_organizer ?? null,
+        formFieldsCount: (state.data.form_fields ?? []).length
       });
 
-      const result = await response.json();
+      const result = await updateEventAction({
+        eventId: initialData.id,
+        event: {
+          title: state.data.title,
+          description: state.data.description,
+          location: state.data.location,
+          event_date: state.data.event_date,
+          start_time: state.data.start_time,
+          end_time: state.data.end_time,
+          capacity: state.data.total_capacity,
+          is_registration_open: state.data.registration_status === 'open',
+          price: state.data.event_type === 'paid' ? state.data.price : 0,
+          status: state.data.save_mode === 'publish' ? 'approved' : 'draft',
+          visibility: state.data.visibility,
+          assigned_organizer: state.data.assigned_organizer || null,
+        },
+        form_fields: state.data.form_fields,
+      });
 
-      if (!response.ok || !result.success) {
-        const message = result.error || 'Failed to update event. Please try again.';
+      console.log(logPrefix, 'submit.result', result);
+
+      if (!result.success) {
+        const message = (result as any).error || 'Failed to update event. Please try again.';
         toast.error(message);
         return;
       }
@@ -143,6 +133,9 @@ function EditEventFormContent({ initialData }: EditEventFormProps) {
       router.push(`/admin-dashboard/events?updated_event=${encodeURIComponent(initialData.id)}`);
     } catch (error) {
       console.error('Error updating event:', error);
+      console.log(logPrefix, 'submit.exception', {
+        message: (error as any)?.message ?? String(error)
+      });
       toast.error('Failed to update event. Please try again.');
     } finally {
       setSubmitting(false);
@@ -348,31 +341,29 @@ function EditEventFormContent({ initialData }: EditEventFormProps) {
   );
 }
 
-export default function EditEventForm({ initialData }: EditEventFormProps) {
+export default function EditEventForm({ initialData, organizers }: EditEventFormProps) {
   const mappedInitialData = {
     title: initialData.title,
     description: initialData.description,
     location: initialData.location,
-    event_date: (initialData.event_date || initialData.start_date || '').includes('T')
-      ? (initialData.event_date || initialData.start_date || '').split('T')[0]
-      : (initialData.event_date || initialData.start_date || ''),
+    event_date: initialData.event_date,
     start_time: initialData.start_time,
     end_time: initialData.end_time,
-    total_capacity: initialData.max_participants,
-    registration_status: 'open' as const,
+    total_capacity: initialData.capacity,
+    registration_status: initialData.is_registration_open ? ('open' as const) : ('closed' as const),
     auto_close_when_full: true,
     event_type: initialData.price > 0 ? 'paid' as const : 'free' as const,
     price: initialData.price,
     currency: 'INR',
     form_fields: initialData.form_fields || [],
-    visibility: initialData.status === 'published' ? 'public' as const : 'hidden' as const,
-    save_mode: initialData.status === 'published' ? 'publish' as const : 'draft' as const,
-    assigned_organizer: initialData.organizer_id,
+    visibility: initialData.visibility,
+    save_mode: initialData.status === 'approved' ? 'publish' as const : 'draft' as const,
+    assigned_organizer: initialData.assigned_organizer ?? null,
   };
 
   return (
     <CreateEventProvider initialData={mappedInitialData}>
-      <EditEventFormContent initialData={initialData} />
+      <EditEventFormContent initialData={initialData} organizers={organizers} />
     </CreateEventProvider>
   );
 }
