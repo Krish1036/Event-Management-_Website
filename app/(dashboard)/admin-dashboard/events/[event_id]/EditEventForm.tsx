@@ -161,6 +161,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
       { key: 'price', label: 'Price', type: 'number' },
       { key: 'visibility', label: 'Visibility', type: 'text' },
       { key: 'save_mode', label: 'Save Mode', type: 'text' },
+      { key: 'form_fields', label: 'Form Fields', type: 'text' },
     ];
 
     fields.forEach(({ key, label, type }) => {
@@ -282,32 +283,49 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
                           <h4 className="font-medium">{diff.label}</h4>
                           <Badge variant="secondary">Modified</Badge>
                         </div>
-                        <div className="grid grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <p className="text-gray-500 mb-1">Original:</p>
-                            <div className="bg-red-50 border border-red-200 rounded p-2 text-red-800">
-                              {diff.type === 'boolean' 
-                                ? (diff.original ? 'Yes' : 'No')
-                                : (diff.original || 'Empty')
-                              }
+                        {diff.field === 'form_fields' ? (
+                          <div className="text-sm">
+                            <p className="text-slate-300 mb-2">Custom form fields have been modified</p>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <p className="text-slate-300 mb-1">Original fields:</p>
+                                <div className="bg-red-50 border border-red-200 rounded p-2 text-red-800">
+                                  {Array.isArray(diff.original) ? diff.original.length : 0} fields
+                                </div>
+                              </div>
+                              <div>
+                                <p className="text-slate-300 mb-1">New fields:</p>
+                                <div className="bg-green-50 border border-green-200 rounded p-2 text-green-800">
+                                  {Array.isArray(diff.current) ? diff.current.length : 0} fields
+                                </div>
+                              </div>
                             </div>
                           </div>
-                          <div>
-                            <p className="text-gray-500 mb-1">New:</p>
-                            <div className="bg-green-50 border border-green-200 rounded p-2 text-green-800">
-                              {diff.type === 'boolean' 
-                                ? (diff.current ? 'Yes' : 'No')
-                                : (diff.current || 'Empty')
-                              }
+                        ) : (
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                              <p className="text-slate-300 mb-1">Original:</p>
+                              <div className="bg-red-50 border border-red-200 rounded p-2 text-red-800">
+                                {diff.type === 'boolean' 
+                                  ? (diff.original ? 'Yes' : 'No')
+                                  : (diff.original || 'Empty')
+                                }
+                              </div>
+                            </div>
+                            <div>
+                              <p className="text-slate-300 mb-1">New:</p>
+                              <div className="bg-green-50 border border-green-200 rounded p-2 text-green-800">
+                                {diff.type === 'boolean' 
+                                  ? (diff.current ? 'Yes' : 'No')
+                                  : (diff.current || 'Empty')
+                                }
+                              </div>
                             </div>
                           </div>
-                        </div>
+                        )}
                       </div>
                     ))}
                   </div>
-                  
-                  <Separator />
-                  
                   <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
                     <h4 className="font-medium text-yellow-800 mb-2">Summary</h4>
                     <p className="text-sm text-yellow-700">
