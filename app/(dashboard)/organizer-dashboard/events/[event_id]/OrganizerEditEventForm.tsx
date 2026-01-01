@@ -5,13 +5,13 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { EventBasicsSection } from '../../admin-dashboard/create-event/EventBasicsSection';
-import { CapacitySection } from '../../admin-dashboard/create-event/CapacitySection';
-import { PricingSection } from '../../admin-dashboard/create-event/PricingSection';
-import { FormBuilderSection } from '../../admin-dashboard/create-event/FormBuilderSection';
-import { VisibilitySection } from '../../admin-dashboard/create-event/VisibilitySection';
-import { ReviewSection } from '../../admin-dashboard/create-event/ReviewSection';
-import { CreateEventProvider, useCreateEvent, FormField, EventData } from '../../admin-dashboard/create-event/CreateEventProvider';
+import { EventBasicsSection } from '../../../admin-dashboard/create-event/EventBasicsSection';
+import { CapacitySection } from '../../../admin-dashboard/create-event/CapacitySection';
+import { PricingSection } from '../../../admin-dashboard/create-event/PricingSection';
+import { FormBuilderSection } from '../../../admin-dashboard/create-event/FormBuilderSection';
+import { VisibilitySection } from '../../../admin-dashboard/create-event/VisibilitySection';
+import { ReviewSection } from '../../../admin-dashboard/create-event/ReviewSection';
+import { CreateEventProvider, useCreateEvent, FormField, EventData } from '../../../admin-dashboard/create-event/CreateEventProvider';
 
 interface Event {
   id: string;
