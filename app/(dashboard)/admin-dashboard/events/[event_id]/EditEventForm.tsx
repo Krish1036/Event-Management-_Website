@@ -266,7 +266,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
       {/* Diff-style Confirmation Dialog */}
       {state.showConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto">
+          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-800 border-slate-700">
             <CardHeader>
               <CardTitle>Review Event Changes</CardTitle>
               <CardDescription>
@@ -278,9 +278,9 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
                 <>
                   <div className="space-y-3">
                     {differences.map((diff, index) => (
-                      <div key={index} className="border rounded-lg p-4">
+                      <div key={index} className="border border-slate-600 rounded-lg p-4 bg-slate-700/50">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium">{diff.label}</h4>
+                          <h4 className="font-medium text-white">{diff.label}</h4>
                           <Badge variant="secondary">Modified</Badge>
                         </div>
                         {diff.field === 'form_fields' ? (
@@ -326,9 +326,9 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
                       </div>
                     ))}
                   </div>
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <h4 className="font-medium text-yellow-800 mb-2">Summary</h4>
-                    <p className="text-sm text-yellow-700">
+                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
+                    <h4 className="font-medium text-white mb-2">Summary</h4>
+                    <p className="text-sm text-slate-300">
                       You are making {differences.length} change{differences.length !== 1 ? 's' : ''} to this event.
                       The event will be updated as {state.data.save_mode === 'publish' ? 'PUBLISHED' : 'DRAFT'}.
                     </p>
@@ -336,7 +336,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
                 </>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-500">No changes detected</p>
+                  <p className="text-slate-400">No changes detected</p>
                 </div>
               )}
               

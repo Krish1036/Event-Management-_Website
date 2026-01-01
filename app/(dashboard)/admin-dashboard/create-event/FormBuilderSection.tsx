@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useCreateEvent } from './CreateEventProvider';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -25,18 +25,7 @@ interface FormFieldEditorProps {
 }
 
 const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, onMoveDown }: FormFieldEditorProps) => {
-  const [options, setOptions] = useState<string>(field.options?.join(', ') || '');
   const [isExpanded, setIsExpanded] = useState(true);
-
-  useEffect(() => {
-    if (field.field_type === 'select' && options) {
-      const optionsArray = options
-        .split(',')
-        .map(opt => opt.trim())
-        .filter(opt => opt.length > 0);
-      onUpdate(field.id, { options: optionsArray });
-    }
-  }, [options, field.field_type, field.id, onUpdate]);
 
   const handleTypeChange = (newType: FieldType) => {
     const updates: any = { field_type: newType };
@@ -142,18 +131,56 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
 
           {field.field_type === 'select' && (
             <div>
-              <label className="block text-sm font-medium text-slate-300 mb-1">
-                Options (comma separated)
+              <label className="block text-sm font-medium text-slate-300 mb-2">
+                Dropdown Options
               </label>
-              <input
-                type="text"
-                value={options}
-                onChange={(e) => setOptions(e.target.value)}
-                className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
-                placeholder="e.g., Option 1, Option 2, Option 3"
-              />
-              <p className="mt-1 text-xs text-slate-400">
-                Separate options with commas
+              <div className="space-y-2">
+                {field.options?.map((option, index) => (
+                  <div key={index} className="flex items-center space-x-2">
+                    <input
+                      type="text"
+                      value={option}
+                      onChange={(e) => {
+                        const newOptions = [...(field.options || [])];
+                        newOptions[index] = e.target.value;
+                        onUpdate(field.id, { options: newOptions });
+                      }}
+                      className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      placeholder={`Option ${index + 1}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const newOptions = field.options?.filter((_, i) => i !== index) || [];
+                        onUpdate(field.id, { options: newOptions });
+                      }}
+                      className="p-2 text-red-400 hover:text-red-300 hover:bg-red-900/20 rounded-lg transition-colors"
+                      aria-label="Remove option"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+                <button
+                  type="button"
+                  onClick={() => {
+                    const currentOptions = field.options || [];
+                    const newOptionNumber = currentOptions.length + 1;
+                    const newOptions = [...currentOptions, `Option ${newOptionNumber}`];
+                    onUpdate(field.id, { options: newOptions });
+                  }}
+                  className="w-full rounded-lg border border-dashed border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-sky-500 hover:text-sky-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
+                >
+                  <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                  Add option
+                </button>
+              </div>
+              <p className="mt-2 text-xs text-slate-400">
+                Add options for the dropdown menu. Each option will be available for selection during registration.
               </p>
             </div>
           )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useReducer, ReactNode, useEffect } from 'react';
+import { createContext, useContext, useReducer, ReactNode, useEffect, useCallback } from 'react';
 
 // Types
 export interface FormField {
@@ -240,9 +240,9 @@ export function CreateEventProvider({
     dispatch({ type: 'ADD_FORM_FIELD', field });
   };
 
-  const updateFormField = (id: string, updates: Partial<FormField>) => {
+  const updateFormField = useCallback((id: string, updates: Partial<FormField>) => {
     dispatch({ type: 'UPDATE_FORM_FIELD', id, updates });
-  };
+  }, []);
 
   const removeFormField = (id: string) => {
     dispatch({ type: 'REMOVE_FORM_FIELD', id });
