@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -99,6 +100,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (Array.isArray(formFields) && formFields.length > 0) {
+      const admin = getSupabaseAdminClient();
       const insertPayload = formFields.map((field) => ({
         event_id: event.id,
         label: field.label,
@@ -110,7 +112,7 @@ export async function POST(request: NextRequest) {
         created_at: new Date().toISOString()
       }));
 
-      const { error: fieldsError } = await supabase.from('event_form_fields').insert(insertPayload);
+      const { error: fieldsError } = await admin.from('event_form_fields').insert(insertPayload);
 
       if (fieldsError) {
         console.error('Failed to insert form fields', fieldsError);
