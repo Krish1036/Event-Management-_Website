@@ -32,35 +32,54 @@ export default async function AdminEventPreviewPage({
 }: {
   params: { event_id: string };
 }) {
-  await requireAdmin();
+  const { user } = await requireAdmin();
 
   const admin = getSupabaseAdminClient();
   const eventId = params.event_id;
 
-  const { data: event } = await admin
-    .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,is_paid,status,created_by,assigned_organizer,created_at,visibility')
-    .eq('id', eventId)
-    .single();
+  let event: any = null;
+  let organizer: any = null;
+  let formFields: any[] = [];
+  let fetchError: string | null = null;
 
-  if (!event) {
-    redirect('/admin-dashboard/events');
+  try {
+    const { data: eventData, error: eventError } = await admin
+      .from('events')
+      .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,is_paid,status,created_by,assigned_organizer,created_at,visibility')
+      .eq('id', eventId)
+      .single();
+
+    if (eventError) {
+      console.error('[AdminEventPreview] event fetch error', eventError);
+      fetchError = 'Failed to load event data';
+    } else if (!eventData) {
+      fetchError = 'Event not found';
+    } else {
+      event = eventData;
+
+      const { data: organizerData } = await admin
+        .from('profiles')
+        .select('id,full_name')
+        .eq('id', (event.created_by as string) ?? '')
+        .single();
+
+      organizer = organizerData;
+
+      const { data: fieldsData } = await admin
+        .from('event_form_fields')
+        .select('id,label,field_type,required,options,disabled,original_required')
+        .eq('event_id', eventId)
+        .order('created_at', { ascending: true });
+
+      formFields = fieldsData ?? [];
+    }
+  } catch (e: any) {
+    console.error('[AdminEventPreview] unexpected error', e);
+    fetchError = 'Unexpected error loading preview';
   }
 
-  const { data: organizer } = await admin
-    .from('profiles')
-    .select('id,full_name')
-    .eq('id', (event.created_by as string) ?? '')
-    .single();
-
-  const { data: formFields } = await admin
-    .from('event_form_fields')
-    .select('id,label,field_type,required,options,disabled,original_required')
-    .eq('event_id', eventId)
-    .order('created_at', { ascending: true });
-
-  const activeFields = (formFields ?? []).filter((f: any) => !f.disabled);
-  const disabledFields = (formFields ?? []).filter((f: any) => !!f.disabled);
+  const activeFields = formFields.filter((f: any) => !f.disabled);
+  const disabledFields = formFields.filter((f: any) => !!f.disabled);
 
   return (
     <div className="container mx-auto py-8 space-y-6">
@@ -87,6 +106,27 @@ export default async function AdminEventPreviewPage({
         </div>
       </div>
 
+      {fetchError && (
+        <Card className="border-red-800 bg-red-950/30">
+          <CardHeader>
+            <CardTitle className="text-red-300">Error</CardTitle>
+          </CardHeader>
+          <CardContent className="text-sm text-red-200">
+            <p>{fetchError}</p>
+            <div className="mt-4">
+              <Link href="/admin-dashboard/events">
+                <Button variant="outline" size="sm">
+                  <ArrowLeft className="h-4 w-4 mr-2" />
+                  Back to Events
+                </Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!fetchError && event && (
+        <>
       <Card className="border-slate-800 bg-slate-900/60">
         <CardHeader>
           <CardTitle className="text-white">Event Details</CardTitle>
@@ -216,6 +256,8 @@ export default async function AdminEventPreviewPage({
           </Link>
         </CardContent>
       </Card>
+        </>
+      )}
     </div>
   );
 }

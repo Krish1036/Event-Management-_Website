@@ -62,7 +62,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div>
           <h1 className="mb-2 text-2xl font-semibold tracking-tight">{event.title}</h1>
-          <p className="mb-3 text-sm text-slate-300">{event.description}</p>
+          <p className="mb-3 text-sm text-slate-300 line-clamp-3 text-ellipsis overflow-hidden">{event.description}</p>
           <div className="flex flex-wrap gap-3 text-xs text-slate-300">
             <span className="rounded-full bg-slate-800 px-3 py-1">
               {new Date(event.event_date as string).toLocaleDateString()} {event.start_time}–{event.end_time}
