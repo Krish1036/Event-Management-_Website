@@ -382,6 +382,22 @@ export default async function AdminEventsPage({
                 <div className="flex flex-wrap gap-2">
                   <form action={handleEventAction} className="flex flex-wrap gap-2">
                     <input type="hidden" name="eventId" value={event.id} />
+                    {event.status === 'pending_approval' && (
+                      <button
+                        type="submit"
+                        name="action"
+                        value="approve"
+                        className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
+                      >
+                        Approve Event
+                      </button>
+                    )}
+                    <Link
+                      href={`/admin-dashboard/events/${event.id}/preview`}
+                      className="rounded-md bg-slate-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-slate-600 inline-block"
+                    >
+                      Preview
+                    </Link>
                     <Link
                       href={`/admin-dashboard/events/${event.id}/edit`}
                       className="rounded-md bg-blue-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-600 inline-block"
