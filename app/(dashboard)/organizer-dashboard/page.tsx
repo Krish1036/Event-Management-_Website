@@ -18,39 +18,19 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
 
   const eventIds = (events ?? []).map((e: any) => e.id as string);
 
-  // Get ALL registrations for these events (no status filtering)
-  // Also join with events to verify ownership
+  // Get registrations for this organizer's events (no status filtering)
+  // Use a filtered query by event IDs so RLS policies are respected and results are accurate
   const { data: registrations } = eventIds.length > 0
     ? await supabase
         .from('registrations')
-        .select(`
-          event_id,
-          status,
-          created_at,
-          events!inner(
-            id,
-            created_by,
-            assigned_organizer
-          )
-        `)
+        .select('event_id,status,created_at')
         .in('event_id', eventIds)
-        .eq('events.created_by', organizerId) // Ensure we only get registrations for organizer's created events
     : { data: [] as any[] };
 
-  console.log('DEBUG: Registrations with event join', registrations);
+  console.log('DEBUG: Registrations for organizer events', registrations);
 
-  // Alternative: Get all registrations and filter client-side to verify
-  const { data: allRegistrations } = await supabase
-    .from('registrations')
-    .select('event_id,status,created_at');
-
-  console.log('DEBUG: All registrations in system', allRegistrations);
-
-  const organizerEventRegistrations = (allRegistrations ?? []).filter((reg: any) => 
-    eventIds.includes(reg.event_id)
-  );
-
-  console.log('DEBUG: Filtered registrations for organizer events', organizerEventRegistrations);
+  // Use the registrations returned from the filtered query
+  const organizerEventRegistrations = registrations ?? [];
 
   // Count upcoming events
   const { count: upcomingCount } = await supabase
@@ -74,8 +54,7 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
     totalRegistrations,
     upcomingCount,
     eventIds,
-    registrationCountFromJoin: (registrations ?? []).length,
-    registrationCountFromFilter: organizerEventRegistrations.length
+    registrationsFound: (registrations ?? []).length
   });
 
   const totalCapacity = (events ?? []).reduce((sum: number, e: any) => sum + (Number(e.capacity ?? 0) || 0), 0);
