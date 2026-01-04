@@ -80,7 +80,7 @@ function OrganizerCreateEventFormContent() {
     <div className="space-y-6">
       <Card className="border-gray-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">Event Basics</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Event Basics</CardTitle>
           <CardDescription className="text-gray-500">Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
@@ -90,7 +90,7 @@ function OrganizerCreateEventFormContent() {
 
       <Card className="border-gray-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">Capacity & Registration</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Capacity & Registration</CardTitle>
           <CardDescription className="text-gray-500">Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
@@ -100,7 +100,7 @@ function OrganizerCreateEventFormContent() {
 
       <Card className="border-gray-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">Pricing & Payment</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Pricing & Payment</CardTitle>
           <CardDescription className="text-gray-500">Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
@@ -110,7 +110,7 @@ function OrganizerCreateEventFormContent() {
 
       <Card className="border-gray-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">Registration Form Builder</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Registration Form Builder</CardTitle>
           <CardDescription className="text-gray-500">Customize the registration form</CardDescription>
         </CardHeader>
         <CardContent>
@@ -120,7 +120,7 @@ function OrganizerCreateEventFormContent() {
 
       <Card className="border-gray-200">
         <CardHeader className="pb-4">
-          <CardTitle className="text-lg font-semibold text-gray-900">Review</CardTitle>
+          <CardTitle className="text-lg font-semibold text-black">Review</CardTitle>
           <CardDescription className="text-gray-500">Review your event details before saving</CardDescription>
         </CardHeader>
         <CardContent>
@@ -150,7 +150,7 @@ function OrganizerCreateEventFormContent() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
           <Card className="w-full max-w-md border-gray-200">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg font-semibold text-gray-900">Confirm</CardTitle>
+              <CardTitle className="text-lg font-semibold text-black">Confirm</CardTitle>
               <CardDescription className="text-gray-500">
                 {intent === 'submit'
                   ? 'This event will be submitted for admin approval. Continue?'
