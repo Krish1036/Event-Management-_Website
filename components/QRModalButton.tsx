@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import { X } from 'lucide-react';
 
@@ -13,9 +13,49 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
   const [preview, setPreview] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirming, setConfirming] = useState(false);
+  const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
+  const [deviceId, setDeviceId] = useState<string | null>(null);
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const scannerMountRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    // discover devices when modal opens
+    if (!open) return;
+    (async () => {
+      try {
+        const ds = await navigator.mediaDevices.enumerateDevices();
+        const videoInputs = ds.filter((d) => d.kind === 'videoinput');
+        setDevices(videoInputs);
+        if (videoInputs.length > 0) setDeviceId(videoInputs[0].deviceId);
+      } catch (err: any) {
+        // permission may not be granted yet
+        setPermissionError('Camera access not available. You can enter the code manually or upload the QR image.');
+      }
+    })();
+  }, [open]);
+
+  const playBeep = () => {
+    try {
+      const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.value = 880;
+      g.gain.value = 0.05;
+      o.connect(g);
+      g.connect(ctx.destination);
+      o.start();
+      setTimeout(() => {
+        o.stop();
+        ctx.close();
+      }, 150);
+    } catch (e) {
+      // ignore audio errors
+    }
+  };
 
   const handleScan = async (text: string) => {
-    // Simple de-bounce to avoid multiple scans firing rapidly
+    // de-bounce - ignore if already scanning
     if (scanned) return;
     setScanned(text);
     setLoadingPreview(true);
@@ -30,6 +70,8 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || 'Preview failed');
       setPreview(json);
+      // play a short detect sound
+      playBeep();
     } catch (err: any) {
       setError(err?.message ?? String(err));
       setScanned(null);
@@ -51,16 +93,43 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || 'Check-in failed');
-      // success - close and show small success state
       setOpen(false);
       setScanned(null);
       setPreview(null);
-      // small visual feedback — you can extend toasts later
+      playBeep();
+      // small visual feedback
       alert('Checked in: ' + (json.user?.full_name ?? json.registrationId));
     } catch (err: any) {
       setError(err?.message ?? String(err));
     } finally {
       setConfirming(false);
+    }
+  };
+
+  const handleImageUpload = async (file: File | null) => {
+    if (!file) return;
+    setLoadingPreview(true);
+    setError(null);
+    try {
+      const blobUrl = URL.createObjectURL(file);
+      const img = new Image();
+      img.src = blobUrl;
+      await new Promise((res) => (img.onload = res));
+      const { BrowserMultiFormatReader } = await import('@zxing/browser');
+      const reader = new BrowserMultiFormatReader();
+      try {
+        const result = await reader.decodeFromImage(img);
+        handleScan(result.getText());
+      } catch (err: any) {
+        setError('Could not detect a QR code in the image.');
+      } finally {
+        reader.reset();
+        URL.revokeObjectURL(blobUrl);
+      }
+    } catch (err: any) {
+      setError(String(err));
+    } finally {
+      setLoadingPreview(false);
     }
   };
 
@@ -87,10 +156,38 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
             </div>
 
             <div className="h-72 bg-gray-100 rounded-md overflow-hidden">
-              <QRScanner
-                onScan={handleScan}
-                onError={(err) => setError(err.message)}
-              />
+              <div className="flex h-full">
+                <div className="flex-1">
+                  <QRScanner
+                    onScan={handleScan}
+                    onDetect={(t) => { /* could highlight briefly */ }}
+                    onError={(err) => setError(err.message)}
+                    preferredDeviceId={deviceId}
+                  />
+                </div>
+                <div className="w-44 p-2">
+                  <div className="mb-2">
+                    <label className="text-xs font-medium text-gray-600">Camera</label>
+                    <select
+                      value={deviceId ?? ''}
+                      onChange={(e) => setDeviceId(e.target.value)}
+                      className="w-full mt-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
+                    >
+                      {devices.length === 0 && <option value="">No camera detected</option>}
+                      {devices.map((d) => (
+                        <option key={d.deviceId} value={d.deviceId}>{d.label || d.deviceId}</option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div className="mb-2">
+                    <label className="text-xs font-medium text-gray-600">Upload</label>
+                    <input className="mt-1 w-full text-xs" type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files?.[0] ?? null)} />
+                  </div>
+
+                  {permissionError && <p className="text-xs text-red-600">{permissionError}</p>}
+                </div>
+              </div>
             </div>
 
             <div className="mt-3">
@@ -113,7 +210,7 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
               )}
 
               {!loadingPreview && !preview && !error && (
-                <p className="text-sm text-gray-600 mt-2">Point the camera at the attendee's QR code. The scanner only accepts registration QR payloads.</p>
+                <p className="text-sm text-gray-600 mt-2">Point the camera at the attendee's QR code. The scanner requires two quick consecutive detections to reduce false positives. You can also upload an image.</p>
               )}
             </div>
           </div>

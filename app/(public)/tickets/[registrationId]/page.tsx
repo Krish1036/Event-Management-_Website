@@ -32,6 +32,8 @@ async function getTicket(registrationId: string) {
   return { registration, event };
 }
 
+import { signPayload } from '@/lib/qr';
+
 export default async function TicketPage({ params }: { params: { registrationId: string } }) {
   const data = await getTicket(params.registrationId);
 
@@ -40,6 +42,9 @@ export default async function TicketPage({ params }: { params: { registrationId:
   }
 
   const { registration, event } = data as any;
+
+  // sign a token for the ticket (if secret configured this will be HMAC-signed)
+  const qrData = signPayload({ registration_id: registration.id });
 
   const status = registration.status as 'PENDING' | 'CONFIRMED' | 'CANCELLED';
 
@@ -85,7 +90,7 @@ export default async function TicketPage({ params }: { params: { registrationId:
           </div>
         </div>
         <div className="flex flex-col items-center justify-center gap-4 rounded-xl border border-slate-800 bg-slate-900/60 p-4">
-          <TicketQr registrationId={registration.id as string} />
+          <TicketQr data={qrData} />
         </div>
       </div>
     </div>

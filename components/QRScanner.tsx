@@ -5,15 +5,17 @@ import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser';
 
 export type QRScannerProps = {
   onScan: (text: string) => void;
+  onDetect?: (text: string) => void;
   onError?: (err: Error) => void;
   paused?: boolean;
   constraints?: MediaTrackConstraints;
   preferredDeviceId?: string | null;
 };
 
-export default function QRScanner({ onScan, onError, paused, constraints, preferredDeviceId }: QRScannerProps) {
+export default function QRScanner({ onScan, onDetect, onError, paused, constraints, preferredDeviceId }: QRScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const lastSeenRef = useRef<Record<string, { count: number; last: number }>>({});
   const [scanning, setScanning] = useState(false);
 
   useEffect(() => {
@@ -25,28 +27,39 @@ export default function QRScanner({ onScan, onError, paused, constraints, prefer
     const start = async () => {
       try {
         setScanning(true);
+        const callback = (result: any, err: any) => {
+          if (!active) return;
+          if (result) {
+            const text = result.getText();
+            onDetect?.(text);
+
+            const now = Date.now();
+            const entry = lastSeenRef.current[text] || { count: 0, last: 0 };
+            if (now - entry.last > 800) {
+              // reset if older than 800ms
+              entry.count = 0;
+            }
+            entry.count += 1;
+            entry.last = now;
+            lastSeenRef.current[text] = entry;
+
+            // require at least 2 detections within the time window to reduce false positives
+            if (entry.count >= 2) {
+              // call onScan and clear the counts for this value
+              onScan(text);
+              lastSeenRef.current = {};
+            }
+          }
+
+          if (err && !(err instanceof NotFoundException)) {
+            onError?.(err as Error);
+          }
+        };
+
         if (preferredDeviceId) {
-          await codeReader.decodeFromVideoDevice(preferredDeviceId, videoRef.current!, (result, err) => {
-            if (!active) return;
-            if (result) {
-              onScan(result.getText());
-            }
-            if (err && !(err instanceof NotFoundException)) {
-              // NotFoundException means "no QR found in this frame" - ignore
-              onError?.(err as Error);
-            }
-          });
+          await codeReader.decodeFromVideoDevice(preferredDeviceId, videoRef.current!, callback);
         } else {
-          // Use default camera and constraints if provided
-          await codeReader.decodeFromVideoDevice(undefined, videoRef.current!, (result, err) => {
-            if (!active) return;
-            if (result) {
-              onScan(result.getText());
-            }
-            if (err && !(err instanceof NotFoundException)) {
-              onError?.(err as Error);
-            }
-          });
+          await codeReader.decodeFromVideoDevice(undefined, videoRef.current!, callback);
         }
       } catch (err: any) {
         onError?.(err);
@@ -65,7 +78,7 @@ export default function QRScanner({ onScan, onError, paused, constraints, prefer
         // ignore
       }
     };
-  }, [onScan, onError, paused, preferredDeviceId, constraints]);
+  }, [onScan, onDetect, onError, paused, preferredDeviceId, constraints]);
 
   return (
     <div className="w-full h-full flex items-center justify-center">

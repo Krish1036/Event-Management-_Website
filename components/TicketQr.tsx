@@ -5,7 +5,7 @@ import QRCode from 'qr-code-styling';
 
 const SIZE = 180;
 
-export function TicketQr({ registrationId }: { registrationId: string }) {
+export function TicketQr({ data }: { data: string }) {
   const ref = useRef<HTMLDivElement | null>(null);
   const qrRef = useRef<any | null>(null);
 
@@ -16,7 +16,7 @@ export function TicketQr({ registrationId }: { registrationId: string }) {
       qrRef.current = new QRCode({
         width: SIZE,
         height: SIZE,
-        data: JSON.stringify({ registration_id: registrationId }),
+        data: data,
         dotsOptions: {
           color: '#0ea5e9',
           type: 'rounded'
@@ -27,9 +27,9 @@ export function TicketQr({ registrationId }: { registrationId: string }) {
       });
       qrRef.current.append(ref.current);
     } else {
-      qrRef.current.update({ data: JSON.stringify({ registration_id: registrationId }) });
+      qrRef.current.update({ data });
     }
-  }, [registrationId]);
+  }, [data]);
 
   return <div ref={ref} className="h-[180px] w-[180px]" aria-label="Ticket QR code" />;
 }

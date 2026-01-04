@@ -22,6 +22,19 @@ export async function POST(req: Request) {
     const t = (text ?? '').trim();
     if (!t) return null;
 
+    // If the token looks signed (b64.sig) and we have a verifier, verify it first
+    try {
+      const { verifyToken } = await import('@/lib/qr');
+      const verification = verifyToken(t);
+      if (verification.valid && verification.payload && verification.payload.registration_id) {
+        const rid = verification.payload.registration_id as string;
+        const { data: regById } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('id', rid).limit(1).single();
+        if (regById) return regById;
+      }
+    } catch (e) {
+      // verification failed or no secret configured — fall back to legacy methods
+    }
+
     // try by entry_code first
     let { data: regs } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('entry_code', t).limit(1).single();
     if (regs) return regs;
