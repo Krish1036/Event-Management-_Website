@@ -78,53 +78,53 @@ function OrganizerCreateEventFormContent() {
 
   return (
     <div className="space-y-6">
-      <Card className="border-gray-200">
+      <Card variant="light" className="border-gray-200">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold text-black">Event Basics</CardTitle>
           <CardDescription className="text-gray-500">Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
-          <EventBasicsSection />
+          <EventBasicsSection variant="light" />
         </CardContent>
       </Card>
 
-      <Card className="border-gray-200">
+      <Card variant="light" className="border-gray-200">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold text-black">Capacity & Registration</CardTitle>
           <CardDescription className="text-gray-500">Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
-          <CapacitySection />
+          <CapacitySection variant="light" />
         </CardContent>
       </Card>
 
-      <Card className="border-gray-200">
+      <Card variant="light" className="border-gray-200">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold text-black">Pricing & Payment</CardTitle>
           <CardDescription className="text-gray-500">Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
-          <PricingSection />
+          <PricingSection variant="light" />
         </CardContent>
       </Card>
 
-      <Card className="border-gray-200">
+      <Card variant="light" className="border-gray-200">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold text-black">Registration Form Builder</CardTitle>
           <CardDescription className="text-gray-500">Customize the registration form</CardDescription>
         </CardHeader>
         <CardContent>
-          <FormBuilderSection />
+          <FormBuilderSection variant="light" />
         </CardContent>
       </Card>
 
-      <Card className="border-gray-200">
+      <Card variant="light" className="border-gray-200">
         <CardHeader className="pb-4">
           <CardTitle className="text-lg font-semibold text-black">Review</CardTitle>
           <CardDescription className="text-gray-500">Review your event details before saving</CardDescription>
         </CardHeader>
         <CardContent>
-          <ReviewSection />
+          <ReviewSection variant="light" />
         </CardContent>
       </Card>
 
@@ -148,7 +148,7 @@ function OrganizerCreateEventFormContent() {
 
       {state.showConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-md border-gray-200">
+          <Card variant="light" className="w-full max-w-md border-gray-200">
             <CardHeader className="pb-4">
               <CardTitle className="text-lg font-semibold text-black">Confirm</CardTitle>
               <CardDescription className="text-gray-500">

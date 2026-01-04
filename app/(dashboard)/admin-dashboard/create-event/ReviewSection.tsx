@@ -3,8 +3,9 @@
 import { useCreateEvent } from './CreateEventProvider';
 import { format } from 'date-fns';
 
-export function ReviewSection() {
+export function ReviewSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state } = useCreateEvent();
+  const isLight = variant === 'light';
   const { data } = state;
 
   const formatTime = (timeString: string) => {
@@ -24,11 +25,11 @@ export function ReviewSection() {
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
           <div>
             <h4 className="text-sm font-medium text-slate-400">Title</h4>
-            <p className="text-white">{data.title || 'Not set'}</p>
+            <p className={isLight ? 'text-gray-900' : 'text-white'}>{data.title || 'Not set'}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-slate-400">Location</h4>
-            <p className="text-white">{data.location || 'Not set'}</p>
+            <p className={isLight ? 'text-gray-900' : 'text-white'}>{data.location || 'Not set'}</p>
           </div>
           <div>
             <h4 className="text-sm font-medium text-slate-400">Date</h4>

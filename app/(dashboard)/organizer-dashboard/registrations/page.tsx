@@ -105,8 +105,8 @@ export default async function OrganizerRegistrationsPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Registrations</h1>
-          <p className="mt-1 text-sm text-slate-400">View registrations for your events (read-only).</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Registrations</h1>
+          <p className="mt-1 text-sm text-gray-600">View registrations for your events (read-only).</p>
         </div>
         <form className="w-full max-w-xs">
           <input
@@ -114,19 +114,19 @@ export default async function OrganizerRegistrationsPage({
             name="search"
             defaultValue={search ?? ''}
             placeholder="Search by name, email, or entry code"
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+            className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
           />
         </form>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
         <form className="grid gap-3 md:grid-cols-3">
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Event</label>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">Event</label>
             <select
               name="event"
               defaultValue={eventId ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">All Events</option>
               {events.map((event: any) => (
@@ -138,11 +138,11 @@ export default async function OrganizerRegistrationsPage({
           </div>
 
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Status</label>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">Status</label>
             <select
               name="status"
               defaultValue={status ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">All Status</option>
               <option value="PENDING">Pending</option>
@@ -167,11 +167,11 @@ export default async function OrganizerRegistrationsPage({
       ) : (
         <div className="space-y-3 text-sm">
           {registrations.map((reg: any) => (
-            <div key={reg.id} className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+            <div key={reg.id} className="rounded-xl border border-gray-200 bg-white p-4">
               <div className="space-y-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="text-sm font-semibold text-white">{reg.event?.title ?? 'Event'}</h2>
-                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-200 bg-slate-800">
+                  <h2 className="text-sm font-semibold text-gray-900">{reg.event?.title ?? 'Event'}</h2>
+                  <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-gray-700 bg-gray-100">
                     {reg.status}
                   </span>
                   {reg.event?.is_paid && (
@@ -180,10 +180,10 @@ export default async function OrganizerRegistrationsPage({
                     </span>
                   )}
                 </div>
-                <p className="text-xs text-slate-300">
+                <p className="text-xs text-gray-600">
                   {reg.user?.full_name ?? 'User'} · {reg.user?.email ?? 'No email'} · Entry code: {reg.entry_code ?? 'N/A'}
                 </p>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-gray-600">
                   Registered on {new Date(reg.created_at).toLocaleString()}
                   {reg.event?.price && reg.event.is_paid && ` · Price: ₹${reg.event.price}`}
                 </p>

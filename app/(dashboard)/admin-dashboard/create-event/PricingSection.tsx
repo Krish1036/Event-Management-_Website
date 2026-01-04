@@ -2,9 +2,18 @@
 
 import { useCreateEvent } from './CreateEventProvider';
 
-export function PricingSection() {
+export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, updateField, setError, clearError } = useCreateEvent();
   const paymentsEnabled = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED !== 'false';
+
+  const isLight = variant === 'light';
+  const headerBorder = isLight ? 'border-b border-gray-200 pb-2' : 'border-b border-slate-700 pb-2';
+  const headerTitle = isLight ? 'text-lg font-semibold text-gray-900' : 'text-lg font-semibold text-white';
+  const headerDesc = isLight ? 'text-sm text-gray-600' : 'text-sm text-slate-400';
+  const labelClass = isLight ? 'block text-sm font-medium text-gray-700 mb-2' : 'block text-sm font-medium text-slate-300 mb-2';
+  const inputBase = isLight
+    ? 'block w-full pl-7 pr-12 py-2 rounded-lg border bg-white text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500'
+    : 'block w-full pl-7 pr-12 py-2 rounded-lg border bg-slate-800 text-white placeholder:slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500';
 
   const handlePriceChange = (value: string) => {
     const numValue = parseFloat(value) || 0;
@@ -35,9 +44,9 @@ export function PricingSection() {
           Payments are disabled (Test Mode). Paid events will behave as free for testing.
         </div>
       )}
-      <div className="border-b border-slate-700 pb-2">
-        <h2 className="text-lg font-semibold text-white">Pricing & Payment</h2>
-        <p className="text-sm text-slate-400">Set event pricing and payment options</p>
+      <div className={headerBorder}>
+        <h2 className={headerTitle}>Pricing & Payment</h2>
+        <p className={headerDesc}>Set event pricing and payment options</p>
       </div>
 
       <div className="space-y-6">
@@ -52,20 +61,20 @@ export function PricingSection() {
               onClick={() => handleEventTypeChange('free')}
               className={`rounded-lg p-4 border-2 transition-colors ${
                 state.data.event_type === 'free'
-                  ? 'border-sky-500 bg-sky-500/10'
-                  : 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
+                  ? (isLight ? 'border-sky-500 bg-sky-50' : 'border-sky-500 bg-sky-500/10')
+                  : (isLight ? 'border-gray-200 hover:border-gray-300 bg-white' : 'border-slate-700 hover:border-slate-600 bg-slate-800/50')
               }`}
             >
               <div className="text-left">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-white">Free</span>
+                  <span className={`font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>Free</span>
                   {state.data.event_type === 'free' && (
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-sky-100 text-sky-800">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${isLight ? 'bg-sky-100 text-sky-800' : 'bg-sky-100 text-sky-800'}`}>
                       Selected
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-slate-400">No payment required</p>
+                <p className={`mt-1 text-sm ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>No payment required</p>
               </div>
             </button>
 
@@ -74,8 +83,8 @@ export function PricingSection() {
               onClick={() => handleEventTypeChange('paid')}
               className={`rounded-lg p-4 border-2 transition-colors ${
                 state.data.event_type === 'paid'
-                  ? 'border-green-500 bg-green-500/10'
-                  : 'border-slate-700 hover:border-slate-600 bg-slate-800/50'
+                  ? (isLight ? 'border-green-500 bg-green-50' : 'border-green-500 bg-green-500/10')
+                  : (isLight ? 'border-gray-200 hover:border-gray-300 bg-white' : 'border-slate-700 hover:border-slate-600 bg-slate-800/50')
               }`}
             >
               <div className="text-left">
@@ -96,12 +105,12 @@ export function PricingSection() {
         {/* Price Input (Conditional) */}
         {state.data.event_type === 'paid' && (
           <div>
-            <label htmlFor="price" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="price" className={labelClass}>
               Price per attendee <span className="text-red-400">*</span>
             </label>
             <div className="relative rounded-md shadow-sm">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-slate-400 sm:text-sm">₹</span>
+                <span className={`sm:text-sm ${isLight ? 'text-gray-500' : 'text-slate-400'}`}>₹</span>
               </div>
               <input
                 type="number"
@@ -110,13 +119,11 @@ export function PricingSection() {
                 onChange={(e) => handlePriceChange(e.target.value)}
                 min="0"
                 step="0.01"
-                className={`block w-full pl-7 pr-12 py-2 rounded-lg border bg-slate-800 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-                  state.errors.price ? 'border-red-500' : 'border-slate-600'
-                }`}
+                className={`${inputBase} ${state.errors.price ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
                 placeholder="0.00"
               />
               <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-slate-400 sm:text-sm" id="price-currency">
+                <span className={`sm:text-sm ${isLight ? 'text-gray-500' : 'text-slate-400'}`} id="price-currency">
                   INR
                 </span>
               </div>
@@ -124,7 +131,7 @@ export function PricingSection() {
             {state.errors.price && (
               <p className="mt-1 text-sm text-red-400">{state.errors.price}</p>
             )}
-            <p className="mt-1 text-xs text-slate-500">
+            <p className="mt-1 text-xs text-gray-500">
               Amount in Indian Rupees (INR)
             </p>
           </div>
@@ -143,13 +150,13 @@ export function PricingSection() {
                 type="checkbox"
                 checked={true}
                 disabled
-                className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+                className={`h-4 w-4 rounded ${isLight ? 'border-gray-300 bg-white text-sky-500' : 'border-slate-600 bg-slate-800 text-sky-500'} focus:ring-sky-500`}
               />
               <div>
-                <label htmlFor="stripe-payment" className="block text-sm font-medium text-white">
+                <label htmlFor="stripe-payment" className={`block text-sm font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>
                   Credit/Debit Card (Stripe)
                 </label>
-                <p className="text-xs text-slate-400">Secure online payments via Stripe</p>
+                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Secure online payments via Stripe</p>
               </div>
             </div>
             
@@ -160,14 +167,14 @@ export function PricingSection() {
                   name="offline-payment"
                   type="checkbox"
                   disabled
-                  className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-slate-400 focus:ring-slate-500"
+                  className={`h-4 w-4 rounded ${isLight ? 'border-gray-300 bg-white text-gray-400' : 'border-slate-600 bg-slate-800 text-slate-400'} focus:ring-slate-500`}
                 />
               </div>
               <div>
-                <label htmlFor="offline-payment" className="block text-sm font-medium text-slate-400">
+                <label htmlFor="offline-payment" className={`block text-sm font-medium ${isLight ? 'text-gray-700' : 'text-slate-400'}`}>
                   Offline Payment (Coming Soon)
                 </label>
-                <p className="text-xs text-slate-500">
+                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-slate-500'}`}>
                   Enable cash, bank transfer, or other offline payment methods
                 </p>
               </div>

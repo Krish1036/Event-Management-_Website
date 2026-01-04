@@ -138,68 +138,68 @@ function OrganizerEditEventFormContent({ initialData }: { initialData: Event }) 
 
   return (
     <div className="space-y-6">
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
-        <p className="font-semibold text-white">Status: {initialData.status}</p>
-        <p className="mt-1 text-[11px] text-slate-400">{statusHelper}</p>
+      <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+        <p className="font-semibold text-gray-900">Status: {initialData.status}</p>
+        <p className="mt-1 text-[11px] text-gray-600">{statusHelper}</p>
       </div>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Event Basics</CardTitle>
           <CardDescription>Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
-          <EventBasicsSection />
+          <EventBasicsSection variant="light" />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Capacity & Registration</CardTitle>
           <CardDescription>Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
           <div className={isApproved ? 'pointer-events-none opacity-60' : ''}>
-            <CapacitySection />
+            <CapacitySection variant="light" />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Pricing & Payment</CardTitle>
           <CardDescription>Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
           <div className={isApproved ? 'pointer-events-none opacity-60' : ''}>
-            <PricingSection />
+            <PricingSection variant="light" />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Registration Form Builder</CardTitle>
           <CardDescription>Customize the registration form</CardDescription>
         </CardHeader>
         <CardContent>
-          <FormBuilderSection />
+          <FormBuilderSection variant="light" />
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Visibility</CardTitle>
           <CardDescription>Visibility will take effect after approval</CardDescription>
         </CardHeader>
         <CardContent>
           <div className={isApproved ? 'pointer-events-none opacity-60' : ''}>
-            <VisibilitySection />
+            <VisibilitySection variant="light" />
           </div>
         </CardContent>
       </Card>
 
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle>Review</CardTitle>
           <CardDescription>Review your changes before saving</CardDescription>
@@ -222,7 +222,7 @@ function OrganizerEditEventFormContent({ initialData }: { initialData: Event }) 
 
       {state.showConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-md">
+          <Card variant="light" className="w-full max-w-md">
             <CardHeader>
               <CardTitle>Confirm</CardTitle>
               <CardDescription>

@@ -34,7 +34,7 @@ export default async function OrganizerDashboardLayout({ children }: { children:
   const { user, profile } = await requireOrganizer();
 
   return (
-    <div className="min-h-screen bg-[#F3F9F9] flex">
+    <div className="min-h-screen bg-[#F3F9F9] flex text-gray-900">
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-indigo-50 via-violet-50 to-orange-50 shadow-md relative min-h-screen overflow-y-auto">
         <OrganizerSidebar />

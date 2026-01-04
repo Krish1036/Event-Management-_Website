@@ -24,8 +24,14 @@ interface FormFieldEditorProps {
   onMoveDown: () => void;
 }
 
-const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, onMoveDown }: FormFieldEditorProps) => {
+const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, onMoveDown, variant }: FormFieldEditorProps & { variant?: 'dark' | 'light' }) => {
   const [isExpanded, setIsExpanded] = useState(true);
+  const isLight = variant === 'light';
+  const headerBg = isLight ? 'p-3 bg-white/0 cursor-pointer' : 'p-3 bg-slate-800/50 cursor-pointer';
+  const containerBg = isLight ? 'border border-gray-200 rounded-lg overflow-hidden bg-white mb-4' : 'border border-slate-700 rounded-lg overflow-hidden bg-slate-800/50 mb-4';
+  const inputBase = isLight
+    ? 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500'
+    : 'w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500';
 
   const handleTypeChange = (newType: FieldType) => {
     const updates: any = { field_type: newType };
@@ -38,21 +44,21 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
   };
 
   return (
-    <div className="border border-slate-700 rounded-lg overflow-hidden bg-slate-800/50 mb-4">
+    <div className={containerBg}>
       <div 
-        className="flex items-center justify-between p-3 bg-slate-800/50 cursor-pointer"
+        className={headerBg}
         onClick={() => setIsExpanded(!isExpanded)}
       >
         <div className="flex items-center space-x-2">
-          <span className="text-slate-400">
+          <span className={isLight ? 'text-gray-500' : 'text-slate-400'}>
             {isExpanded ? '▼' : '►'}
           </span>
-          <span className="font-medium text-white">{field.label || 'Untitled Field'}</span>
-          <span className="text-xs px-2 py-0.5 bg-slate-700 text-slate-300 rounded-full">
+          <span className={`font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>{field.label || 'Untitled Field'}</span>
+          <span className={`text-xs px-2 py-0.5 rounded-full ${isLight ? 'bg-gray-100 text-gray-700' : 'bg-slate-700 text-slate-300'}`}>
             {field.field_type}
           </span>
           {field.required && (
-            <span className="text-xs px-2 py-0.5 bg-red-900/50 text-red-300 rounded-full">
+            <span className={`text-xs px-2 py-0.5 rounded-full ${isLight ? 'bg-red-100 text-red-700' : 'bg-red-900/50 text-red-300'}`}>
               Required
             </span>
           )}
@@ -65,7 +71,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
               onMoveUp();
             }}
             disabled={index === 0}
-            className="text-slate-500 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className={isLight ? 'text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed' : 'text-slate-500 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed'}
             aria-label="Move field up"
           >
             ▲
@@ -77,7 +83,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
               onMoveDown();
             }}
             disabled={index === total - 1}
-            className="text-slate-500 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed"
+            className={isLight ? 'text-gray-500 hover:text-gray-700 disabled:opacity-40 disabled:cursor-not-allowed' : 'text-slate-500 hover:text-slate-200 disabled:opacity-40 disabled:cursor-not-allowed'}
             aria-label="Move field down"
           >
             ▼
@@ -88,7 +94,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
               e.stopPropagation();
               onRemove(field.id);
             }}
-            className="text-slate-400 hover:text-red-400"
+            className={isLight ? 'text-gray-500 hover:text-red-600' : 'text-slate-400 hover:text-red-400'}
             aria-label="Remove field"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -101,26 +107,26 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
       {isExpanded && (
         <div className="p-4 space-y-4">
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
+            <label className={`block text-sm font-medium ${isLight ? 'text-gray-700 mb-1' : 'text-slate-300 mb-1'}`}>
               Field Label <span className="text-red-400">*</span>
             </label>
             <input
               type="text"
               value={field.label}
               onChange={(e) => onUpdate(field.id, { label: e.target.value })}
-              className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className={inputBase}
               placeholder="e.g., Phone Number, Company Name"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-300 mb-1">
+            <label className={`block text-sm font-medium ${isLight ? 'text-gray-700 mb-1' : 'text-slate-300 mb-1'}`}>
               Field Type
             </label>
             <select
               value={field.field_type}
               onChange={(e) => handleTypeChange(e.target.value as FieldType)}
-              className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className={isLight ? 'w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500' : 'w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-sky-500'}
             >
               <option value="text">Text</option>
               <option value="number">Number</option>
@@ -145,7 +151,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
                         newOptions[index] = e.target.value;
                         onUpdate(field.id, { options: newOptions });
                       }}
-                      className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                      className={inputBase}
                       placeholder={`Option ${index + 1}`}
                     />
                     <button
@@ -171,7 +177,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
                     const newOptions = [...currentOptions, `Option ${newOptionNumber}`];
                     onUpdate(field.id, { options: newOptions });
                   }}
-                  className="w-full rounded-lg border border-dashed border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-sky-500 hover:text-sky-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
+                  className={isLight ? 'w-full rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors' : 'w-full rounded-lg border border-dashed border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-sky-500 hover:text-sky-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors'}
                 >
                   <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -260,8 +266,12 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
   );
 };
 
-export function FormBuilderSection() {
+export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, addFormField, updateFormField, removeFormField, moveFormField } = useCreateEvent();
+  const isLight = variant === 'light';
+  const headerBorder = isLight ? 'border-b border-gray-200 pb-2' : 'border-b border-slate-700 pb-2';
+  const headerTitle = isLight ? 'text-lg font-semibold text-gray-900' : 'text-lg font-semibold text-white';
+  const headerDesc = isLight ? 'text-sm text-gray-600' : 'text-sm text-slate-400';
   
   const defaultFields = [
     {
@@ -302,35 +312,35 @@ export function FormBuilderSection() {
 
   return (
     <div className="space-y-4">
-      <div className="border-b border-slate-700 pb-2">
-        <h2 className="text-lg font-semibold text-white">Registration Form Builder</h2>
-        <p className="text-sm text-slate-400">
+      <div className={headerBorder}>
+        <h2 className={headerTitle}>Registration Form Builder</h2>
+        <p className={headerDesc}>
           Customize the registration form with additional fields
         </p>
       </div>
 
       <div className="space-y-4">
-        <div className="rounded-lg border border-slate-700 bg-slate-800/30 p-4">
-          <h3 className="text-sm font-medium text-white mb-2">Default Fields</h3>
-          <p className="text-xs text-slate-400 mb-3">
+        <div className={isLight ? 'rounded-lg border border-gray-200 bg-white p-4' : 'rounded-lg border border-slate-700 bg-slate-800/30 p-4'}>
+          <h3 className={isLight ? 'text-sm font-medium text-gray-900 mb-2' : 'text-sm font-medium text-white mb-2'}>Default Fields</h3>
+          <p className={isLight ? 'text-xs text-gray-600 mb-3' : 'text-xs text-slate-400 mb-3'}>
             These fields are included by default and cannot be removed or modified
           </p>
           
           <div className="space-y-2">
             {defaultFields.map((field) => (
-              <div key={field.id} className="flex items-center justify-between p-2 bg-slate-800/50 rounded">
+              <div key={field.id} className={isLight ? 'flex items-center justify-between p-2 bg-white/0 rounded' : 'flex items-center justify-between p-2 bg-slate-800/50 rounded'}>
                 <div className="flex items-center space-x-2">
-                  <span className="text-white">{field.label}</span>
-                  <span className="text-xs px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded">
+                  <span className={isLight ? 'text-gray-900' : 'text-white'}>{field.label}</span>
+                  <span className={isLight ? 'text-xs px-1.5 py-0.5 bg-gray-100 text-gray-700 rounded' : 'text-xs px-1.5 py-0.5 bg-slate-700 text-slate-300 rounded'}>
                     {field.field_type}
                   </span>
                   {field.required && (
-                    <span className="text-xs px-1.5 py-0.5 bg-red-900/30 text-red-300 rounded">
+                    <span className={isLight ? 'text-xs px-1.5 py-0.5 bg-red-100 text-red-700 rounded' : 'text-xs px-1.5 py-0.5 bg-red-900/30 text-red-300 rounded'}>
                       Required
                     </span>
                   )}
                 </div>
-                <span className="text-xs text-slate-500">System field</span>
+                <span className={isLight ? 'text-xs text-gray-500' : 'text-xs text-slate-500'}>System field</span>
               </div>
             ))}
           </div>
@@ -395,6 +405,7 @@ export function FormBuilderSection() {
                   onRemove={handleRemoveField}
                   onMoveUp={() => moveFormField(index, index - 1)}
                   onMoveDown={() => moveFormField(index, index + 1)}
+                  variant={variant}
                 />
               ))}
               
@@ -402,8 +413,7 @@ export function FormBuilderSection() {
                 <button
                   type="button"
                   onClick={handleAddField}
-                  className="inline-flex items-center px-4 py-2 border border-dashed border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
-                >
+                  className={isLight ? 'inline-flex items-center px-4 py-2 border border-dashed border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500' : 'inline-flex items-center px-4 py-2 border border-dashed border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500'}
                   <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>

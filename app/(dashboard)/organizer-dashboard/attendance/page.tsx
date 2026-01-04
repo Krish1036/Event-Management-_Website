@@ -232,18 +232,18 @@ export default async function OrganizerAttendancePage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Attendance</h1>
-        <p className="mt-1 text-sm text-slate-400">Mark attendance for your events. Undo is not allowed.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Attendance</h1>
+        <p className="mt-1 text-sm text-gray-600">Mark attendance for your events. Undo is not allowed.</p>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
         <form className="grid gap-3 md:grid-cols-2">
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Event</label>
+            <label className="block text-[11px] font-medium text-gray-600 mb-1">Event</label>
             <select
               name="event"
               defaultValue={eventFilter ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-sky-500"
             >
               <option value="all">All Events</option>
               {events.map((event: any) => (
@@ -262,10 +262,10 @@ export default async function OrganizerAttendancePage({
         </form>
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <h2 className="text-lg font-medium text-white mb-4">Event Attendance Statistics</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Event Attendance Statistics</h2>
         {Array.from(eventStats.entries()).length === 0 ? (
-          <p className="text-sm text-slate-400">No confirmed registrations.</p>
+          <p className="text-sm text-gray-600">No confirmed registrations.</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {Array.from(eventStats.entries()).map(([eventId, stats]) => {
@@ -274,24 +274,24 @@ export default async function OrganizerAttendancePage({
               const percentage = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
 
               return (
-                <div key={eventId} className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
-                  <h3 className="text-sm font-medium text-white mb-2">{eventName}</h3>
+                <div key={eventId} className="rounded-lg border border-gray-200 bg-white p-3">
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">{eventName}</h3>
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Total Registered:</span>
-                      <span className="text-slate-200 font-medium">{stats.total}</span>
+                      <span className="text-gray-600">Total Registered:</span>
+                      <span className="text-gray-700 font-medium">{stats.total}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Present:</span>
-                      <span className="text-emerald-400 font-medium">{stats.present}</span>
+                      <span className="text-gray-600">Present:</span>
+                      <span className="text-emerald-600 font-medium">{stats.present}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Absent:</span>
-                      <span className="text-red-400 font-medium">{stats.absent}</span>
+                      <span className="text-gray-600">Absent:</span>
+                      <span className="text-red-600 font-medium">{stats.absent}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Attendance Rate:</span>
-                      <span className="text-sky-400 font-medium">{percentage}%</span>
+                      <span className="text-gray-600">Attendance Rate:</span>
+                      <span className="text-sky-600 font-medium">{percentage}%</span>
                     </div>
                   </div>
                 </div>
@@ -301,17 +301,17 @@ export default async function OrganizerAttendancePage({
         )}
       </div>
 
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <h2 className="text-lg font-medium text-white mb-4">Manual Check-in</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Manual Check-in</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Entry Code</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Entry Code</h3>
             <form action={handleOrganizerAttendanceAction} className="space-y-2">
               <input
                 type="text"
                 name="entryCode"
                 placeholder="Scan QR code or enter entry code"
-                className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               />
               <button
                 type="submit"
@@ -325,13 +325,13 @@ export default async function OrganizerAttendancePage({
           </div>
 
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Registration ID</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Registration ID</h3>
             <form action={handleOrganizerAttendanceAction} className="space-y-2">
               <input
                 type="text"
                 name="registrationId"
                 placeholder="Enter registration ID"
-                className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               />
               <button
                 type="submit"
@@ -348,19 +348,19 @@ export default async function OrganizerAttendancePage({
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-3">
-          <h2 className="text-lg font-medium text-white">Checked In</h2>
+          <h2 className="text-lg font-medium text-gray-900">Checked In</h2>
           {attendanceList.length === 0 ? (
-            <p className="text-sm text-slate-400">No one checked in yet.</p>
+            <p className="text-sm text-gray-600">No one checked in yet.</p>
           ) : (
             <div className="space-y-2 text-sm">
               {attendanceList.map((a: any) => (
-                <div key={a.id} className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                <div key={a.id} className="rounded-xl border border-gray-200 bg-white p-3">
                   <div className="space-y-1">
-                    <p className="font-medium text-white">{a.event?.title ?? 'Event'}</p>
-                    <p className="text-xs text-slate-300">
+                    <p className="font-medium text-gray-900">{a.event?.title ?? 'Event'}</p>
+                    <p className="text-xs text-gray-600">
                       {a.user?.full_name ?? 'User'} · {a.entryCode ?? 'N/A'}
                     </p>
-                    <p className="text-[11px] text-slate-400">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
+                    <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -369,20 +369,20 @@ export default async function OrganizerAttendancePage({
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-medium text-white">Not Checked In</h2>
+          <h2 className="text-lg font-medium text-gray-900">Not Checked In</h2>
           {notCheckedIn.length === 0 ? (
-            <p className="text-sm text-slate-400">All confirmed registrations are checked in.</p>
+            <p className="text-sm text-gray-600">All confirmed registrations are checked in.</p>
           ) : (
             <div className="space-y-2 text-sm">
               {notCheckedIn.map((r: any) => (
-                <div key={r.registrationId} className="rounded-xl border border-slate-800 bg-slate-900/60 p-3">
+                <div key={r.registrationId} className="rounded-xl border border-gray-200 bg-white p-3">
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium text-white">{r.event?.title ?? 'Event'}</p>
-                      <p className="text-xs text-slate-300">
+                      <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
+                      <p className="text-xs text-gray-600">
                         {r.user?.full_name ?? 'User'} · {r.entryCode ?? 'N/A'}
                       </p>
-                      <p className="text-[11px] text-slate-400">Confirmed registration</p>
+                      <p className="text-[11px] text-gray-600">Confirmed registration</p>
                     </div>
                     <form action={handleOrganizerAttendanceAction}>
                       <input type="hidden" name="registrationId" value={r.registrationId} />

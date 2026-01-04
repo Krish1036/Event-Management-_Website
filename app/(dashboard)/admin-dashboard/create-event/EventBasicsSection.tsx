@@ -2,8 +2,17 @@
 
 import { useCreateEvent } from './CreateEventProvider';
 
-export function EventBasicsSection() {
+export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, updateField, setError, clearError } = useCreateEvent();
+
+  const isLight = variant === 'light';
+  const headerBorder = isLight ? 'border-b border-gray-200 pb-2' : 'border-b border-slate-700 pb-2';
+  const headerTitle = isLight ? 'text-lg font-semibold text-gray-900' : 'text-lg font-semibold text-white';
+  const headerDesc = isLight ? 'text-sm text-gray-600' : 'text-sm text-slate-400';
+  const labelClass = isLight ? 'block text-sm font-medium text-gray-700 mb-1' : 'block text-sm font-medium text-slate-300 mb-1';
+  const inputBase = isLight
+    ? 'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500'
+    : 'w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500';
 
   const handleInputChange = (field: string, value: string) => {
     updateField(field as any, value);
@@ -68,15 +77,15 @@ export function EventBasicsSection() {
 
   return (
     <div className="space-y-4">
-      <div className="border-b border-slate-700 pb-2">
-        <h2 className="text-lg font-semibold text-white">Event Basics</h2>
-        <p className="text-sm text-slate-400">Required information about your event</p>
+      <div className={headerBorder}>
+        <h2 className={headerTitle}>Event Basics</h2>
+        <p className={headerDesc}>Required information about your event</p>
       </div>
 
       <div className="grid gap-4">
         {/* Event Title */}
         <div>
-          <label htmlFor="title" className="block text-sm font-medium text-slate-300 mb-1">
+          <label htmlFor="title" className={labelClass}>
             Event Title <span className="text-red-400">*</span>
           </label>
           <input
@@ -84,9 +93,7 @@ export function EventBasicsSection() {
             id="title"
             value={state.data.title}
             onChange={(e) => handleInputChange('title', e.target.value)}
-            className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-              state.errors.title ? 'border-red-500' : 'border-slate-600'
-            }`}
+            className={`${inputBase} ${state.errors.title ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
             placeholder="Enter event title"
           />
           {state.errors.title && (
@@ -96,7 +103,7 @@ export function EventBasicsSection() {
 
         {/* Event Description */}
         <div>
-          <label htmlFor="description" className="block text-sm font-medium text-slate-300 mb-1">
+          <label htmlFor="description" className={labelClass}>
             Event Description <span className="text-red-400">*</span>
           </label>
           <textarea
@@ -104,9 +111,7 @@ export function EventBasicsSection() {
             value={state.data.description}
             onChange={(e) => handleInputChange('description', e.target.value)}
             rows={4}
-            className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 resize-vertical ${
-              state.errors.description ? 'border-red-500' : 'border-slate-600'
-            }`}
+            className={`${inputBase} resize-vertical ${state.errors.description ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
             placeholder="Describe your event in detail"
           />
           {state.errors.description && (
@@ -116,7 +121,7 @@ export function EventBasicsSection() {
 
         {/* Location */}
         <div>
-          <label htmlFor="location" className="block text-sm font-medium text-slate-300 mb-1">
+          <label htmlFor="location" className={labelClass}>
             Location <span className="text-red-400">*</span>
           </label>
           <input
@@ -124,9 +129,7 @@ export function EventBasicsSection() {
             id="location"
             value={state.data.location}
             onChange={(e) => handleInputChange('location', e.target.value)}
-            className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-              state.errors.location ? 'border-red-500' : 'border-slate-600'
-            }`}
+            className={`${inputBase} ${state.errors.location ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
             placeholder="Event location or venue"
           />
           {state.errors.location && (
@@ -136,7 +139,7 @@ export function EventBasicsSection() {
 
         {/* Event Date */}
         <div>
-          <label htmlFor="event_date" className="block text-sm font-medium text-slate-300 mb-1">
+          <label htmlFor="event_date" className={labelClass}>
             Event Date <span className="text-red-400">*</span>
           </label>
           <input
@@ -145,9 +148,7 @@ export function EventBasicsSection() {
             value={state.data.event_date}
             onChange={(e) => handleDateChange(e.target.value)}
             min={new Date().toISOString().split('T')[0]}
-            className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-              state.errors.event_date ? 'border-red-500' : 'border-slate-600'
-            }`}
+            className={`${inputBase} ${state.errors.event_date ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
           />
           {state.errors.event_date && (
             <p className="mt-1 text-sm text-red-400">{state.errors.event_date}</p>
@@ -157,7 +158,7 @@ export function EventBasicsSection() {
         {/* Start and End Times */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="start_time" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="start_time" className={labelClass}>
               Start Time <span className="text-red-400">*</span>
             </label>
             <input
@@ -165,9 +166,7 @@ export function EventBasicsSection() {
               id="start_time"
               value={state.data.start_time}
               onChange={(e) => handleTimeChange('start_time', e.target.value)}
-              className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-                state.errors.start_time ? 'border-red-500' : 'border-slate-600'
-              }`}
+              className={`${inputBase} ${state.errors.start_time ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
             />
             {state.errors.start_time && (
               <p className="mt-1 text-sm text-red-400">{state.errors.start_time}</p>

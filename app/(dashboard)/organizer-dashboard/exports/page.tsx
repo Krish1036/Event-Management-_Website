@@ -40,27 +40,27 @@ export default async function OrganizerExportsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Exports</h1>
-        <p className="mt-1 text-sm text-slate-400">Export data for your events (CSV). Payment details are read-only.</p>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Exports</h1>
+        <p className="mt-1 text-sm text-gray-600">Export data for your events (CSV). Payment details are read-only.</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-gray-200 bg-white p-4">
           <input type="hidden" name="exportType" value="registrations" />
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-white">Registrations</h2>
-            <p className="text-xs text-slate-400">Export registrations for your events, including payment fields.</p>
+            <h2 className="text-sm font-semibold text-gray-900">Registrations</h2>
+            <p className="text-xs text-gray-600">Export registrations for your events, including payment fields.</p>
             <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
               Export CSV
             </button>
           </div>
         </form>
 
-        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-gray-200 bg-white p-4">
           <input type="hidden" name="exportType" value="attendance" />
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-white">Attendance</h2>
-            <p className="text-xs text-slate-400">Export attendance records with timestamps.</p>
+            <h2 className="text-sm font-semibold text-gray-900">Attendance</h2>
+            <p className="text-xs text-gray-600">Export attendance records with timestamps.</p>
             <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
               Export CSV
             </button>
@@ -85,7 +85,7 @@ export default async function OrganizerExportsPage() {
             <p className="text-xs text-slate-400">Export a single event with registrations, custom responses, and payment fields.</p>
             <select
               name="eventId"
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+              className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
               defaultValue={events[0]?.id ?? ''}
             >
               <option value="" disabled>
