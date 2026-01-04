@@ -34,9 +34,9 @@ export default async function OrganizerDashboardLayout({ children }: { children:
   const { user, profile } = await requireOrganizer();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
+    <div className="min-h-screen bg-[#F3F9F9] flex">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md relative">
+      <div className="w-64 bg-purple-50 shadow-md relative">
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
@@ -49,49 +49,49 @@ export default async function OrganizerDashboardLayout({ children }: { children:
           {/* Panel Title */}
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-gray-900">Organizer Panel</h2>
-            <p className="text-sm text-gray-500">University Event Management</p>
+            <p className="text-sm text-gray-600">University Event Management</p>
           </div>
 
           {/* Navigation */}
           <nav className="space-y-2">
             <Link
               href="/organizer-dashboard"
-              className="flex items-center gap-3 px-4 py-3 bg-gray-800 text-white rounded-lg"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <LayoutDashboard className="w-5 h-5" />
               <span>Dashboard</span>
             </Link>
             <Link
               href="/organizer-dashboard/events"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-3 bg-purple-200 text-gray-900 rounded-lg"
             >
               <Calendar className="w-5 h-5" />
               <span>My Events</span>
             </Link>
             <Link
               href="/organizer-dashboard/create-event"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <PlusCircle className="w-5 h-5" />
               <span>Create Event</span>
             </Link>
             <Link
               href="/organizer-dashboard/registrations"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <FileText className="w-5 h-5" />
               <span>Registrations</span>
             </Link>
             <Link
               href="/organizer-dashboard/attendance"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <CheckCircle className="w-5 h-5" />
               <span>Attendance</span>
             </Link>
             <Link
               href="/organizer-dashboard/exports"
-              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-purple-100 rounded-lg transition-colors"
             >
               <Download className="w-5 h-5" />
               <span>Exports</span>
@@ -100,7 +100,7 @@ export default async function OrganizerDashboardLayout({ children }: { children:
         </div>
 
         {/* Purple gradient at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-100 to-transparent pointer-events-none"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-200 to-transparent pointer-events-none"></div>
       </div>
 
       {/* Main Content */}
