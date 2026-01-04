@@ -32,9 +32,14 @@ export default async function OrganizerCreateEventPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Create Event</h1>
-        <p className="mt-1 text-sm text-slate-400">Create your event as a draft, then submit it for approval.</p>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Create Event</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Create your event as a draft, then submit it for approval
+          </p>
+        </div>
       </div>
 
       <OrganizerCreateEventForm />

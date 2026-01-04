@@ -78,85 +78,99 @@ function OrganizerCreateEventFormContent() {
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Basics</CardTitle>
-          <CardDescription>Basic information about your event</CardDescription>
+      <Card className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">Event Basics</CardTitle>
+          <CardDescription className="text-gray-500">Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
           <EventBasicsSection />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Capacity & Registration</CardTitle>
-          <CardDescription>Set capacity and registration options</CardDescription>
+      <Card className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">Capacity & Registration</CardTitle>
+          <CardDescription className="text-gray-500">Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
           <CapacitySection />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing & Payment</CardTitle>
-          <CardDescription>Configure pricing and payment options</CardDescription>
+      <Card className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">Pricing & Payment</CardTitle>
+          <CardDescription className="text-gray-500">Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
           <PricingSection />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Registration Form Builder</CardTitle>
-          <CardDescription>Customize the registration form</CardDescription>
+      <Card className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">Registration Form Builder</CardTitle>
+          <CardDescription className="text-gray-500">Customize the registration form</CardDescription>
         </CardHeader>
         <CardContent>
           <FormBuilderSection />
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Review</CardTitle>
-          <CardDescription>Review your event details before saving</CardDescription>
+      <Card className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-gray-900">Review</CardTitle>
+          <CardDescription className="text-gray-500">Review your event details before saving</CardDescription>
         </CardHeader>
         <CardContent>
           <ReviewSection />
         </CardContent>
       </Card>
 
-      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+      <div className="flex flex-col gap-3 sm:flex-row sm:justify-end pt-4 border-t border-gray-200">
         <Button
           variant="outline"
           onClick={() => openConfirmation('draft')}
           disabled={state.isSubmitting}
+          className="border-gray-300 text-gray-700 hover:bg-gray-50"
         >
           Save Draft
         </Button>
-        <Button onClick={() => openConfirmation('submit')} disabled={state.isSubmitting}>
+        <Button 
+          onClick={() => openConfirmation('submit')} 
+          disabled={state.isSubmitting}
+          className="bg-purple-600 hover:bg-purple-700 text-white"
+        >
           Submit for Approval
         </Button>
       </div>
 
       {state.showConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Confirm</CardTitle>
-              <CardDescription>
+          <Card className="w-full max-w-md border-gray-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-gray-900">Confirm</CardTitle>
+              <CardDescription className="text-gray-500">
                 {intent === 'submit'
                   ? 'This event will be submitted for admin approval. Continue?'
                   : 'This event will be saved as a draft. Continue?'}
               </CardDescription>
             </CardHeader>
-            <CardContent className="flex justify-end space-x-4">
-              <Button variant="outline" onClick={toggleConfirmation} disabled={state.isSubmitting}>
+            <CardContent className="flex justify-end space-x-3">
+              <Button 
+                variant="outline" 
+                onClick={toggleConfirmation} 
+                disabled={state.isSubmitting}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} disabled={state.isSubmitting}>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={state.isSubmitting}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
                 {state.isSubmitting ? 'Saving...' : 'Confirm'}
               </Button>
             </CardContent>
