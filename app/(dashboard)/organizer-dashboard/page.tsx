@@ -1,7 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
-import { Calendar, Users, ListChecks, Clock, PieChart } from 'lucide-react';
-import { format, subDays, startOfDay } from 'date-fns';
+import { Calendar, Users, ListChecks, Clock, PieChart, LayoutDashboard, PlusCircle, FileText, CheckCircle, Download, Bell, Settings } from 'lucide-react';
+import { format, subDays } from 'date-fns';
 
 export const revalidate = 0;
 
@@ -17,7 +17,7 @@ async function requireOrganizer() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('role')
+    .select('role,full_name')
     .eq('id', user.id)
     .single();
 
@@ -25,53 +25,7 @@ async function requireOrganizer() {
     redirect('/');
   }
 
-  return { user };
-}
-
-function MetricCard({ 
-  icon: Icon, 
-  label, 
-  value, 
-  helper, 
-  bgGradient 
-}: { 
-  icon: any; 
-  label: string; 
-  value: string | number; 
-  helper?: string; 
-  bgGradient?: string;
-}) {
-  const gradients = {
-    blue: 'from-blue-500/20 to-cyan-500/20 border-blue-500/30',
-    purple: 'from-purple-500/20 to-pink-500/20 border-purple-500/30',
-    green: 'from-green-500/20 to-emerald-500/20 border-green-500/30',
-    orange: 'from-orange-500/20 to-yellow-500/20 border-orange-500/30',
-    pink: 'from-pink-500/20 to-rose-500/20 border-pink-500/30',
-  };
-  
-  const iconColors = {
-    blue: 'text-blue-400',
-    purple: 'text-purple-400',
-    green: 'text-green-400',
-    orange: 'text-orange-400',
-    pink: 'text-pink-400',
-  };
-  
-  const selectedGradient = bgGradient ? gradients[bgGradient as keyof typeof gradients] : gradients.blue;
-  const selectedIconColor = bgGradient ? iconColors[bgGradient as keyof typeof iconColors] : iconColors.blue;
-  
-  return (
-    <div className={`rounded-xl border ${selectedGradient} bg-slate-900/40 p-6 backdrop-blur-sm`}>
-      <div className="flex items-start justify-between">
-        <Icon className={`h-6 w-6 ${selectedIconColor}`} />
-        <div className="text-right">
-          <p className="text-3xl font-bold text-white">{value}</p>
-          <p className="mt-1 text-xs text-slate-300">{label}</p>
-          {helper && <p className="mt-2 text-[10px] text-slate-400">{helper}</p>}
-        </div>
-      </div>
-    </div>
-  );
+  return { user, profile };
 }
 
 async function getOrganizerOverviewMetrics(organizerId: string) {
@@ -168,7 +122,7 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
             y1={padding + chartHeight * ratio}
             x2={width - padding}
             y2={padding + chartHeight * ratio}
-            stroke="#475569"
+            stroke="#e5e7eb"
             strokeWidth="1"
             strokeDasharray="2,2"
           />
@@ -185,7 +139,7 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
         <polyline
           points={points}
           fill="none"
-          stroke="#06b6d4"
+          stroke="#3b82f6"
           strokeWidth="2"
         />
         
@@ -199,7 +153,7 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
               cx={x}
               cy={y}
               r="4"
-              fill="#06b6d4"
+              fill="#3b82f6"
               className="hover:r-6 transition-all"
             />
           );
@@ -214,7 +168,7 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
               x={x}
               y={height - 10}
               textAnchor="middle"
-              className="text-xs fill-slate-400"
+              className="text-xs fill-gray-500"
             >
               {d.date}
             </text>
@@ -230,7 +184,7 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
               x={padding - 10}
               y={padding + chartHeight * (1 - ratio) + 5}
               textAnchor="end"
-              className="text-xs fill-slate-400"
+              className="text-xs fill-gray-500"
             >
               {value}
             </text>
@@ -240,8 +194,8 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
         {/* Gradient definition */}
         <defs>
           <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-            <stop offset="0%" stopColor="#06b6d4" stopOpacity="0.8" />
-            <stop offset="100%" stopColor="#06b6d4" stopOpacity="0.1" />
+            <stop offset="0%" stopColor="#3b82f6" stopOpacity="0.8" />
+            <stop offset="100%" stopColor="#3b82f6" stopOpacity="0.1" />
           </linearGradient>
         </defs>
       </svg>
@@ -250,60 +204,201 @@ function RegistrationChart({ data }: { data: { date: string; count: number }[] }
 }
 
 export default async function OrganizerDashboardPage() {
-  const { user } = await requireOrganizer();
+  const { user, profile } = await requireOrganizer();
   const metrics = await getOrganizerOverviewMetrics(user.id);
 
+  const currentDate = new Date();
+  const formattedDateTime = `${currentDate.getFullYear()}, ${currentDate.getHours()}:${currentDate.getMinutes().toString().padStart(2, '0')} ${currentDate.getHours() >= 12 ? 'PM' : 'AM'}`;
+
   return (
-    <div className="space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-white">Organizer Overview</h1>
-        <p className="mt-2 text-sm text-slate-400">Your events and registration activity at a glance</p>
+    <div className="min-h-screen bg-gray-50 flex">
+      {/* Sidebar */}
+      <div className="w-64 bg-white shadow-md">
+        <div className="p-6">
+          {/* Logo */}
+          <div className="flex items-center gap-2 mb-8">
+            <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
+              <div className="w-4 h-4 bg-white rounded-sm"></div>
+            </div>
+            <span className="text-xl font-bold text-gray-900">UnivEvents</span>
+          </div>
+
+          {/* Panel Title */}
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-gray-900">Organizer Panel</h2>
+            <p className="text-sm text-gray-500">University Event Management</p>
+          </div>
+
+          {/* Navigation */}
+          <nav className="space-y-2">
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 bg-gray-800 text-white rounded-lg"
+            >
+              <LayoutDashboard className="w-5 h-5" />
+              <span>Dashboard</span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Calendar className="w-5 h-5" />
+              <span>My Events</span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <PlusCircle className="w-5 h-5" />
+              <span>Create Event</span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <FileText className="w-5 h-5" />
+              <span>Registrations</span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <CheckCircle className="w-5 h-5" />
+              <span>Attendance</span>
+            </a>
+            <a
+              href="#"
+              className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+            >
+              <Download className="w-5 h-5" />
+              <span>Exports</span>
+            </a>
+          </nav>
+        </div>
+
+        {/* Purple gradient at bottom */}
+        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-100 to-transparent pointer-events-none"></div>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        <MetricCard
-          icon={Calendar}
-          label="Total events created"
-          value={metrics.totalEvents}
-          bgGradient="blue"
-        />
-        <MetricCard
-          icon={ListChecks}
-          label="Event status counts"
-          value={metrics.totalEvents}
-          helper={`${metrics.draftEvents} draft • ${metrics.pendingEvents} pending • ${metrics.approvedEvents} approved • ${metrics.cancelledEvents} cancelled`}
-          bgGradient="purple"
-        />
-        <MetricCard
-          icon={Users}
-          label="Total registrations (your events)"
-          value={metrics.totalRegistrations}
-          bgGradient="green"
-        />
-        <MetricCard
-          icon={Clock}
-          label="Upcoming events"
-          value={metrics.upcomingEvents}
-          bgGradient="orange"
-        />
-        <MetricCard
-          icon={PieChart}
-          label="Capacity usage"
-          value={`${metrics.capacityUtilization}%`}
-          bgGradient="pink"
-        />
-      </div>
-      
-      <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-6">
-        <h2 className="text-xl font-semibold tracking-tight text-white mb-6">Event Registration Activity</h2>
-        {metrics.activityData.some(d => d.count > 0) ? (
-          <RegistrationChart data={metrics.activityData} />
-        ) : (
-          <div className="flex flex-col items-center justify-center py-12 text-slate-400">
-            <Users className="h-12 w-12 mb-4 opacity-50" />
-            <p className="text-sm">No registration activity in the last 7 days</p>
+      {/* Main Content */}
+      <div className="flex-1">
+        {/* Header */}
+        <header className="bg-white shadow-sm px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div></div>
+            <div className="flex items-center gap-6">
+              {/* Date/Time */}
+              <span className="text-sm text-gray-600">{formattedDateTime}</span>
+              
+              {/* Icons */}
+              <button className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Bell className="w-5 h-5" />
+              </button>
+              <button className="text-gray-600 hover:text-gray-900 transition-colors">
+                <Settings className="w-5 h-5" />
+              </button>
+              
+              {/* User Profile */}
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-medium">
+                    {profile?.full_name?.charAt(0) || 'O'}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-900">
+                  {profile?.full_name || 'Orlando Laurentius'}
+                </span>
+                <button className="text-gray-400 hover:text-gray-600">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              </div>
+            </div>
           </div>
-        )}
+        </header>
+
+        {/* Dashboard Content */}
+        <main className="p-8">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Organizer Overview</h1>
+            <p className="mt-2 text-sm text-gray-600">Your events and registration activity at a glance</p>
+          </div>
+
+          {/* Metric Cards */}
+          <div className="grid grid-cols-5 gap-6 mb-8">
+            {/* Total Events Created */}
+            <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <Calendar className="w-6 h-6 text-blue-600" />
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-900">{metrics.totalEvents}</p>
+                  <p className="mt-1 text-xs text-gray-600">Total events created</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Event Status Counts */}
+            <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <ListChecks className="w-6 h-6 text-green-600" />
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-900">{metrics.totalEvents}</p>
+                  <p className="mt-1 text-xs text-gray-600">Event status counts</p>
+                  <p className="mt-2 text-[10px] text-gray-500">
+                    {metrics.draftEvents} draft • {metrics.pendingEvents} pending • {metrics.approvedEvents} approved • {metrics.cancelledEvents} cancelled
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Total Registrations */}
+            <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <Users className="w-6 h-6 text-purple-600" />
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-900">{metrics.totalRegistrations}</p>
+                  <p className="mt-1 text-xs text-gray-600">Total registrations (your events)</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Upcoming Events */}
+            <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <Clock className="w-6 h-6 text-orange-600" />
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-900">{metrics.upcomingEvents}</p>
+                  <p className="mt-1 text-xs text-gray-600">Upcoming events</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Capacity Usage */}
+            <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl p-6 shadow-sm">
+              <div className="flex items-start justify-between">
+                <PieChart className="w-6 h-6 text-pink-600" />
+                <div className="text-right">
+                  <p className="text-3xl font-bold text-gray-900">{metrics.capacityUtilization}%</p>
+                  <p className="mt-1 text-xs text-gray-600">Capacity usage</p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Event Registration Activity Chart */}
+          <div className="bg-white rounded-2xl shadow-sm p-6">
+            <h2 className="text-xl font-semibold text-gray-900 mb-6">Event Registration Activity</h2>
+            {metrics.activityData.some(d => d.count > 0) ? (
+              <RegistrationChart data={metrics.activityData} />
+            ) : (
+              <div className="flex flex-col items-center justify-center py-12 text-gray-400">
+                <Users className="h-12 w-12 mb-4 opacity-50" />
+                <p className="text-sm">No registration activity in the last 7 days</p>
+              </div>
+            )}
+          </div>
+        </main>
       </div>
     </div>
   );
