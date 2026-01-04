@@ -18,7 +18,6 @@ interface Props {
 export function AttendanceCheckinClient({ notCheckedIn }: Props) {
   const router = useRouter();
   const [loadingByCode, setLoadingByCode] = useState(false);
-  const [loadingById, setLoadingById] = useState(false);
   const [loadingRegistrationId, setLoadingRegistrationId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -67,24 +66,6 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
     }
   }
 
-  async function handleCheckinById(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const registrationId = (formData.get('registrationId') as string | null)?.trim();
-    if (!registrationId) return;
-
-    try {
-      setLoadingById(true);
-      const ok = await checkInRequest({ registration_id: registrationId });
-      if (ok) {
-        // Optimistically remove this registration from local list
-        setNotCheckedInState((prev) => prev.filter((item) => item.registrationId !== registrationId));
-        e.currentTarget.reset();
-      }
-    } finally {
-      setLoadingById(false);
-    }
-  }
 
   async function handleSingleCheckin(registrationId: string) {
     try {
@@ -135,6 +116,28 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
             </form>
           </div>
 
+          {/* QR Code (text box) - replaces Registration ID and is placed before Entry Code */}
+          <div>
+            <h3 className="text-sm font-medium text-slate-300 mb-2">QR Code</h3>
+            <form onSubmit={handleCheckinByCode} className="space-y-2">
+              <div>
+                <input
+                  type="text"
+                  name="entryCode"
+                  placeholder="Scan or paste QR code"
+                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                />
+              </div>
+              <button
+                type="submit"
+                disabled={loadingByCode}
+                className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed"
+              >
+                {loadingByCode ? 'Checking in…' : 'Check In (QR)'}
+              </button>
+            </form>
+          </div>
+
           {/* Entry Code only */}
           <div>
             <h3 className="text-sm font-medium text-slate-300 mb-2">Entry Code</h3>
@@ -153,28 +156,6 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
                 className="w-full rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-600 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loadingByCode ? 'Checking in…' : 'Check In (Entry Code)'}
-              </button>
-            </form>
-          </div>
-
-          {/* Registration ID */}
-          <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Registration ID</h3>
-            <form onSubmit={handleCheckinById} className="space-y-2">
-              <div>
-                <input
-                  type="text"
-                  name="registrationId"
-                  placeholder="Enter registration ID"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                disabled={loadingById}
-                className="w-full rounded-md bg-amber-700 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {loadingById ? 'Checking in…' : 'Check In (Registration ID)'}
               </button>
             </form>
           </div>

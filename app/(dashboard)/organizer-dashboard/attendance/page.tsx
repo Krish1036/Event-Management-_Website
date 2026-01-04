@@ -165,14 +165,6 @@ async function handleOrganizerAttendanceAction(formData: FormData) {
       .eq('status', 'CONFIRMED')
       .single();
     registration = regData;
-  } else if (action === 'checkin_by_id' && registrationId) {
-    const { data: regData } = await admin
-      .from('registrations')
-      .select('id,status,entry_code,event_id,user_id')
-      .eq('id', registrationId)
-      .eq('status', 'CONFIRMED')
-      .single();
-    registration = regData;
   } else if (action === 'checkin' && registrationId) {
     const { data: regData } = await admin
       .from('registrations')
@@ -324,6 +316,26 @@ export default async function OrganizerAttendancePage({
         <h2 className="text-lg font-medium text-gray-900 mb-4">Manual Check-in</h2>
         <div className="grid gap-4 md:grid-cols-2">
           <div>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">QR Code</h3>
+            <form action={handleOrganizerAttendanceAction} className="flex gap-3">
+              <input
+                type="text"
+                name="entryCode"
+                placeholder="Scan or paste QR code"
+                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <button
+                type="submit"
+                name="action"
+                value="checkin_by_code"
+                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
+              >
+                Check In (QR)
+              </button>
+            </form>
+          </div>
+
+          <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2">Entry Code</h3>
             <form action={handleOrganizerAttendanceAction} className="flex gap-3">
               <input
@@ -342,26 +354,6 @@ export default async function OrganizerAttendancePage({
               </button>
             </form>
           </div>
-
-          <div>
-            <h3 className="text-sm font-medium text-gray-700 mb-2">Registration ID</h3>
-            <form action={handleOrganizerAttendanceAction} className="flex gap-3">
-              <input
-                type="text"
-                name="registrationId"
-                placeholder="Registration ID"
-                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
-              />
-              <button
-                type="submit"
-                name="action"
-                value="checkin_by_id"
-                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
-              >
-                Check In
-              </button>
-            </form>
-          </div> 
         </div>
       </div>
 

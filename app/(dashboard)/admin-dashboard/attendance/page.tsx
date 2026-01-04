@@ -149,14 +149,6 @@ async function handleAttendanceAction(formData: FormData) {
       .eq('status', 'CONFIRMED')
       .single();
     registration = regData;
-  } else if (action === 'checkin_by_id' && registrationId) {
-    const { data: regData } = await supabase
-      .from('registrations')
-      .select('id,status,entry_code,event_id,user_id')
-      .eq('id', registrationId)
-      .eq('status', 'CONFIRMED')
-      .single();
-    registration = regData;
   } else if (action === 'checkin' && registrationId) {
     const { data: regData } = await supabase
       .from('registrations')
@@ -180,7 +172,7 @@ async function handleAttendanceAction(formData: FormData) {
 
   const finalRegistrationId = registration.id;
 
-  if (action === 'checkin' || action === 'checkin_by_code' || action === 'checkin_by_id') {
+  if (action === 'checkin' || action === 'checkin_by_code') {
     const { data: existing } = await supabase
       .from('attendance')
       .select('id')
@@ -234,7 +226,7 @@ export default async function AdminAttendancePage() {
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-white">Attendance</h1>
         <p className="mt-1 text-sm text-slate-400">
-          View attendance per event, mark attendance by QR code, entry code, or registration ID, and undo check-ins.
+          View attendance per event and mark attendance by QR code or entry code, and undo check-ins.
         </p>
       </div>
 
