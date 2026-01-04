@@ -228,6 +228,7 @@ export default async function OrganizerAttendancePage({
   const eventFilter = searchParams?.event ?? null;
 
   const { attendanceList, notCheckedIn, eventStats, events } = await getAttendanceData(user.id, eventFilter);
+  const selectedEventName = (events.find((e: any) => e.id === eventFilter)?.title) ?? (events[0]?.title ?? null);
 
   return (
     <div className="space-y-6">
@@ -263,7 +264,15 @@ export default async function OrganizerAttendancePage({
       </div>
 
       <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <h2 className="text-lg font-medium text-gray-900 mb-4">Event Attendance Statistics</h2>
+        <h2 className="text-lg font-medium text-gray-900 mb-2">Event Attendance Statistics</h2>
+        {selectedEventName && (
+          <div className="mb-3">
+            <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
+              <svg className="h-3 w-3 mr-2 text-purple-600" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4" /></svg>
+              {selectedEventName}
+            </span>
+          </div>
+        )}
         {Array.from(eventStats.entries()).length === 0 ? (
           <p className="text-sm text-gray-600">No confirmed registrations.</p>
         ) : (
@@ -306,18 +315,18 @@ export default async function OrganizerAttendancePage({
         <div className="grid gap-4 md:grid-cols-2">
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2">Entry Code</h3>
-            <form action={handleOrganizerAttendanceAction} className="space-y-2">
+            <form action={handleOrganizerAttendanceAction} className="flex gap-3">
               <input
                 type="text"
                 name="entryCode"
-                placeholder="Scan QR code or enter entry code"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                placeholder="Entry Code"
+                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
               <button
                 type="submit"
                 name="action"
                 value="checkin_by_code"
-                className="w-full rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-600"
+                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
               >
                 Check In
               </button>
@@ -326,23 +335,23 @@ export default async function OrganizerAttendancePage({
 
           <div>
             <h3 className="text-sm font-medium text-gray-700 mb-2">Registration ID</h3>
-            <form action={handleOrganizerAttendanceAction} className="space-y-2">
+            <form action={handleOrganizerAttendanceAction} className="flex gap-3">
               <input
                 type="text"
                 name="registrationId"
-                placeholder="Enter registration ID"
-                className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                placeholder="Registration ID"
+                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
               <button
                 type="submit"
                 name="action"
                 value="checkin_by_id"
-                className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600"
+                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
               >
                 Check In
               </button>
             </form>
-          </div>
+          </div> 
         </div>
       </div>
 
@@ -375,7 +384,7 @@ export default async function OrganizerAttendancePage({
           ) : (
             <div className="space-y-2 text-sm">
               {notCheckedIn.map((r: any) => (
-                <div key={r.registrationId} className="rounded-xl border border-gray-200 bg-white p-3">
+                <div key={r.registrationId} className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
                       <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
@@ -384,15 +393,15 @@ export default async function OrganizerAttendancePage({
                       </p>
                       <p className="text-[11px] text-gray-600">Confirmed registration</p>
                     </div>
-                    <form action={handleOrganizerAttendanceAction}>
+                    <form action={handleOrganizerAttendanceAction} className="mt-3 md:mt-0 md:ml-4 w-full md:w-auto">
                       <input type="hidden" name="registrationId" value={r.registrationId} />
                       <button
                         type="submit"
                         name="action"
                         value="checkin"
-                        className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
+                        className="w-full rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
                       >
-                        Check in
+                        Check In
                       </button>
                     </form>
                   </div>

@@ -64,18 +64,18 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
   };
 
   return (
-    <header className="bg-white shadow-sm px-8 py-4">
+    <header className="bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 shadow-sm px-8 py-5 rounded-lg">
       <div className="flex items-center justify-between">
         <div></div>
         <div className="flex items-center gap-6">
           {/* Date/Time */}
-          <span className="text-sm text-gray-600">{currentTime}</span>
+          <span className="text-sm text-gray-700 font-medium">{currentTime}</span>
           
           {/* Icons */}
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="text-gray-700 hover:text-gray-900 transition-colors">
             <Bell className="w-5 h-5" />
           </button>
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="text-gray-700 hover:text-gray-900 transition-colors">
             <Settings className="w-5 h-5" />
           </button>
           
