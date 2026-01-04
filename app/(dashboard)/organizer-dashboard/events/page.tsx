@@ -36,7 +36,6 @@ async function getOrganizerEvents(organizerId: string) {
       start_time,
       end_time,
       status,
-      image_url,
       created_by,
       assigned_organizer,
       created_at
