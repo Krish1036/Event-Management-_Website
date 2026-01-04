@@ -7,6 +7,7 @@ export const revalidate = 0;
 async function getOrganizerOverviewMetrics(organizerId: string) {
   const supabase = getSupabaseServerClient();
 
+  // Get all events belonging to this organizer (created_by OR assigned_organizer)
   const { data: events } = await supabase
     .from('events')
     .select('id,status,event_date,capacity')
@@ -15,17 +16,21 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
 
   const eventIds = (events ?? []).map((e: any) => e.id as string);
 
-  const [{ data: registrations }, { count: upcomingCount }] = await Promise.all([
-    eventIds.length > 0
-      ? supabase.from('registrations').select('event_id,status,created_at').in('event_id', eventIds)
-      : Promise.resolve({ data: [] as any[] }),
-    supabase
-      .from('events')
-      .select('id', { count: 'exact', head: true })
-      .or(`created_by.eq.${organizerId},assigned_organizer.eq.${organizerId}`)
-      .gte('event_date', new Date().toISOString().split('T')[0])
-      .eq('status', 'approved')
-  ]);
+  // Get ALL registrations for these events (no status filtering)
+  const { data: registrations } = eventIds.length > 0
+    ? await supabase
+        .from('registrations')
+        .select('event_id,status,created_at')
+        .in('event_id', eventIds)
+    : { data: [] as any[] };
+
+  // Count upcoming events
+  const { count: upcomingCount } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .or(`created_by.eq.${organizerId},assigned_organizer.eq.${organizerId}`)
+    .gte('event_date', new Date().toISOString().split('T')[0])
+    .eq('status', 'approved');
 
   const totalEvents = (events ?? []).length;
   const draftEvents = (events ?? []).filter((e: any) => e.status === 'draft').length;
@@ -33,6 +38,7 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
   const approvedEvents = (events ?? []).filter((e: any) => e.status === 'approved').length;
   const cancelledEvents = (events ?? []).filter((e: any) => e.status === 'cancelled').length;
 
+  // TOTAL registrations = ALL registrations for organizer's events (regardless of status)
   const totalRegistrations = (registrations ?? []).length;
 
   const totalCapacity = (events ?? []).reduce((sum: number, e: any) => sum + (Number(e.capacity ?? 0) || 0), 0);
