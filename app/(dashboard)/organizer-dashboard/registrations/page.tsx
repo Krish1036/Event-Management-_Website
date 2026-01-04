@@ -71,8 +71,32 @@ async function getOrganizerRegistrations(params: {
   const { data } = await query;
   console.log('DEBUG: Organizer registrations query', { organizerId: params.organizerId, eventId: params.eventId, status: params.status, search: params.search, returned: (data ?? []).length });
 
+  const registrations = data ?? [];
+
+  // If some profiles are missing emails, try to fetch them from the auth.users table (service role)
+  try {
+    const admin = getSupabaseAdminClient();
+    const missingUserIds = Array.from(new Set(registrations.filter((r: any) => !r.user?.email && r.user?.id).map((r: any) => r.user.id)));
+    if (missingUserIds.length > 0) {
+      const { data: authUsers } = await admin.from('auth.users').select('id,email').in('id', missingUserIds as string[]);
+      const emailMap = new Map<string, string>();
+      for (const u of authUsers ?? []) {
+        if (u?.id && u?.email) emailMap.set(u.id, u.email);
+      }
+
+      for (const reg of registrations) {
+        if (!reg.user?.email && reg.user?.id) {
+          const fallback = emailMap.get(reg.user.id as string);
+          if (fallback) reg.user.email = fallback;
+        }
+      }
+    }
+  } catch (e) {
+    // ignore; this is a best-effort fallback
+  }
+
   return {
-    registrations: data ?? [],
+    registrations,
     events
   };
 }

@@ -68,6 +68,16 @@ export async function POST(req: Request) {
     // fetch user profile
     const { data: userProfile } = await admin.from('profiles').select('id,full_name,email').eq('id', registration.user_id).single();
 
+    // best-effort: if profile missing email, try fetching from auth.users
+    if (!userProfile?.email) {
+      try {
+        const { data: authUser } = await admin.from('auth.users').select('email').eq('id', registration.user_id).single();
+        if (authUser?.email) userProfile.email = authUser.email;
+      } catch (e) {
+        // ignore
+      }
+    }
+
     // check attendance existence
     const { data: existing } = await admin.from('attendance').select('id').eq('registration_id', registration.id).single();
 

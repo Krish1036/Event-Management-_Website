@@ -47,6 +47,28 @@ async function getAttendanceData() {
     .eq('status', 'CONFIRMED')
     .order('created_at', { ascending: false });
 
+  // best-effort: fill missing emails from auth.users using service-role admin client
+  try {
+    const admin = getSupabaseAdminClient();
+    const missingUserIds = Array.from(new Set((allRegistrations ?? []).filter((r: any) => !r.user?.email && r.user?.id).map((r: any) => r.user.id)));
+    if (missingUserIds.length > 0) {
+      const { data: authUsers } = await admin.from('auth.users').select('id,email').in('id', missingUserIds as string[]);
+      const emailMap = new Map<string, string>();
+      for (const u of authUsers ?? []) {
+        if (u?.id && u?.email) emailMap.set(u.id, u.email);
+      }
+
+      for (const r of (allRegistrations ?? [])) {
+        if (!r.user?.email && r.user?.id) {
+          const fallback = emailMap.get(r.user.id as string);
+          if (fallback) r.user.email = fallback;
+        }
+      }
+    }
+  } catch (e) {
+    // ignore best-effort fallback
+  }
+
   const attendanceMap = new Map<string, { id: string; checked_in_at: string }>();
   for (const a of attendance ?? []) {
     attendanceMap.set(a.registration_id as string, {
