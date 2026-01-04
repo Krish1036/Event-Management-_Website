@@ -118,7 +118,7 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
       const { BrowserMultiFormatReader } = await import('@zxing/browser');
       const reader = new BrowserMultiFormatReader();
       try {
-        const result = await reader.decodeFromImage(img);
+        const result = await reader.decodeFromImageElement(img);
         handleScan(result.getText());
       } catch (err: any) {
         setError('Could not detect a QR code in the image.');
