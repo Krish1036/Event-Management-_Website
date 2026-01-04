@@ -52,7 +52,7 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
       <div className="space-y-6">
         {/* Event Type */}
         <div>
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className={labelClass}>
             Event Type
           </label>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -89,14 +89,14 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
             >
               <div className="text-left">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-white">Paid</span>
+                  <span className={`font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>Paid</span>
                   {state.data.event_type === 'paid' && (
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                       Selected
                     </span>
                   )}
                 </div>
-                <p className="mt-1 text-sm text-slate-400">Charge attendees to register</p>
+                <p className={`mt-1 text-sm ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Charge attendees to register</p>
               </div>
             </button>
           </div>
@@ -139,13 +139,13 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
 
         {/* Payment Methods */}
         <div className="pt-2">
-          <label className="block text-sm font-medium text-slate-300 mb-2">
+          <label className={isLight ? 'block text-sm font-medium text-gray-700 mb-2' : 'block text-sm font-medium text-slate-300 mb-2'}>
             Payment Methods
           </label>
           <div className="space-y-2">
             <div className="flex items-center space-x-3">
               <input
-                id="stripe-payment"
+                id="razorpay-payment"
                 name="payment-method"
                 type="checkbox"
                 checked={true}
@@ -153,10 +153,10 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
                 className={`h-4 w-4 rounded ${isLight ? 'border-gray-300 bg-white text-sky-500' : 'border-slate-600 bg-slate-800 text-sky-500'} focus:ring-sky-500`}
               />
               <div>
-                <label htmlFor="stripe-payment" className={`block text-sm font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>
-                  Credit/Debit Card (Stripe)
+                <label htmlFor="razorpay-payment" className={`block text-sm font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>
+                  Credit/Debit Card (Razorpay)
                 </label>
-                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Secure online payments via Stripe</p>
+                <p className={`text-xs ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Secure online payments via Razorpay</p>
               </div>
             </div>
             
@@ -195,8 +195,7 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
                 <h3 className="text-sm font-medium text-amber-300">Test Mode</h3>
                 <div className="mt-2 text-sm text-amber-200">
                   <p>
-                    Payments are in test mode. No real transactions will be processed. 
-                    Use test card <code className="bg-amber-900/50 px-1 rounded">4242 4242 4242 4242</code> with any future date and CVC.
+                    Payments are in test mode. No real transactions will be processed. Use Razorpay sandbox/Test credentials to simulate payments.
                   </p>
                 </div>
               </div>

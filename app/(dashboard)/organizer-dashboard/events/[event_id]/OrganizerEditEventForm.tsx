@@ -205,7 +205,7 @@ function OrganizerEditEventFormContent({ initialData }: { initialData: Event }) 
           <CardDescription>Review your changes before saving</CardDescription>
         </CardHeader>
         <CardContent>
-          <ReviewSection />
+          <ReviewSection variant="light" />
         </CardContent>
       </Card>
 

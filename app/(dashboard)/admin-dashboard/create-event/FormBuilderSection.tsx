@@ -205,20 +205,20 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
                   }
                   onUpdate(field.id, updates);
                 }}
-                className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500"
+                className={isLight ? 'h-4 w-4 rounded border-gray-300 bg-white text-purple-600 focus:ring-purple-500' : 'h-4 w-4 rounded border-slate-600 bg-slate-800 text-sky-500 focus:ring-sky-500'}
               />
               <label
                 htmlFor={`required-${field.id}`}
-                className="ml-2 block text-sm text-slate-300"
+                className={isLight ? 'ml-2 block text-sm text-gray-700' : 'ml-2 block text-sm text-slate-300'}
               >
                 Required field
               </label>
             </div>
 
-            <div className="flex flex-wrap items-center gap-3 text-xs text-slate-300">
+            <div className={isLight ? 'flex flex-wrap items-center gap-3 text-xs text-gray-700' : 'flex flex-wrap items-center gap-3 text-xs text-slate-300'}>
               <button
                 type="button"
-                className="rounded border border-slate-600 px-2 py-1 hover:border-sky-500 hover:text-sky-300"
+                className={isLight ? 'rounded border border-gray-300 px-2 py-1 hover:border-purple-500 hover:text-purple-700 text-gray-700' : 'rounded border border-slate-600 px-2 py-1 hover:border-sky-500 hover:text-sky-300'}
                 onClick={() => {
                   const updates: any = {};
                   if (typeof field.original_required !== 'boolean') {
@@ -236,7 +236,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
               {typeof field.original_required === 'boolean' && field.required !== field.original_required && (
                 <button
                   type="button"
-                  className="rounded border border-emerald-600 px-2 py-1 text-emerald-200 hover:bg-emerald-900/40"
+                  className={isLight ? 'rounded border border-purple-600 px-2 py-1 text-purple-700 hover:bg-purple-50' : 'rounded border border-emerald-600 px-2 py-1 text-emerald-200 hover:bg-emerald-900/40'}
                   onClick={() => onUpdate(field.id, { required: field.original_required })}
                 >
                   Restore original required
@@ -249,11 +249,11 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
                   type="checkbox"
                   checked={!!field.disabled}
                   onChange={(e) => onUpdate(field.id, { disabled: e.target.checked })}
-                  className="h-4 w-4 rounded border-slate-600 bg-slate-800 text-red-500 focus:ring-red-500"
+                  className={isLight ? 'h-4 w-4 rounded border-gray-300 bg-white text-red-500 focus:ring-red-500' : 'h-4 w-4 rounded border-slate-600 bg-slate-800 text-red-500 focus:ring-red-500'}
                 />
                 <label
                   htmlFor={`disabled-${field.id}`}
-                  className="ml-2 block text-sm text-slate-300"
+                  className={isLight ? 'ml-2 block text-sm text-gray-700' : 'ml-2 block text-sm text-slate-300'}
                 >
                   Disable field
                 </label>
@@ -348,11 +348,11 @@ export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'l
 
         <div>
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-white">Custom Fields</h3>
+            <h3 className={isLight ? 'text-sm font-medium text-gray-900' : 'text-sm font-medium text-white'}>Custom Fields</h3>
             <button
               type="button"
               onClick={handleAddField}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
             >
               <svg className="-ml-0.5 mr-1.5 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -362,9 +362,9 @@ export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'l
           </div>
 
           {state.data.form_fields.length === 0 ? (
-            <div className="text-center py-8 border-2 border-dashed border-slate-700 rounded-lg">
+            <div className={isLight ? 'text-center py-8 border-2 border-dashed border-gray-300 rounded-lg' : 'text-center py-8 border-2 border-dashed border-slate-700 rounded-lg'}>
               <svg
-                className="mx-auto h-12 w-12 text-slate-500"
+                className={isLight ? 'mx-auto h-12 w-12 text-gray-400' : 'mx-auto h-12 w-12 text-slate-500'}
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -376,15 +376,15 @@ export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'l
                   d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
                 />
               </svg>
-              <h3 className="mt-2 text-sm font-medium text-white">No custom fields</h3>
-              <p className="mt-1 text-sm text-slate-400">
+              <h3 className={isLight ? 'mt-2 text-sm font-medium text-gray-900' : 'mt-2 text-sm font-medium text-white'}>No custom fields</h3>
+              <p className={isLight ? 'mt-1 text-sm text-gray-600' : 'mt-1 text-sm text-slate-400'}>
                 Add custom fields to collect additional information from attendees.
               </p>
               <div className="mt-4">
                 <button
                   type="button"
                   onClick={handleAddField}
-                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-sky-600 hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500"
+                  className="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
                 >
                   <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -413,7 +413,7 @@ export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'l
                 <button
                   type="button"
                   onClick={handleAddField}
-                  className={isLight ? 'inline-flex items-center px-4 py-2 border border-dashed border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500' : 'inline-flex items-center px-4 py-2 border border-dashed border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500'}>
+                  className={isLight ? 'inline-flex items-center px-4 py-2 border border-dashed border-gray-300 rounded-md shadow-sm text-sm font-medium text-purple-700 bg-white hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500' : 'inline-flex items-center px-4 py-2 border border-dashed border-slate-600 rounded-md shadow-sm text-sm font-medium text-slate-300 bg-slate-800/50 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-sky-500'}>
                   <svg className="-ml-1 mr-2 h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                   </svg>

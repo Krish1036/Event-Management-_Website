@@ -174,7 +174,7 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
           </div>
 
           <div>
-            <label htmlFor="end_time" className="block text-sm font-medium text-slate-300 mb-1">
+            <label htmlFor="end_time" className={labelClass}>
               End Time <span className="text-red-400">*</span>
             </label>
             <input
@@ -182,9 +182,7 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
               id="end_time"
               value={state.data.end_time}
               onChange={(e) => handleTimeChange('end_time', e.target.value)}
-              className={`w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 ${
-                state.errors.end_time ? 'border-red-500' : 'border-slate-600'
-              }`}
+              className={`${inputBase} ${state.errors.end_time ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
             />
             {state.errors.end_time && (
               <p className="mt-1 text-sm text-red-400">{state.errors.end_time}</p>
