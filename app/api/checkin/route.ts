@@ -72,7 +72,9 @@ export async function POST(req: Request) {
     if (!userProfile?.email) {
       try {
         const { data: authUser } = await admin.from('auth.users').select('email').eq('id', registration.user_id).single();
-        if (authUser?.email) userProfile.email = authUser.email;
+        if (authUser?.email && userProfile) {
+          userProfile.email = authUser.email;
+        }
       } catch (e) {
         // ignore
       }
