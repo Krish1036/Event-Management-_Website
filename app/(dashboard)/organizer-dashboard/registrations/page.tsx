@@ -163,7 +163,7 @@ export default async function OrganizerRegistrationsPage({
       </div>
 
       {registrations.length === 0 ? (
-        <p className="text-sm text-slate-400">No registrations found.</p>
+        <p className="text-sm text-gray-600">No registrations found.</p>
       ) : (
         <div className="space-y-3 text-sm">
           {registrations.map((reg: any) => (

@@ -50,7 +50,7 @@ export default async function OrganizerExportsPage() {
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-gray-900">Registrations</h2>
             <p className="text-xs text-gray-600">Export registrations for your events, including payment fields.</p>
-            <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
+            <button type="submit" className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600">
               Export CSV
             </button>
           </div>
@@ -61,28 +61,28 @@ export default async function OrganizerExportsPage() {
           <div className="space-y-3">
             <h2 className="text-sm font-semibold text-gray-900">Attendance</h2>
             <p className="text-xs text-gray-600">Export attendance records with timestamps.</p>
-            <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
+            <button type="submit" className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600">
               Export CSV
             </button>
           </div>
         </form>
 
-        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-gray-200 bg-white p-4">
           <input type="hidden" name="exportType" value="payments" />
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-white">Payments (Read-only)</h2>
-            <p className="text-xs text-slate-400">Export payment details for registrations in your events.</p>
-            <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
+            <h2 className="text-sm font-semibold text-gray-900">Payments (Read-only)</h2>
+            <p className="text-xs text-gray-600">Export payment details for registrations in your events.</p>
+            <button type="submit" className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600">
               Export CSV
             </button>
           </div>
         </form>
 
-        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-slate-800 bg-slate-900/60 p-4">
+        <form action="/api/organizer/exports" method="post" className="rounded-xl border border-gray-200 bg-white p-4">
           <input type="hidden" name="exportType" value="event_detailed" />
           <div className="space-y-3">
-            <h2 className="text-sm font-semibold text-white">Event Detailed Export</h2>
-            <p className="text-xs text-slate-400">Export a single event with registrations, custom responses, and payment fields.</p>
+            <h2 className="text-sm font-semibold text-gray-900">Event Detailed Export</h2>
+            <p className="text-xs text-gray-600">Export a single event with registrations, custom responses, and payment fields.</p>
             <select
               name="eventId"
               className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
@@ -98,15 +98,15 @@ export default async function OrganizerExportsPage() {
                 </option>
               ))}
             </select>
-            <button type="submit" className="w-full rounded-md bg-slate-700 px-3 py-2 text-xs font-medium text-white hover:bg-slate-600">
+            <button type="submit" className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600">
               Export Event CSV
             </button>
           </div>
         </form>
       </div>
 
-      <div className="rounded-lg border border-slate-700 bg-slate-900/40 p-4 text-xs text-slate-400">
-        <p className="font-semibold text-slate-300 mb-2">Export Information:</p>
+      <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+        <p className="font-semibold text-gray-900 mb-2">Export Information:</p>
         <ul className="space-y-1 list-disc list-inside">
           <li>Exports are scoped to your events only</li>
           <li>All exports are CSV, compatible with Excel</li>
