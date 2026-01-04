@@ -32,6 +32,16 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
   // Use the registrations returned from the filtered query
   const organizerEventRegistrations = registrations ?? [];
 
+  // Also request a server-side exact count (more efficient and avoids pulling full rows if not needed)
+  let regCount: number | null = null;
+  if (eventIds.length > 0) {
+    const { count } = await supabase
+      .from('registrations')
+      .select('id', { count: 'exact', head: true })
+      .in('event_id', eventIds);
+    regCount = count ?? null;
+  }
+
   // Count upcoming events
   const { count: upcomingCount } = await supabase
     .from('events')
@@ -46,15 +56,16 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
   const approvedEvents = (events ?? []).filter((e: any) => e.status === 'approved').length;
   const cancelledEvents = (events ?? []).filter((e: any) => e.status === 'cancelled').length;
 
-  // Use the filtered count to ensure accuracy
-  const totalRegistrations = organizerEventRegistrations.length;
+  // Use the server-side count if available, otherwise fallback to row count
+  const totalRegistrations = regCount !== null ? Number(regCount) : organizerEventRegistrations.length;
 
   console.log('DEBUG: Final counts', {
     totalEvents,
     totalRegistrations,
     upcomingCount,
     eventIds,
-    registrationsFound: (registrations ?? []).length
+    registrationsFound: (registrations ?? []).length,
+    regCount
   });
 
   const totalCapacity = (events ?? []).reduce((sum: number, e: any) => sum + (Number(e.capacity ?? 0) || 0), 0);

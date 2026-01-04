@@ -69,6 +69,7 @@ async function getOrganizerRegistrations(params: {
   }
 
   const { data } = await query;
+  console.log('DEBUG: Organizer registrations query', { organizerId: params.organizerId, eventId: params.eventId, status: params.status, search: params.search, returned: (data ?? []).length });
 
   return {
     registrations: data ?? [],
