@@ -1,8 +1,10 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { redirect } from 'next/navigation';
 import dynamic from 'next/dynamic';
 
 const QRModalButton = dynamic(() => import('@/components/QRModalButton'), { ssr: false });
+const AdminBackfillEmailsButton = dynamic(() => import('@/components/AdminBackfillEmailsButton'), { ssr: false });
 
 export const revalidate = 0;
 
@@ -245,11 +247,19 @@ export default async function AdminAttendancePage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Attendance</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          View attendance per event and mark attendance by QR code or entry code, and undo check-ins.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Attendance</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            View attendance per event, mark attendance by QR code or entry code, and undo check-ins.
+          </p>
+        </div>
+        <div>
+          {/* Admin tool: backfill missing emails from auth.users into profiles */}
+          <div>
+            <AdminBackfillEmailsButton />
+          </div>
+        </div>
       </div>
 
       {/* Attendance Statistics */}
