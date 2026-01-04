@@ -6,8 +6,10 @@ import { X } from 'lucide-react';
 
 const QRScanner = dynamic(() => import('./QRScanner'), { ssr: false });
 
-export default function QRModalButton({ eventId }: { eventId?: string | null }) {
+export default function QRModalButton({ eventId, buttonLabel, className }: { eventId?: string | null; buttonLabel?: string; className?: string }) {
   const [open, setOpen] = useState(false);
+  const btnLabel = buttonLabel ?? 'Scan QR';
+  const btnClass = className ?? 'rounded-full bg-purple-600 px-4 py-1 text-sm font-medium text-white hover:bg-purple-700';
   const [scanned, setScanned] = useState<string | null>(null);
   const [loadingPreview, setLoadingPreview] = useState(false);
   const [preview, setPreview] = useState<any | null>(null);
@@ -138,9 +140,9 @@ export default function QRModalButton({ eventId }: { eventId?: string | null }) 
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="rounded-full bg-purple-600 px-4 py-1 text-sm font-medium text-white hover:bg-purple-700"
+        className={btnClass}
       >
-        Scan QR
+        {btnLabel}
       </button>
 
       {open && (

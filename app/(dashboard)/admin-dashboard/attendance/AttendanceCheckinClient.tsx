@@ -1,7 +1,10 @@
 'use client';
 
 import { useState, FormEvent } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
+
+const QRModalButton = dynamic(() => import('@/components/QRModalButton'), { ssr: false });
 
 interface NotCheckedInItem {
   registrationId: string;
@@ -106,13 +109,7 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
                   className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 />
               </div>
-              <button
-                type="submit"
-                disabled={loadingByCode}
-                className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed"
-              >
-                {loadingByCode ? 'Checking in…' : 'Check In (QR/Entry Code)'}
-              </button>
+              <QRModalButton buttonLabel={loadingByCode ? 'Checking in…' : 'Check In (QR/Entry Code)'} className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed" />
             </form>
           </div>
 

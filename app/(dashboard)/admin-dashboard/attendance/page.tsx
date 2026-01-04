@@ -285,7 +285,7 @@ export default async function AdminAttendancePage() {
                   placeholder="Scan QR code or enter entry code"
                   className="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 />
-                <QRModalButton />
+                {/* QR Scanner button removed from header - replaced in Manual Check-in below */}
               </div>
               <form action={handleAttendanceAction} className="mt-2">
                 <button

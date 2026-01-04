@@ -258,8 +258,7 @@ export default async function OrganizerAttendancePage({
               Apply
             </button>
             <div className="ml-2">
-              {/* QR Scanner button (client component) */}
-              <QRModalButton eventId={selectedEventId} />
+              {/* QR Scanner button removed from header - replaced in Manual Check-in below */}
             </div>
           </div>
         </div>
@@ -324,14 +323,7 @@ export default async function OrganizerAttendancePage({
                 placeholder="Scan or paste QR code"
                 className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
               />
-              <button
-                type="submit"
-                name="action"
-                value="checkin_by_code"
-                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
-              >
-                Check In (QR)
-              </button>
+              <QRModalButton eventId={selectedEventId} buttonLabel="Check In (QR)" className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700" />
             </form>
           </div>
 
