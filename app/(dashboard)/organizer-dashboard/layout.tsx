@@ -3,7 +3,6 @@ import { redirect } from 'next/navigation';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { Calendar, LayoutDashboard, PlusCircle, FileText, CheckCircle, Download } from 'lucide-react';
 import Link from 'next/link';
-import OrganizerHeader from './OrganizerHeader';
 
 export const revalidate = 0;
 
@@ -105,9 +104,6 @@ export default async function OrganizerDashboardLayout({ children }: { children:
 
       {/* Main Content */}
       <div className="flex-1">
-        {/* Header with working dropdown and real-time clock */}
-        <OrganizerHeader userName={profile?.full_name || 'Orlando Laurentius'} />
-
         {/* Page Content */}
         <main className="p-8">
           {children}

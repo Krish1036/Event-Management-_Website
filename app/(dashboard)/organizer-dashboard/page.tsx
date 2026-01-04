@@ -237,11 +237,6 @@ export default async function OrganizerDashboardPage() {
 
   return (
     <>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Organizer Overview</h1>
-        <p className="mt-2 text-sm text-gray-600">Your events and registration activity at a glance</p>
-      </div>
-
       {/* Metric Cards */}
       <div className="grid grid-cols-5 gap-6 mb-8">
         {/* Total Events Created */}
