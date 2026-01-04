@@ -10,19 +10,47 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
   // Get all events belonging to this organizer (created_by OR assigned_organizer)
   const { data: events } = await supabase
     .from('events')
-    .select('id,status,event_date,capacity')
+    .select('id,status,event_date,capacity,created_by,assigned_organizer')
     .or(`created_by.eq.${organizerId},assigned_organizer.eq.${organizerId}`)
     .order('event_date', { ascending: true });
+
+  console.log('DEBUG: Events for organizer', organizerId, events);
 
   const eventIds = (events ?? []).map((e: any) => e.id as string);
 
   // Get ALL registrations for these events (no status filtering)
+  // Also join with events to verify ownership
   const { data: registrations } = eventIds.length > 0
     ? await supabase
         .from('registrations')
-        .select('event_id,status,created_at')
+        .select(`
+          event_id,
+          status,
+          created_at,
+          events!inner(
+            id,
+            created_by,
+            assigned_organizer
+          )
+        `)
         .in('event_id', eventIds)
+        .eq('events.created_by', organizerId) // Ensure we only get registrations for organizer's created events
     : { data: [] as any[] };
+
+  console.log('DEBUG: Registrations with event join', registrations);
+
+  // Alternative: Get all registrations and filter client-side to verify
+  const { data: allRegistrations } = await supabase
+    .from('registrations')
+    .select('event_id,status,created_at');
+
+  console.log('DEBUG: All registrations in system', allRegistrations);
+
+  const organizerEventRegistrations = (allRegistrations ?? []).filter((reg: any) => 
+    eventIds.includes(reg.event_id)
+  );
+
+  console.log('DEBUG: Filtered registrations for organizer events', organizerEventRegistrations);
 
   // Count upcoming events
   const { count: upcomingCount } = await supabase
@@ -38,16 +66,25 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
   const approvedEvents = (events ?? []).filter((e: any) => e.status === 'approved').length;
   const cancelledEvents = (events ?? []).filter((e: any) => e.status === 'cancelled').length;
 
-  // TOTAL registrations = ALL registrations for organizer's events (regardless of status)
-  const totalRegistrations = (registrations ?? []).length;
+  // Use the filtered count to ensure accuracy
+  const totalRegistrations = organizerEventRegistrations.length;
+
+  console.log('DEBUG: Final counts', {
+    totalEvents,
+    totalRegistrations,
+    upcomingCount,
+    eventIds,
+    registrationCountFromJoin: (registrations ?? []).length,
+    registrationCountFromFilter: organizerEventRegistrations.length
+  });
 
   const totalCapacity = (events ?? []).reduce((sum: number, e: any) => sum + (Number(e.capacity ?? 0) || 0), 0);
   const capacityUtilization =
     totalCapacity > 0 ? Math.min(100, Math.round((totalRegistrations / totalCapacity) * 100)) : 0;
 
   // Get registration activity for the last 7 days
-  const sevenDaysAgo = subDays(new Date(), 7);
-  const registrationActivity = (registrations ?? [])
+  const sevenDaysAgo = subDays(new Date(),7);
+  const registrationActivity = organizerEventRegistrations
     .filter((r: any) => new Date(r.created_at) >= sevenDaysAgo)
     .reduce((acc: Record<string, number>, r: any) => {
       const date = format(new Date(r.created_at), 'MMM d');
