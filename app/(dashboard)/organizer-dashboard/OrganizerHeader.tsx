@@ -12,11 +12,19 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
   useEffect(() => {
     // Update time immediately and then every minute
     const updateTime = () => {
+      const now = new Date();
+      const options: Intl.DateTimeFormatOptions = {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false,
+        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
+      };
+      
       setCurrentTime(
-        new Date().toLocaleString(undefined, {
-          dateStyle: "medium",
-          timeStyle: "short",
-        })
+        now.toLocaleString('en-US', options)
       );
     };
 
@@ -85,15 +93,15 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
               <span className="text-sm font-medium text-gray-900">
                 {userName || 'Orlando Laurentius'}
               </span>
-              <button className="text-gray-400 hover:text-gray-600">
+              <span className="text-gray-400 hover:text-gray-600">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
-              </button>
+              </span>
             </button>
 
             {dropdownOpen && (
-              <div className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg z-50">
+              <div className="absolute right-0 mt-2 w-48 rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg z-[9999]">
                 <button
                   type="button"
                   className="flex w-full px-4 py-2 text-left text-gray-700 hover:bg-gray-100"
