@@ -36,7 +36,8 @@ export async function POST(req: Request) {
   }
 
   // log action
-  await admin.from('admin_logs').insert({ admin_id: user.id, action: 'BACKFILL_EMAILS', details: { updated: updatedCount } }).catch(() => null);
+  const { error: logError } = await admin.from('admin_logs').insert({ admin_id: user.id, action: 'BACKFILL_EMAILS', details: { updated: updatedCount } });
+  if (logError) console.error('Failed to log admin action:', logError);
 
   return NextResponse.json({ success: true, updated: updatedCount, attempted: updates.length });
 }
