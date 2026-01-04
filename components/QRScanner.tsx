@@ -14,7 +14,7 @@ export type QRScannerProps = {
 
 export default function QRScanner({ onScan, onDetect, onError, paused, constraints, preferredDeviceId }: QRScannerProps) {
   const videoRef = useRef<HTMLVideoElement | null>(null);
-  const codeReaderRef = useRef<BrowserMultiFormatReader | null>(null);
+  const codeReaderRef = useRef<InstanceType<typeof BrowserMultiFormatReader> | null>(null);
   const lastSeenRef = useRef<Record<string, { count: number; last: number }>>({});
   const [scanning, setScanning] = useState(false);
 
