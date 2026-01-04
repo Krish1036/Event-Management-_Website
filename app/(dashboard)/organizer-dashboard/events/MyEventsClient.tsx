@@ -10,6 +10,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface Event {
   id: string;
@@ -230,20 +237,18 @@ export default function MyEventsClient({ events }: MyEventsClientProps) {
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
           />
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        >
-          <option value="all">All events</option>
-          <option value="draft">Draft</option>
-          <option value="pending_approval">Pending approval</option>
-          <option value="approved">Approved / Published</option>
-          <option value="cancelled">Cancelled</option>
-        </select>
-        <button className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50">
-          Filter
-        </button>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
+            <SelectValue placeholder="All events" />
+          </SelectTrigger>
+          <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+            <SelectItem value="all">All events</SelectItem>
+            <SelectItem value="draft">Draft</SelectItem>
+            <SelectItem value="pending_approval">Pending approval</SelectItem>
+            <SelectItem value="approved">Approved / Published</SelectItem>
+            <SelectItem value="cancelled">Cancelled</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
 
       {/* Events List */}
