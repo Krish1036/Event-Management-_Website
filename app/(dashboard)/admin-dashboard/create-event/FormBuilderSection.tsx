@@ -177,7 +177,7 @@ const FormFieldEditor = ({ field, index, total, onUpdate, onRemove, onMoveUp, on
                     const newOptions = [...currentOptions, `Option ${newOptionNumber}`];
                     onUpdate(field.id, { options: newOptions });
                   }}
-                  className={isLight ? 'w-full rounded-lg border border-dashed border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 hover:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors' : 'w-full rounded-lg border border-dashed border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-sky-500 hover:text-sky-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors'}
+                  className={isLight ? 'w-full rounded-lg border border-dashed border-purple-300 bg-white px-3 py-2 text-sm text-purple-700 hover:border-purple-500 hover:bg-purple-50 focus:outline-none focus:ring-2 focus:ring-purple-500 transition-colors' : 'w-full rounded-lg border border-dashed border-slate-600 bg-slate-800/50 px-3 py-2 text-sm text-slate-300 hover:border-sky-500 hover:text-sky-300 hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors'}
                 >
                   <svg className="w-4 h-4 inline-block mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
