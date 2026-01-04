@@ -61,9 +61,10 @@ async function getAttendanceData() {
       }
 
       for (const r of (allRegistrations ?? [])) {
-        if (!r.user?.email && r.user?.id) {
-          const fallback = emailMap.get(r.user.id as string);
-          if (fallback) r.user.email = fallback;
+        const user = r.user as any;
+        if (!user?.email && user?.id) {
+          const fallback = emailMap.get(user.id as string);
+          if (fallback) user.email = fallback;
         }
       }
     }

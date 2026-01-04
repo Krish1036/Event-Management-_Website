@@ -86,9 +86,10 @@ async function getOrganizerRegistrations(params: {
       }
 
       for (const reg of registrations) {
-        if (!reg.user?.email && reg.user?.id) {
-          const fallback = emailMap.get(reg.user.id as string);
-          if (fallback) reg.user.email = fallback;
+        const user = reg.user as any;
+        if (!user?.email && user?.id) {
+          const fallback = emailMap.get(user.id as string);
+          if (fallback) user.email = fallback;
         }
       }
     }
