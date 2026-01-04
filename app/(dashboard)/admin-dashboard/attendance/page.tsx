@@ -1,5 +1,8 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+const QRModalButton = dynamic(() => import('@/components/QRModalButton'), { ssr: false });
 
 export const revalidate = 0;
 
@@ -39,7 +42,7 @@ async function getAttendanceData() {
     .select(
       `id,status,entry_code,event_id,user_id,
        event:events(id,title,event_date),
-       user:profiles(id,full_name)`
+       user:profiles(id,full_name,email)`
     )
     .eq('status', 'CONFIRMED')
     .order('created_at', { ascending: false });
@@ -282,24 +285,27 @@ export default async function AdminAttendancePage() {
           {/* QR Scanner */}
           <div>
             <h3 className="text-sm font-medium text-slate-300 mb-2">QR Code Scanner</h3>
-            <form action={handleAttendanceAction} className="space-y-2">
-              <div>
+            <div className="space-y-2">
+              <div className="flex gap-3">
                 <input
                   type="text"
                   name="entryCode"
                   placeholder="Scan QR code or enter entry code"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 />
+                <QRModalButton />
               </div>
-              <button
-                type="submit"
-                name="action"
-                value="checkin_by_code"
-                className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600"
-              >
-                Check In (QR/Entry Code)
-              </button>
-            </form>
+              <form action={handleAttendanceAction} className="mt-2">
+                <button
+                  type="submit"
+                  name="action"
+                  value="checkin_by_code"
+                  className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600"
+                >
+                  Check In (QR/Entry Code)
+                </button>
+              </form>
+            </div>
           </div>
 
           {/* Entry Code */}
@@ -366,7 +372,7 @@ export default async function AdminAttendancePage() {
                     <div className="space-y-1">
                       <p className="font-medium text-white">{a.event?.title ?? 'Event'}</p>
                       <p className="text-xs text-slate-300">
-                        {a.user?.full_name ?? 'User'} · {a.entryCode ?? 'N/A'}
+                        {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
                       </p>
                       <p className="text-[11px] text-slate-400">
                         Checked in at {new Date(a.checkedInAt).toLocaleString()}
@@ -405,7 +411,7 @@ export default async function AdminAttendancePage() {
                     <div className="space-y-1">
                       <p className="font-medium text-white">{r.event?.title ?? 'Event'}</p>
                       <p className="text-xs text-slate-300">
-                        {r.user?.full_name ?? 'User'} · {r.entryCode ?? 'N/A'}
+                        {r.user?.full_name ?? 'User'} · {r.user?.email ?? 'No email'} · {r.entryCode ?? 'N/A'}
                       </p>
                       <p className="text-[11px] text-slate-400">Confirmed registration</p>
                     </div>

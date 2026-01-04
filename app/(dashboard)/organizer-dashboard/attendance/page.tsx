@@ -1,6 +1,10 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { redirect } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+// client component loaded dynamically to avoid SSR issues
+const QRModalButton = dynamic(() => import('@/components/QRModalButton'), { ssr: false });
 
 export const revalidate = 0;
 
@@ -60,7 +64,7 @@ async function getAttendanceData(organizerId: string, eventFilter: string | null
     .select(
       `id,status,entry_code,event_id,user_id,
        event:events(id,title,event_date),
-       user:profiles(id,full_name)`
+       user:profiles(id,full_name,email)`
     )
     .eq('status', 'CONFIRMED')
     .in('event_id', filteredEventIds)
@@ -229,6 +233,7 @@ export default async function OrganizerAttendancePage({
 
   const { attendanceList, notCheckedIn, eventStats, events } = await getAttendanceData(user.id, eventFilter);
   const selectedEventName = (events.find((e: any) => e.id === eventFilter)?.title) ?? (events[0]?.title ?? null);
+  const selectedEventId = eventFilter ?? (events[0]?.id ?? null);
 
   return (
     <div className="space-y-6">
@@ -237,14 +242,14 @@ export default async function OrganizerAttendancePage({
         <p className="mt-1 text-sm text-gray-600">Mark attendance for your events. Undo is not allowed.</p>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-4">
-        <form className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="block text-[11px] font-medium text-gray-600 mb-1">Event</label>
+      <form className="rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <label className="sr-only">Event</label>
             <select
               name="event"
               defaultValue={eventFilter ?? 'all'}
-              className="w-full rounded-md border border-gray-300 bg-white px-2 py-1.5 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-sky-500"
+              className="w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700"
             >
               <option value="all">All Events</option>
               {events.map((event: any) => (
@@ -255,13 +260,18 @@ export default async function OrganizerAttendancePage({
               ))}
             </select>
           </div>
-          <div className="flex items-end">
-            <button type="submit" className="w-full rounded-md bg-sky-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-600">
+
+          <div className="mt-2 md:mt-0 flex items-center gap-3">
+            <button type="submit" className="ml-2 rounded-full bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700">
               Apply
             </button>
+            <div className="ml-2">
+              {/* QR Scanner button (client component) */}
+              <QRModalButton eventId={selectedEventId} />
+            </div>
           </div>
-        </form>
-      </div>
+        </div>
+      </form>
 
       <div className="rounded-lg border border-gray-200 bg-white p-4">
         <h2 className="text-lg font-medium text-gray-900 mb-2">Event Attendance Statistics</h2>
@@ -367,7 +377,7 @@ export default async function OrganizerAttendancePage({
                   <div className="space-y-1">
                     <p className="font-medium text-gray-900">{a.event?.title ?? 'Event'}</p>
                     <p className="text-xs text-gray-600">
-                      {a.user?.full_name ?? 'User'} · {a.entryCode ?? 'N/A'}
+                      {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
                     </p>
                     <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
                   </div>
@@ -389,7 +399,7 @@ export default async function OrganizerAttendancePage({
                     <div className="space-y-1">
                       <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
                       <p className="text-xs text-gray-600">
-                        {r.user?.full_name ?? 'User'} · {r.entryCode ?? 'N/A'}
+                        {r.user?.full_name ?? 'User'} · {r.user?.email ?? 'No email'} · {r.entryCode ?? 'N/A'}
                       </p>
                       <p className="text-[11px] text-gray-600">Confirmed registration</p>
                     </div>
