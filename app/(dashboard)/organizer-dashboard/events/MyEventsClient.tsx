@@ -238,15 +238,15 @@ export default function MyEventsClient({ events }: MyEventsClientProps) {
           />
         </div>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white">
-            <SelectValue placeholder="All events" />
+          <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+            <SelectValue placeholder="All events" className="text-black" />
           </SelectTrigger>
           <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
-            <SelectItem value="all">All events</SelectItem>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="pending_approval">Pending approval</SelectItem>
-            <SelectItem value="approved">Approved / Published</SelectItem>
-            <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectItem value="all" className="text-black hover:bg-gray-100">All events</SelectItem>
+            <SelectItem value="draft" className="text-black hover:bg-gray-100">Draft</SelectItem>
+            <SelectItem value="pending_approval" className="text-black hover:bg-gray-100">Pending approval</SelectItem>
+            <SelectItem value="approved" className="text-black hover:bg-gray-100">Approved / Published</SelectItem>
+            <SelectItem value="cancelled" className="text-black hover:bg-gray-100">Cancelled</SelectItem>
           </SelectContent>
         </Select>
       </div>
