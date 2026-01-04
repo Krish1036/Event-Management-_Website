@@ -1,216 +1,87 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
-import Image from 'next/image';
-import './EventsDashboard.css';
-import { Bell, Settings, Search, Plus, Grid, Menu, MapPin, ChevronLeft, ChevronRight, ImageIcon } from 'lucide-react';
 
 export const revalidate = 60;
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 
+type EventCard = {
+  id: string;
+  title: string;
+  description: string | null;
+  event_date: string;
+  location: string | null;
+  price: number;
+  is_paid: boolean;
+};
+
 export default async function HomePage() {
   const supabase = getSupabaseServerClient();
-  
-  const { data: events } = await supabase
+
+  const { data: featured } = await supabase
     .from('events')
-    .select('id,title,description,event_date,location,price,is_paid,category,image_url,capacity,registered_count')
+    .select('id,title,description,event_date,location,price,is_paid')
     .eq('status', 'approved')
     .order('event_date', { ascending: true })
-    .limit(8);
-
-  const calculateProgress = (registered = 0, capacity = 100) => {
-    return Math.round((registered / capacity) * 100);
-  };
-
-  const formatEventDate = (dateString: string | null | undefined): string => {
-    if (!dateString) return 'TBA';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return 'Invalid Date';
-      return date.toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-      });
-    } catch (error) {
-      return 'Invalid Date';
-    }
-  };
-
-  const formatEventTime = (dateString: string | null | undefined): string => {
-    if (!dateString) return '';
-    try {
-      const date = new Date(dateString);
-      if (isNaN(date.getTime())) return '';
-      return date.toLocaleTimeString('en-US', { 
-        hour: 'numeric', 
-        minute: '2-digit',
-        hour12: true 
-      });
-    } catch (error) {
-      return '';
-    }
-  };
+    .limit(3);
 
   return (
-    <div className="dashboard-container">
-      {/* Header */}
-      <header className="dashboard-header">
-        <div className="header-content">
-          <div className="header-left">
-            <div className="logo-section">
-              <div className="logo-icon"></div>
-              <span className="logo-text">Ventixe</span>
-            </div>
-            <nav className="main-nav">
-              <span className="nav-link active">Events</span>
-            </nav>
-          </div>
-          <div className="header-right">
-            <button className="icon-button">
-              <Bell className="icon" />
-            </button>
-            <button className="icon-button">
-              <Settings className="icon" />
-            </button>
-            <div className="admin-profile">
-              <div className="admin-avatar"></div>
-              <span className="admin-label">Admin</span>
-            </div>
-          </div>
+    <div className="mx-auto max-w-6xl px-4 py-10">
+      <section className="mb-12 grid gap-8 md:grid-cols-[3fr,2fr]">
+        <div>
+          <h1 className="mb-4 text-3xl font-semibold tracking-tight md:text-4xl">
+            University Event Management
+          </h1>
+          <p className="mb-6 max-w-xl text-sm text-slate-300">
+            Discover, register, and manage events across the university with secure
+            payment handling, real-time capacity protection, and QR-based
+            attendance.
+          </p>
         </div>
-      </header>
-
-      {/* Main Content */}
-      <div className="main-content">
-        {/* Page Title */}
-        <div className="page-header">
-          <div className="breadcrumb">Dashboard / Events</div>
-          <h1 className="page-title">Events</h1>
+        <div className="rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-xs text-slate-300">
+          <h2 className="mb-2 text-sm font-semibold text-white">System guarantees</h2>
+          <ul className="space-y-1 list-disc list-inside">
+            <li>Capacity-safe registrations</li>
+            <li>Razorpay-verified payments only</li>
+            <li>QR + entry code attendance</li>
+            <li>Admin audit logging</li>
+          </ul>
         </div>
+      </section>
 
-        {/* Filters */}
-        <div className="filters-section">
-          <div className="filter-tabs">
-            <button className="filter-tab active">Active</button>
-            <button className="filter-tab">Draft</button>
-            <button className="filter-tab">Past</button>
-          </div>
-          
-          <div className="filter-actions">
-            <div className="search-box">
-              <Search className="search-icon" />
-              <input 
-                type="text" 
-                placeholder="Search event, location, etc"
-                className="search-input"
-              />
-            </div>
-            <button className="action-button primary">
-              <Plus className="icon" />
-            </button>
-            <button className="action-button secondary">All Category</button>
-            <button className="action-button secondary">This Month</button>
-            <button className="action-button primary">
-              <Grid className="icon" />
-            </button>
-            <button className="action-button secondary">
-              <Menu className="icon" />
-            </button>
-          </div>
+      <section>
+        <div className="mb-3 flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Featured events</h2>
         </div>
-
-        {/* Events Grid */}
-        <div className="events-grid">
-          {events?.map((event) => {
-            const progress = calculateProgress(event.registered_count, event.capacity);
-            
-            return (
-              <Link key={event.id} href={`/events/${event.id}`} className="event-card">
-                {/* Event Image */}
-                <div className="event-image">
-                  {event.image_url ? (
-                    <Image
-                      src={event.image_url}
-                      alt={event.title}
-                      fill
-                      className="image-content"
-                    />
-                  ) : (
-                    <div className="image-placeholder">
-                      <ImageIcon className="placeholder-icon" />
-                    </div>
-                  )}
-                  
-                  {/* Category Badge */}
-                  <div className="category-badge">
-                    {event.category || 'General'}
-                  </div>
-                  
-                  {/* Active Badge */}
-                  <div className="active-badge">
-                    <span className="active-dot"></span>
-                    Active
-                  </div>
-                </div>
-
-                {/* Event Details */}
-                <div className="event-details">
-                  <div className="event-date">
-                    {formatEventDate(event.event_date)} — {formatEventTime(event.event_date)}
-                  </div>
-                  
-                  <h3 className="event-title">{event.title}</h3>
-                  
-                  <div className="event-location">
-                    <MapPin className="location-icon" />
-                    <span className="location-text">{event.location || 'Online'}</span>
-                  </div>
-
-                  {/* Progress Bar */}
-                  <div className="progress-section">
-                    <div className="progress-header">
-                      <span className="progress-percentage">{progress}%</span>
-                      <span className="event-price">
-                        {event.is_paid ? `$${event.price}` : 'Free'}
-                      </span>
-                    </div>
-                    <div className="progress-bar">
-                      <div className="progress-fill" style={{ width: `${progress}%` }}></div>
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })}
+        <div className="grid gap-4 md:grid-cols-3">
+          {featured?.map((event: EventCard) => (
+            <Link
+              key={event.id}
+              href={`/events/${event.id}`}
+              className="group rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm hover:border-slate-600"
+            >
+              <div className="mb-2 flex items-center justify-between">
+                <h3 className="font-medium text-white group-hover:text-sky-300">
+                  {event.title}
+                </h3>
+              </div>
+              <p className="mb-3 line-clamp-3 text-xs text-slate-300">
+                {event.description}
+              </p>
+              <div className="flex items-center justify-between text-[11px] text-slate-400">
+                <span>{new Date(event.event_date).toLocaleDateString()}</span>
+                <span>
+                  {event.is_paid ? `₹${event.price}` : 'Free'}
+                  {!PAYMENTS_ENABLED && event.is_paid && ' · payments disabled (test mode)'}
+                </span>
+              </div>
+            </Link>
+          ))}
+          {featured?.length === 0 && (
+            <p className="text-sm text-slate-400">No upcoming events.</p>
+          )}
         </div>
-
-        {/* Pagination */}
-        <div className="pagination">
-          <div className="pagination-info">
-            Showing 
-            <select className="page-size-select">
-              <option>8</option>
-              <option>16</option>
-              <option>32</option>
-            </select> 
-          </div>
-          
-          <div className="pagination-controls">
-            <button className="pagination-button">
-              <ChevronLeft className="icon" />
-            </button>
-            <button className="pagination-button active">1</button>
-            <button className="pagination-button">2</button>
-            <button className="pagination-button">3</button>
-            <span className="pagination-ellipsis">...</span>
-            <button className="pagination-button">8</button>
-            <button className="pagination-button primary">
-              <ChevronRight className="icon" />
-            </button>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }

@@ -3,8 +3,6 @@ import { Database } from '@/types/supabase';
 
 export async function checkIn(params: { registration_id: string; entry_code: string }) {
   const { registration_id, entry_code } = params;
-  console.log('[edge] checkIn called', { registration_id, entry_code });
-
   const supabase = createClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -24,25 +22,22 @@ export async function checkIn(params: { registration_id: string; entry_code: str
     .eq('entry_code', entry_code)
     .single();
 
-  console.log('[edge] registration lookup', { registration, registrationError });
-
   if (registrationError || !registration) {
     throw new Error('Invalid registration or entry code');
   }
 
-  // Insert attendance row (use attendance table to track check-ins)
-  const { data: attendance, error: attendanceError } = await supabase
-    .from('attendance')
-    .insert({ registration_id })
-    .select()
-    .single();
+  // Update check-in status
+  const { error: updateError } = await supabase
+    .from('registrations')
+    .update({ 
+      checked_in: true, 
+      checked_in_at: new Date().toISOString() 
+    })
+    .eq('id', registration_id);
 
-  if (attendanceError) {
-    console.error('[edge] attendance insert failed', attendanceError);
-    throw new Error('Failed to record attendance');
+  if (updateError) {
+    throw new Error('Failed to update check-in status');
   }
-
-  console.log('[edge] attendance recorded', attendance);
 
   return { success: true };
 }
@@ -83,27 +78,25 @@ export async function registerForEvent(params: { event_id: string; user_id: stri
     throw new Error('Already registered for this event');
   }
 
-  console.log('[edge] creating registration', { event_id, user_id });
-
-  // Generate a random 6-digit entry code (placeholder - real entry code is generated on confirm)
+  // Generate a random 6-digit entry code
   const entry_code = Math.floor(100000 + Math.random() * 900000).toString();
 
-  // Create registration - use schema fields and valid status value
+  // Create registration
   const { data: registration, error: registrationError } = await supabase
     .from('registrations')
     .insert({
       event_id,
       user_id,
-      status: 'PENDING',
-      entry_code
+      status: 'confirmed',
+      registered_at: new Date().toISOString(),
+      entry_code,
+      checked_in: false
     })
     .select()
     .single();
 
-  console.log('[edge] registration result', { registration, registrationError });
-
   if (registrationError) {
-    console.error('[edge] Registration error:', registrationError);
+    console.error('Registration error:', registrationError);
     throw new Error('Failed to register for event');
   }
 
