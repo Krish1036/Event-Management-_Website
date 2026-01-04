@@ -36,7 +36,7 @@ export default async function OrganizerDashboardLayout({ children }: { children:
   return (
     <div className="min-h-screen bg-[#F3F9F9] flex">
       {/* Sidebar */}
-      <div className="w-64 bg-purple-50 shadow-md relative">
+      <div className="w-64 bg-gradient-to-b from-indigo-50 via-violet-50 to-orange-50 shadow-md relative min-h-screen overflow-y-auto">
         <div className="p-6">
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8">
@@ -99,9 +99,7 @@ export default async function OrganizerDashboardLayout({ children }: { children:
           </nav>
         </div>
 
-        {/* Purple gradient at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 h-32 bg-gradient-to-t from-purple-200 to-transparent pointer-events-none"></div>
-      </div>
+        </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">
