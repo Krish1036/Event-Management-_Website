@@ -31,8 +31,16 @@ async function requireAdmin() {
   return { user };
 }
 
-async function getAttendanceData() {
+async function getAttendanceData(eventFilter: string | null) {
   const supabase = getSupabaseServerClient();
+
+  const { data: events } = await supabase
+    .from('events')
+    .select('id,title,event_date')
+    .order('title', { ascending: true });
+
+  const filteredEventIds =
+    eventFilter && eventFilter !== 'all' ? [eventFilter] : (events ?? []).map((e: any) => e.id as string);
 
   const { data: attendance } = await supabase
     .from('attendance')
@@ -43,10 +51,11 @@ async function getAttendanceData() {
     .from('registrations')
     .select(
       `id,status,entry_code,event_id,user_id,
-       event:events(id,title,event_date),
-       user:profiles(id,full_name,email)`
+         event:events(id,title,event_date),
+         user:profiles(id,full_name,email)`
     )
     .eq('status', 'CONFIRMED')
+    .in('event_id', filteredEventIds)
     .order('created_at', { ascending: false });
 
   // best-effort: fill missing emails from auth.users using service-role admin client
@@ -242,58 +251,99 @@ async function handleAttendanceAction(formData: FormData) {
   redirect('/admin-dashboard/attendance');
 }
 
-export default async function AdminAttendancePage() {
+export default async function AdminAttendancePage({
+  searchParams
+}: {
+  searchParams?: { event?: string };
+}) {
   await requireAdmin();
-  const { attendanceList, notCheckedIn, eventStats } = await getAttendanceData();
+  const eventFilter = searchParams?.event ?? null;
+  const { attendanceList, notCheckedIn, eventStats } = await getAttendanceData(eventFilter);
+  
+  const { data: events } = await getSupabaseServerClient()
+    .from('events')
+    .select('id,title,event_date')
+    .order('title', { ascending: true });
+    
+  const selectedEventName = (events?.find((e: any) => e.id === eventFilter)?.title) ?? (events?.[0]?.title ?? null);
+  const selectedEventId = eventFilter ?? (events?.[0]?.id ?? null);
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Attendance</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            View attendance per event, mark attendance by QR code or entry code, and undo check-ins.
-          </p>
-        </div>
-        <div>
-          {/* Admin tool: backfill missing emails from auth.users into profiles */}
-          <div>
-            <AdminBackfillEmailsButton />
-          </div>
-        </div>
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Attendance</h1>
+        <p className="mt-1 text-sm text-gray-600">Mark attendance for your events. Undo is not allowed.</p>
       </div>
 
+      <form className="rounded-2xl bg-gradient-to-br from-purple-50 to-purple-100 p-6">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="flex-1">
+            <label className="sr-only">Event</label>
+            <select
+              name="event"
+              defaultValue={eventFilter ?? 'all'}
+              className="w-full rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700"
+            >
+              <option value="all">All Events</option>
+              {events?.map((event: any) => (
+                <option key={event.id} value={event.id}>
+                  {event.title}
+                  {event.event_date ? ` • ${new Date(event.event_date as string).toLocaleDateString()}` : ''}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="mt-2 md:mt-0 flex items-center gap-3">
+            <button type="submit" className="ml-2 rounded-full bg-purple-600 px-6 py-2 text-sm font-medium text-white hover:bg-purple-700">
+              Apply
+            </button>
+            <div className="ml-2">
+              {/* QR Scanner button removed from header - replaced in Manual Check-in below */}
+            </div>
+          </div>
+        </div>
+      </form>
+
       {/* Attendance Statistics */}
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <h2 className="text-lg font-medium text-white mb-4">Event Attendance Statistics</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-2">Event Attendance Statistics</h2>
+        {selectedEventName && (
+          <div className="mb-3">
+            <span className="inline-flex items-center rounded-full bg-purple-100 px-3 py-1 text-xs font-medium text-purple-700">
+              <svg className="h-3 w-3 mr-2 text-purple-600" viewBox="0 0 8 8" fill="currentColor"><circle cx="4" cy="4" r="4" /></svg>
+              {selectedEventName}
+            </span>
+          </div>
+        )}
         {Array.from(eventStats.entries()).length === 0 ? (
-          <p className="text-sm text-slate-400">No events with confirmed registrations.</p>
+          <p className="text-sm text-gray-600">No confirmed registrations.</p>
         ) : (
           <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
             {Array.from(eventStats.entries()).map(([eventId, stats]) => {
-              const attendance = attendanceList.find(a => a.event?.id === eventId);
+              const attendance = attendanceList.find((a: any) => a.event?.id === eventId);
               const eventName = attendance?.event?.title || `Event ${eventId}`;
               const percentage = stats.total > 0 ? Math.round((stats.present / stats.total) * 100) : 0;
-              
+
               return (
-                <div key={eventId} className="rounded-lg border border-slate-700 bg-slate-800/50 p-3">
-                  <h3 className="text-sm font-medium text-white mb-2">{eventName}</h3>
+                <div key={eventId} className="rounded-lg border border-gray-200 bg-white p-3">
+                  <h3 className="text-sm font-medium text-gray-900 mb-2">{eventName}</h3>
                   <div className="space-y-1 text-xs">
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Total Registered:</span>
-                      <span className="text-slate-200 font-medium">{stats.total}</span>
+                      <span className="text-gray-600">Total Registered:</span>
+                      <span className="text-gray-700 font-medium">{stats.total}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Present:</span>
-                      <span className="text-emerald-400 font-medium">{stats.present}</span>
+                      <span className="text-gray-600">Present:</span>
+                      <span className="text-emerald-600 font-medium">{stats.present}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Absent:</span>
-                      <span className="text-red-400 font-medium">{stats.absent}</span>
+                      <span className="text-gray-600">Absent:</span>
+                      <span className="text-red-600 font-medium">{stats.absent}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-slate-400">Attendance Rate:</span>
-                      <span className="text-sky-400 font-medium">{percentage}%</span>
+                      <span className="text-gray-600">Attendance Rate:</span>
+                      <span className="text-sky-600 font-medium">{percentage}%</span>
                     </div>
                   </div>
                 </div>
@@ -304,77 +354,40 @@ export default async function AdminAttendancePage() {
       </div>
 
       {/* Manual Check-in Methods */}
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <h2 className="text-lg font-medium text-white mb-4">Manual Check-in</h2>
-        <div className="grid gap-4 md:grid-cols-3">
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Manual Check-in</h2>
+        <div className="grid gap-4 md:grid-cols-2">
           {/* QR Scanner */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">QR Code Scanner</h3>
-            <div className="space-y-2">
-              <div className="flex gap-3">
-                <input
-                  type="text"
-                  name="entryCode"
-                  placeholder="Scan QR code or enter entry code"
-                  className="flex-1 rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                />
-                {/* QR Scanner button removed from header - replaced in Manual Check-in below */}
-              </div>
-              <form action={handleAttendanceAction} className="mt-2">
-                <button
-                  type="submit"
-                  name="action"
-                  value="checkin_by_code"
-                  className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600"
-                >
-                  Check In (QR/Entry Code)
-                </button>
-              </form>
-            </div>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">QR Code</h3>
+            <form action={handleAttendanceAction} className="flex gap-3">
+              <input
+                type="text"
+                name="entryCode"
+                placeholder="Scan or paste QR code"
+                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
+              <QRModalButton eventId={selectedEventId} buttonLabel="Check In (QR)" className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700" />
+            </form>
           </div>
 
           {/* Entry Code */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Entry Code</h3>
-            <form action={handleAttendanceAction} className="space-y-2">
-              <div>
-                <input
-                  type="text"
-                  name="entryCode"
-                  placeholder="Enter entry code manually"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                />
-              </div>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Entry Code</h3>
+            <form action={handleAttendanceAction} className="flex gap-3">
+              <input
+                type="text"
+                name="entryCode"
+                placeholder="Entry Code"
+                className="flex-1 rounded-full border border-gray-300 bg-white px-4 py-2 text-sm text-gray-700 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+              />
               <button
                 type="submit"
                 name="action"
                 value="checkin_by_code"
-                className="w-full rounded-md bg-emerald-700 px-3 py-2 text-xs font-medium text-white hover:bg-emerald-600"
+                className="rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
               >
-                Check In (Entry Code)
-              </button>
-            </form>
-          </div>
-
-          {/* Registration ID */}
-          <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Registration ID</h3>
-            <form action={handleAttendanceAction} className="space-y-2">
-              <div>
-                <input
-                  type="text"
-                  name="registrationId"
-                  placeholder="Enter registration ID"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-                />
-              </div>
-              <button
-                type="submit"
-                name="action"
-                value="checkin_by_id"
-                className="w-full rounded-md bg-amber-700 px-3 py-2 text-xs font-medium text-white hover:bg-amber-600"
-              >
-                Check In (Registration ID)
+                Check In
               </button>
             </form>
           </div>
@@ -383,37 +396,19 @@ export default async function AdminAttendancePage() {
 
       <div className="grid gap-6 md:grid-cols-2">
         <div className="space-y-3">
-          <h2 className="text-lg font-medium text-white">Checked In</h2>
+          <h2 className="text-lg font-medium text-gray-900">Checked In</h2>
           {attendanceList.length === 0 ? (
-            <p className="text-sm text-slate-400">No one checked in yet.</p>
+            <p className="text-sm text-gray-600">No one checked in yet.</p>
           ) : (
             <div className="space-y-2 text-sm">
               {attendanceList.map((a: any) => (
-                <div
-                  key={a.id}
-                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
-                >
-                  <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
-                    <div className="space-y-1">
-                      <p className="font-medium text-white">{a.event?.title ?? 'Event'}</p>
-                      <p className="text-xs text-slate-300">
-                        {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
-                      </p>
-                      <p className="text-[11px] text-slate-400">
-                        Checked in at {new Date(a.checkedInAt).toLocaleString()}
-                      </p>
-                    </div>
-                    <form action={handleAttendanceAction}>
-                      <input type="hidden" name="registrationId" value={a.registrationId} />
-                      <button
-                        type="submit"
-                        name="action"
-                        value="undo"
-                        className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
-                      >
-                        Undo check-in
-                      </button>
-                    </form>
+                <div key={a.id} className="rounded-xl border border-gray-200 bg-white p-3">
+                  <div className="space-y-1">
+                    <p className="font-medium text-gray-900">{a.event?.title ?? 'Event'}</p>
+                    <p className="text-xs text-gray-600">
+                      {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
+                    </p>
+                    <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
                   </div>
                 </div>
               ))}
@@ -422,33 +417,30 @@ export default async function AdminAttendancePage() {
         </div>
 
         <div className="space-y-3">
-          <h2 className="text-lg font-medium text-white">Not Checked In</h2>
+          <h2 className="text-lg font-medium text-gray-900">Not Checked In</h2>
           {notCheckedIn.length === 0 ? (
-            <p className="text-sm text-slate-400">All confirmed registrations are checked in.</p>
+            <p className="text-sm text-gray-600">All confirmed registrations are checked in.</p>
           ) : (
             <div className="space-y-2 text-sm">
               {notCheckedIn.map((r: any) => (
-                <div
-                  key={r.registrationId}
-                  className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
-                >
+                <div key={r.registrationId} className="rounded-xl border border-gray-200 bg-white p-3 shadow-sm">
                   <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div className="space-y-1">
-                      <p className="font-medium text-white">{r.event?.title ?? 'Event'}</p>
-                      <p className="text-xs text-slate-300">
+                      <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
+                      <p className="text-xs text-gray-600">
                         {r.user?.full_name ?? 'User'} · {r.user?.email ?? 'No email'} · {r.entryCode ?? 'N/A'}
                       </p>
-                      <p className="text-[11px] text-slate-400">Confirmed registration</p>
+                      <p className="text-[11px] text-gray-600">Confirmed registration</p>
                     </div>
-                    <form action={handleAttendanceAction}>
+                    <form action={handleAttendanceAction} className="mt-3 md:mt-0 md:ml-4 w-full md:w-auto">
                       <input type="hidden" name="registrationId" value={r.registrationId} />
                       <button
                         type="submit"
                         name="action"
                         value="checkin"
-                        className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
+                        className="w-full rounded-full bg-purple-600 px-5 py-2 text-sm font-medium text-white hover:bg-purple-700"
                       >
-                        Check in
+                        Check In
                       </button>
                     </form>
                   </div>
