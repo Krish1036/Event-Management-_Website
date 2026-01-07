@@ -26,6 +26,7 @@ interface Event {
   start_time: string;
   end_time: string;
   status: 'draft' | 'pending_approval' | 'approved' | 'published' | 'cancelled';
+  visibility?: 'public' | 'hidden';
   created_by: string;
   assigned_organizer?: string;
 }

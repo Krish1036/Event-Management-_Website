@@ -190,7 +190,7 @@ function OrganizerEditEventFormContent({ initialData }: { initialData: Event }) 
       <Card variant="light">
         <CardHeader>
           <CardTitle>Visibility</CardTitle>
-          <CardDescription>Visibility will take effect after approval</CardDescription>
+          <CardDescription>Control event visibility in public listings</CardDescription>
         </CardHeader>
         <CardContent>
           <div className={isApproved ? 'pointer-events-none opacity-60' : ''}>
