@@ -320,32 +320,32 @@ export default async function AdminEventsPage({
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Events</h1>
-        <p className="mt-1 text-sm text-slate-400">
+        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Events</h1>
+        <p className="mt-1 text-sm text-gray-600">
           Manage events, approvals, registrations, and capacity.
         </p>
       </div>
       {events.length === 0 ? (
-        <p className="text-sm text-slate-400">No events found.</p>
+        <p className="text-sm text-gray-500">No events found.</p>
       ) : (
         <div className="space-y-3 text-sm">
           {events.map((event: any) => (
             <details
               key={event.id}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+              className="rounded-xl border border-gray-200 bg-white shadow-sm p-4"
             >
               <summary className="cursor-pointer list-none">
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-sm font-semibold text-white">{event.title}</h2>
-                    <p className="text-xs text-slate-300">
+                    <h2 className="text-sm font-semibold text-gray-900">{event.title}</h2>
+                    <p className="text-xs text-gray-600">
                       {event.location || 'No location'} ·{' '}
                       {new Date(event.event_date).toLocaleDateString()} · {event.start_time} -{' '}
                       {event.end_time}
                     </p>
                   </div>
                   <div className="flex flex-col items-end gap-1 text-[11px]">
-                    <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 font-medium uppercase tracking-wide text-slate-200">
+                    <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 font-medium uppercase tracking-wide text-purple-800">
                       {event.status}
                     </span>
                     <span
@@ -400,7 +400,7 @@ export default async function AdminEventsPage({
                     </Link>
                     <Link
                       href={`/admin-dashboard/events/${event.id}/edit`}
-                      className="rounded-md bg-blue-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-600 inline-block"
+                      className="rounded-md bg-purple-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-purple-700 inline-block"
                     >
                       Edit Event
                     </Link>
@@ -408,7 +408,7 @@ export default async function AdminEventsPage({
                       type="submit"
                       name="action"
                       value="clone_event"
-                      className="rounded-md bg-purple-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-purple-600"
+                      className="rounded-md bg-blue-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-700"
                     >
                       Clone Event
                     </button>
@@ -416,7 +416,7 @@ export default async function AdminEventsPage({
                       type="submit"
                       name="action"
                       value={event.is_registration_open ? 'close_reg' : 'open_reg'}
-                      className="rounded-md bg-sky-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-sky-600"
+                      className="rounded-md bg-green-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-green-700"
                     >
                       {event.is_registration_open ? 'Close Registrations' : 'Open Registrations'}
                     </button>
@@ -424,7 +424,7 @@ export default async function AdminEventsPage({
                       type="submit"
                       name="action"
                       value="cancel"
-                      className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
+                      className="rounded-md bg-amber-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-amber-700"
                     >
                       Cancel Event
                     </button>
@@ -433,7 +433,7 @@ export default async function AdminEventsPage({
                       name="action"
                       value="delete"
                       data-event-title={event.title}
-                      className="rounded-md bg-red-800 px-3 py-1 text-[11px] font-medium text-red-50 hover:bg-red-700"
+                      className="rounded-md bg-red-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-red-700"
                     >
                       Delete Event
                     </button>
