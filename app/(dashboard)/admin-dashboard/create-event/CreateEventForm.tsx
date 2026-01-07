@@ -76,54 +76,54 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
   return (
     <div className="space-y-6">
       {/* Section 1: Event Basics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Basics</CardTitle>
-          <CardDescription>Basic information about your event</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Event Basics</CardTitle>
+          <CardDescription className="text-gray-500">Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
-          <EventBasicsSection />
+          <EventBasicsSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 2: Capacity & Registration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Capacity & Registration</CardTitle>
-          <CardDescription>Set capacity and registration options</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Capacity & Registration</CardTitle>
+          <CardDescription className="text-gray-500">Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
-          <CapacitySection />
+          <CapacitySection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 3: Pricing & Payment */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing & Payment</CardTitle>
-          <CardDescription>Configure pricing and payment options</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Pricing & Payment</CardTitle>
+          <CardDescription className="text-gray-500">Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
-          <PricingSection />
+          <PricingSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 4: Registration Form Builder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Registration Form Builder</CardTitle>
-          <CardDescription>Customize the registration form</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Registration Form Builder</CardTitle>
+          <CardDescription className="text-gray-500">Customize registration form</CardDescription>
         </CardHeader>
         <CardContent>
-          <FormBuilderSection />
+          <FormBuilderSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 5: Visibility & Publishing */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Visibility & Publishing</CardTitle>
-          <CardDescription>Control event visibility and publishing</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Visibility & Publishing</CardTitle>
+          <CardDescription className="text-gray-500">Control event visibility and publishing</CardDescription>
         </CardHeader>
         <CardContent>
           <VisibilitySection />
@@ -131,10 +131,10 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
       </Card>
 
       {/* Section 6: Organizer Assignment */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Organizer Assignment</CardTitle>
-          <CardDescription>Assign an organizer (optional)</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Organizer Assignment</CardTitle>
+          <CardDescription className="text-gray-500">Assign an organizer (optional)</CardDescription>
         </CardHeader>
         <CardContent>
           <OrganizerSection organizers={organizers} />
@@ -142,13 +142,13 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
       </Card>
 
       {/* Section 7: Review & Confirmation */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Review & Confirmation</CardTitle>
-          <CardDescription>Review your event details before publishing</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Review</CardTitle>
+          <CardDescription className="text-gray-500">Review your event details before saving</CardDescription>
         </CardHeader>
         <CardContent>
-          <ReviewSection />
+          <ReviewSection variant="light" />
         </CardContent>
       </Card>
 
@@ -162,18 +162,27 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
       {/* Confirmation Dialog */}
       {state.showConfirmation && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <Card className="w-full max-w-md">
-            <CardHeader>
-              <CardTitle>Confirm Event Creation</CardTitle>
-              <CardDescription>
+          <Card variant="light" className="w-full max-w-md border-gray-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-black">Confirm</CardTitle>
+              <CardDescription className="text-gray-500">
                 This event will be created as {state.data.save_mode === 'publish' ? 'APPROVED' : 'DRAFT'} and may be visible immediately. Continue?
               </CardDescription>
             </CardHeader>
             <CardContent className="flex justify-end space-x-4">
-              <Button variant="outline" onClick={toggleConfirmation} disabled={state.isSubmitting}>
+              <Button 
+                variant="outline" 
+                onClick={toggleConfirmation} 
+                disabled={state.isSubmitting}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
                 Cancel
               </Button>
-              <Button onClick={handleSubmit} disabled={state.isSubmitting}>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={state.isSubmitting}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
                 {state.isSubmitting ? 'Creating...' : 'Confirm & Create'}
               </Button>
             </CardContent>
