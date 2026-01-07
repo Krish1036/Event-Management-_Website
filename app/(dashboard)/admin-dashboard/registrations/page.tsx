@@ -190,7 +190,7 @@ export default async function AdminRegistrationsPage({
     <div className="space-y-6">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Registrations</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Registrations</h1>
           <p className="mt-1 text-sm text-slate-400">
             View and manage registrations. Confirm, cancel, and inspect tickets.
           </p>
@@ -202,7 +202,7 @@ export default async function AdminRegistrationsPage({
         {/* Search bar */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <form className="w-full">
+          <form method="GET" className="w-full">
             <input
               type="text"
               name="search"
@@ -258,7 +258,7 @@ export default async function AdminRegistrationsPage({
 
       {/* Main Filter Section */}
       <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-        <form className="grid gap-4 md:grid-cols-5">
+        <form method="GET" className="grid gap-4 md:grid-cols-5">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Event</label>
             <Select name="event" defaultValue={eventId ?? 'all'}>
