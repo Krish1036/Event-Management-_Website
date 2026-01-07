@@ -26,12 +26,113 @@ interface Event {
   capacity: number;
   price: number;
   image_url?: string;
-  status: 'approved' | 'draft' | 'cancelled';
+  status: 'approved' | 'draft' | 'pending_approval' | 'cancelled' | 'published';
   registration_deadline?: string;
   assigned_organizer: string | null;
   created_at: string;
   updated_at: string;
   form_fields?: any[];
+}
+
+interface EventCardProps {
+  event: Event;
+  onEdit: (eventId: string) => void;
+}
+
+function EventCard({ event, onEdit }: EventCardProps) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'long', 
+      day: 'numeric' 
+    });
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'bg-gray-100 text-gray-800';
+      case 'pending_approval':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'approved':
+      case 'published':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'draft':
+        return 'Draft';
+      case 'pending_approval':
+        return 'Pending Approval';
+      case 'approved':
+      case 'published':
+        return 'Published';
+      case 'cancelled':
+        return 'Cancelled';
+      default:
+        return status;
+    }
+  };
+
+  return (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:shadow-md transition-shadow">
+      <div className="flex gap-4">
+        {/* Event Image */}
+        <div className="flex-shrink-0">
+          <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
+            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+              <Calendar className="w-8 h-8 text-purple-400" />
+            </div>
+          </div>
+        </div>
+
+        {/* Event Details */}
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 truncate">
+            {event.title}
+          </h3>
+          <div className="mt-1 space-y-1">
+            <div className="flex items-center text-sm text-gray-500">
+              <Calendar className="w-4 h-4 mr-1" />
+              {formatDate(event.event_date)} • {event.start_time} - {event.end_time}
+            </div>
+            <div className="flex items-center text-sm text-gray-500">
+              <MapPin className="w-4 h-4 mr-1" />
+              {event.location || 'No location specified'}
+            </div>
+            <div className="flex items-center text-sm text-gray-500">
+              <Users className="w-4 h-4 mr-1" />
+              {event.capacity} participants • {event.price > 0 ? `$${event.price}` : 'Free'}
+            </div>
+            <div className="flex items-center mt-2">
+              <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(event.status)}`}>
+                {getStatusText(event.status)}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Action Button */}
+        <div className="flex-shrink-0">
+          <Button 
+            size="sm" 
+            onClick={() => onEdit(event.id)}
+            className="bg-purple-600 text-white hover:bg-purple-700"
+          >
+            <Edit className="h-3 w-3 mr-1" />
+            Edit
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function EditEventPage() {
@@ -119,20 +220,24 @@ export default function EditEventPage() {
   }
 
   return (
-    <div className="container mx-auto py-8 space-y-6">
-      <div className="flex items-center gap-4">
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Edit Event</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Select an event to edit its details
+          </p>
+        </div>
         <Link href="/admin-dashboard/events">
           <Button variant="outline" size="sm">
             <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Events
           </Button>
         </Link>
-        <div>
-          <h1 className="text-3xl font-bold">Edit Event</h1>
-          <p className="text-gray-600">Select an event to edit its details</p>
-        </div>
       </div>
 
+      {/* Event Selection Section */}
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -144,85 +249,62 @@ export default function EditEventPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <Select onValueChange={handleEventSelect}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select an event to edit..." />
-              </SelectTrigger>
-              <SelectContent>
-                {events.map((event) => (
-                  <SelectItem key={event.id} value={event.id}>
-                    <div className="flex flex-col items-start">
-                      <div className="font-medium">{event.title}</div>
-                      <div className="text-sm text-gray-500 flex items-center gap-4 mt-1">
-                        <div className="flex items-center gap-1">
-                          <Calendar className="h-3 w-3" />
-                          {new Date(event.event_date).toLocaleDateString()}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <MapPin className="h-3 w-3" />
-                          {event.location}
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Users className="h-3 w-3" />
-                          {event.capacity} seats
-                        </div>
-                      </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-
-            {/* Event Cards Grid */}
-            <div className="grid gap-4 mt-6">
+          <Select onValueChange={handleEventSelect}>
+            <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+              <SelectValue placeholder="Select an event to edit..." className="text-black" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
               {events.map((event) => (
-                <Card 
-                  key={event.id} 
-                  className="cursor-pointer hover:shadow-md transition-shadow border-2 hover:border-blue-200"
-                  onClick={() => handleEventSelect(event.id)}
-                >
-                  <CardContent className="p-4">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-lg mb-2">{event.title}</h3>
-                        <div className="space-y-1 text-sm text-gray-600">
-                          <div className="flex items-center gap-2">
-                            <Calendar className="h-4 w-4" />
-                            {new Date(event.event_date).toLocaleDateString()} • {event.start_time} - {event.end_time}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <MapPin className="h-4 w-4" />
-                            {event.location}
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <Users className="h-4 w-4" />
-                            {event.capacity} participants • {event.price > 0 ? `$${event.price}` : 'Free'}
-                          </div>
-                        </div>
+                <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
+                  <div className="flex flex-col items-start">
+                    <div className="font-medium">{event.title}</div>
+                    <div className="text-sm text-gray-500 flex items-center gap-4 mt-1">
+                      <div className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(event.event_date).toLocaleDateString()}
                       </div>
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${
-                          event.status === 'approved' ? 'bg-green-100 text-green-800' :
-                          event.status === 'draft' ? 'bg-yellow-100 text-yellow-800' :
-                          event.status === 'cancelled' ? 'bg-red-100 text-red-800' :
-                          'bg-gray-100 text-gray-800'
-                        }`}>
-                          {event.status}
-                        </span>
-                        <Button size="sm" className="mt-2">
-                          <Edit className="h-3 w-3 mr-1" />
-                          Edit
-                        </Button>
+                      <div className="flex items-center gap-1">
+                        <MapPin className="h-3 w-3" />
+                        {event.location}
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <Users className="h-3 w-3" />
+                        {event.capacity} seats
                       </div>
                     </div>
-                  </CardContent>
-                </Card>
+                  </div>
+                </SelectItem>
               ))}
-            </div>
-          </div>
+            </SelectContent>
+          </Select>
         </CardContent>
       </Card>
+
+      {/* Events List */}
+      {events.length === 0 ? (
+        <div className="text-center py-12">
+          <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <Calendar className="w-8 h-8 text-gray-400" />
+          </div>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">
+            No Events Found
+          </h3>
+          <p className="text-gray-500 mb-4">
+            Create an event first before you can edit it.
+          </p>
+          <Link href="/admin-dashboard/create-event">
+            <Button className="bg-purple-600 text-white hover:bg-purple-700">
+              Create Event
+            </Button>
+          </Link>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {events.map((event) => (
+            <EventCard key={event.id} event={event} onEdit={handleEventSelect} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

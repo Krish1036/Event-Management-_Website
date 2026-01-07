@@ -1,5 +1,12 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import Link from 'next/link';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { DollarSign, Calendar, Users, Filter, Search, Info, AlertTriangle } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -89,162 +96,212 @@ export default async function AdminPaymentsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Payments</h1>
-          <p className="mt-1 text-sm text-slate-400">
+          <h1 className="text-2xl font-bold text-gray-900">Payments</h1>
+          <p className="mt-1 text-sm text-gray-500">
             View all payments, filter by status and event, and detect payment anomalies.
           </p>
         </div>
-        <form className="w-full max-w-xs">
-          <select
-            name="status"
-            defaultValue={statusFilter}
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-          >
-            <option value="all">All Status</option>
-            <option value="CREATED">Created</option>
-            <option value="SUCCESS">Success</option>
-            <option value="FAILED">Failed</option>
-          </select>
-        </form>
       </div>
 
       {/* Filters */}
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <form className="grid gap-3 md:grid-cols-2">
-          <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Status</label>
-            <select
-              name="status"
-              defaultValue={statusFilter}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Status</option>
-              <option value="CREATED">Created</option>
-              <option value="SUCCESS">Success</option>
-              <option value="FAILED">Failed</option>
-            </select>
-          </div>
-          
-          <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Event</label>
-            <select
-              name="event"
-              defaultValue={eventFilter}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Events</option>
-              {events.map((event: any) => (
-                <option key={event.id} value={event.id}>
-                  {event.title}
-                </option>
-              ))}
-            </select>
-          </div>
-          
-          <div className="flex items-end md:col-span-2">
-            <button
-              type="submit"
-              className="w-full rounded-md bg-sky-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-600"
-            >
-              Apply Filters
-            </button>
-          </div>
-        </form>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Filter className="h-5 w-5" />
+            Filters
+          </CardTitle>
+          <CardDescription>
+            Filter payments by status and event
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form className="grid gap-4 md:grid-cols-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+              <Select name="status" defaultValue={statusFilter}>
+                <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                  <SelectValue placeholder="All Status" className="text-black" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <SelectItem value="all" className="text-black hover:bg-gray-100">All Status</SelectItem>
+                  <SelectItem value="CREATED" className="text-black hover:bg-gray-100">Created</SelectItem>
+                  <SelectItem value="SUCCESS" className="text-black hover:bg-gray-100">Success</SelectItem>
+                  <SelectItem value="FAILED" className="text-black hover:bg-gray-100">Failed</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Event</label>
+              <Select name="event" defaultValue={eventFilter}>
+                <SelectTrigger className="w-48 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                  <SelectValue placeholder="All Events" className="text-black" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <SelectItem value="all" className="text-black hover:bg-gray-100">All Events</SelectItem>
+                  {events.map((event: any) => (
+                    <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
+                      {event.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
+            <div className="flex items-end">
+              <Button 
+                type="submit" 
+                className="bg-purple-600 text-white hover:bg-purple-700 px-6 py-2"
+              >
+                Apply Filters
+              </Button>
+            </div>
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Payment mode banner */}
-      <div
-        className={`flex items-center justify-between rounded-lg border px-4 py-3 text-xs ${
-          paymentsEnabled
-            ? 'border-emerald-700 bg-emerald-900/20 text-emerald-200'
-            : 'border-amber-700 bg-amber-900/20 text-amber-100'
-        }`}
-      >
-        <div>
-          <p className="font-semibold">Payment system status</p>
-          <p className="mt-0.5 text-[11px]">
-            {paymentsEnabled
-              ? 'LIVE MODE – real payments are being processed.'
-              : 'TEST MODE – payments are disabled or running in sandbox mode.'}
-          </p>
-        </div>
-        <span className="rounded-full bg-black/20 px-3 py-1 text-[11px] font-medium uppercase tracking-wide">
-          {paymentsEnabled ? 'Live mode' : 'Test mode'}
-        </span>
-      </div>
+      <Card className={`border-l-4 ${
+        paymentsEnabled
+          ? 'border-l-green-500 bg-green-50'
+          : 'border-l-amber-500 bg-amber-50'
+      }`}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                paymentsEnabled ? 'bg-green-100' : 'bg-amber-100'
+              }`}>
+                <Info className={`w-5 h-5 ${
+                  paymentsEnabled ? 'text-green-600' : 'text-amber-600'
+                }`} />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Payment system status</p>
+                <p className="text-sm text-gray-600">
+                  {paymentsEnabled
+                    ? 'LIVE MODE – real payments are being processed.'
+                    : 'TEST MODE – payments are disabled or running in sandbox mode.'}
+                </p>
+              </div>
+            </div>
+            <Badge className={
+              paymentsEnabled 
+                ? 'bg-green-100 text-green-800 border-green-200' 
+                : 'bg-amber-100 text-amber-800 border-amber-200'
+            }>
+              {paymentsEnabled ? 'Live mode' : 'Test mode'}
+            </Badge>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Suspicious payments warning */}
       {suspiciousPayments.length > 0 && (
-        <div className="rounded-lg border border-red-700 bg-red-900/20 px-4 py-3 text-xs text-red-200">
-          <p className="font-semibold">Suspicious payments detected</p>
-          <p className="mt-0.5 text-[11px]">
-            {suspiciousPayments.length} payment(s) marked as SUCCESS but registration is missing or not confirmed.
-          </p>
-        </div>
+        <Card className="border-l-4 border-l-red-500 bg-red-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+                <AlertTriangle className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900">Suspicious payments detected</p>
+                <p className="text-sm text-gray-600">
+                  {suspiciousPayments.length} payment(s) marked as SUCCESS but registration is missing or not confirmed.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
+      {/* Payments List */}
       {payments.length === 0 ? (
-        <p className="text-sm text-slate-400">No payments found.</p>
+        <Card>
+          <CardContent className="p-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No payments found</h3>
+              <p className="text-gray-500">
+                No payments match your current filters.
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-3 text-sm">
+        <div className="space-y-4">
           {payments.map((payment: any) => {
             const isSuspicious = payment.status === 'SUCCESS' && (!payment.registration || payment.registration?.status !== 'CONFIRMED');
             
             return (
-              <div
+              <Card 
                 key={payment.id}
-                className={`rounded-xl border bg-slate-900/60 p-4 ${
-                  isSuspicious ? 'border-red-700/50' : 'border-slate-800'
+                className={`hover:shadow-md transition-shadow ${
+                  isSuspicious ? 'border-red-200 bg-red-50' : 'border-gray-200'
                 }`}
               >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-semibold text-white">
-                        ₹{payment.amount}
-                      </h2>
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${
-                        payment.status === 'SUCCESS'
-                          ? 'bg-emerald-700/30 text-emerald-300'
-                          : payment.status === 'FAILED'
-                          ? 'bg-red-700/30 text-red-300'
-                          : 'bg-slate-700 text-slate-300'
-                      }`}>
-                        {payment.status}
-                      </span>
-                      {isSuspicious && (
-                        <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-red-700/30 text-red-300">
-                          Suspicious
-                        </span>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="w-5 h-5 text-green-600" />
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            ₹{payment.amount}
+                          </h3>
+                        </div>
+                        <Badge className={
+                          payment.status === 'SUCCESS'
+                            ? 'bg-green-100 text-green-800 border-green-200'
+                            : payment.status === 'FAILED'
+                            ? 'bg-red-100 text-red-800 border-red-200'
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                        }>
+                          {payment.status}
+                        </Badge>
+                        {isSuspicious && (
+                          <Badge className="bg-red-100 text-red-800 border-red-200">
+                            Suspicious
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      <div className="space-y-1 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          {payment.event?.title ?? 'Event'} · {payment.user?.full_name ?? 'User'}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4" />
+                          Registration: {payment.registration?.entry_code ?? 'Missing'}
+                        </div>
+                        <div className="text-xs text-gray-500 space-y-1">
+                          {payment.razorpay_order_id && (
+                            <p>Order ID: {payment.razorpay_order_id}</p>
+                          )}
+                          {payment.razorpay_payment_id && (
+                            <p>Payment ID: {payment.razorpay_payment_id}</p>
+                          )}
+                          <p>Created: {new Date(payment.created_at).toLocaleString()}</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex flex-wrap items-center gap-2">
+                      {payment.registration && (
+                        <Badge variant="outline" className="text-xs">
+                          Reg #{payment.registration.id.slice(0, 8)}
+                        </Badge>
                       )}
                     </div>
-                    <p className="text-xs text-slate-300">
-                      {payment.event?.title ?? 'Event'} · {payment.user?.full_name ?? 'User'}
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Registration: {payment.registration?.entry_code ?? 'Missing'}
-                    </p>
-                    <div className="space-y-0.5 text-[11px] text-slate-500">
-                      {payment.razorpay_order_id && (
-                        <p>Order ID: {payment.razorpay_order_id}</p>
-                      )}
-                      {payment.razorpay_payment_id && (
-                        <p>Payment ID: {payment.razorpay_payment_id}</p>
-                      )}
-                      <p>Created: {new Date(payment.created_at).toLocaleString()}</p>
-                    </div>
                   </div>
-                  <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                    {payment.registration && (
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-slate-800 text-slate-300">
-                        Reg #{payment.registration.id.slice(0, 8)}
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>

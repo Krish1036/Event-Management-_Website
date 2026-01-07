@@ -410,6 +410,17 @@ export default async function AdminAttendancePage({
                     </p>
                     <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
                   </div>
+                  <form action={handleAttendanceAction}>
+                    <input type="hidden" name="registrationId" value={a.registrationId} />
+                    <button
+                      type="submit"
+                      name="action"
+                      value="undo"
+                      className="rounded-md border border-gray-300 px-3 py-1 text-[11px] font-medium text-gray-700 hover:bg-gray-50"
+                    >
+                      Undo check-in
+                    </button>
+                  </form>
                 </div>
               ))}
             </div>
