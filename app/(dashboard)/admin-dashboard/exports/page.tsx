@@ -214,7 +214,7 @@ export default async function AdminExportsPage() {
                   <SelectValue placeholder="Select event" className="text-black" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
-                  <SelectItem value="" disabled className="text-gray-400">Select event</SelectItem>
+                  <SelectItem value="all" className="text-black hover:bg-gray-100">All Events</SelectItem>
                   {events.map((event: any) => (
                     <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
                       {event.title}
