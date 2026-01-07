@@ -67,10 +67,10 @@ async function getRegistrations(search: string | null, eventId: string | null, s
   }
 
   if (search && search.trim().length > 0) {
-    // Search by entry code, user full name, or email using the underlying profiles table
+    // Search by entry code, user full name, or email
     query = query.or(
-      `entry_code.ilike.%${search}%,profiles.full_name.ilike.%${search}%,profiles.email.ilike.%${search}%`
-    ) as any;
+      `entry_code.ilike.%${search}%,user.full_name.ilike.%${search}%,user.email.ilike.%${search}%`
+    );
   }
 
   const { data } = await query;
@@ -202,14 +202,20 @@ export default async function AdminRegistrationsPage({
         {/* Search bar */}
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <form method="GET" className="w-full">
+          <form method="GET" className="w-full flex gap-2">
             <input
               type="text"
               name="search"
               defaultValue={search ?? ''}
               placeholder="Search by name, email, or entry code"
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+              className="flex-1 pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
             />
+            <button
+              type="submit"
+              className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+            >
+              Search
+            </button>
           </form>
         </div>
 
