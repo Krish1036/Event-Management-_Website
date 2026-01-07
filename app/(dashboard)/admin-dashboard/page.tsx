@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { Users, Calendar, CheckCircle, DollarSign, UserCheck, TrendingUp } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -84,68 +85,123 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Admin Overview</h1>
-        <p className="mt-1 text-sm text-slate-400">System health and key metrics at a glance.</p>
+      {/* Stats Cards Grid */}
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {/* Total Users Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">TOTAL USERS</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.usersCount}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Events Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">EVENTS (DRAFT / APPROVED / CANCELLED)</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.totalEvents}</p>
+              <p className="mt-1 text-sm text-gray-500">{metrics.draftEvents} draft - {metrics.approvedEvents} approved - {metrics.cancelledEvents} cancelled</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Upcoming Events Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">UPCOMING EVENTS</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.upcomingEvents}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Calendar className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Total Registrations Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">TOTAL REGISTRATIONS</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.registrationsCount}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <Users className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Today's Attendance Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">TODAY'S ATTENDANCE</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.attendanceTodayCount}</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <UserCheck className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Capacity Utilization Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">CAPACITY UTILIZATION</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.capacityUtilization}%</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <TrendingUp className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
+
+        {/* Paid vs Free Events Card */}
+        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-gray-600 uppercase tracking-wide">PAID VS FREE EVENTS</p>
+              <p className="mt-2 text-3xl font-bold text-gray-900">{metrics.paidEvents}/{metrics.freeEvents}</p>
+              <p className="mt-1 text-sm text-gray-500">{metrics.paidEvents} paid - {metrics.freeEvents} free</p>
+            </div>
+            <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+              <DollarSign className="w-6 h-6 text-purple-600" />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        <OverviewCard label="Total users" value={metrics.usersCount} />
-        <OverviewCard
-          label="Events (draft / approved / cancelled)"
-          value={`${metrics.totalEvents}`}
-          helper={`${metrics.draftEvents} draft • ${metrics.approvedEvents} approved • ${metrics.cancelledEvents} cancelled`}
-        />
-        <OverviewCard label="Upcoming events" value={metrics.upcomingEvents} />
-        <OverviewCard label="Total registrations" value={metrics.registrationsCount} />
-        <OverviewCard label="Today's attendance" value={metrics.attendanceTodayCount} />
-        <OverviewCard label="Capacity utilization" value={`${metrics.capacityUtilization}%`} />
-        <OverviewCard
-          label="Paid vs free events"
-          value={`${metrics.paidEvents} / ${metrics.freeEvents}`}
-          helper={`${metrics.paidEvents} paid • ${metrics.freeEvents} free`}
-        />
-      </div>
-
-      <div className="mt-4">
-        <div
-          className={`flex items-center justify-between rounded-lg border px-4 py-3 text-xs ${
-            metrics.paymentsEnabled
-              ? 'border-emerald-700 bg-emerald-900/20 text-emerald-200'
-              : 'border-amber-700 bg-amber-900/20 text-amber-100'
-          }`}
-        >
+      {/* Payment System Status Card */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <div className="flex items-center justify-between">
           <div>
-            <p className="font-semibold">Payment system status</p>
-            <p className="mt-0.5 text-[11px]">
+            <p className="text-lg font-semibold text-gray-900">Payment system status</p>
+            <p className="mt-2 text-sm text-gray-600">
               {metrics.paymentsEnabled
                 ? 'LIVE MODE – real payments are being processed.'
                 : 'TEST MODE – payments are disabled or running in sandbox mode.'}
             </p>
           </div>
-          <span className="rounded-full bg-black/20 px-3 py-1 text-[11px] font-medium uppercase tracking-wide">
-            {metrics.paymentsEnabled ? 'Live mode' : 'Test mode'}
-          </span>
+          <button className={`px-6 py-3 rounded-lg text-sm font-medium transition-colors ${
+            metrics.paymentsEnabled
+              ? 'bg-green-600 text-white hover:bg-green-700'
+              : 'bg-purple-600 text-white hover:bg-purple-700'
+          }`}>
+            {metrics.paymentsEnabled ? 'LIVE MODE' : 'TEST MODE'}
+          </button>
         </div>
       </div>
     </div>
   );
 }
 
-function OverviewCard({
-  label,
-  value,
-  helper
-}: {
-  label: string;
-  value: number | string;
-  helper?: string;
-}) {
-  return (
-    <div className="rounded-xl border border-slate-800 bg-slate-900/60 px-4 py-3">
-      <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">{label}</p>
-      <p className="mt-1 text-xl font-semibold text-white">{value}</p>
-      {helper && <p className="mt-1 text-[11px] text-slate-400">{helper}</p>}
-    </div>
-  );
-}

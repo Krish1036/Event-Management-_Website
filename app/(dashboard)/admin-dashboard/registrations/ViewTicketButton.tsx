@@ -36,7 +36,7 @@ export function ViewTicketButton({ registration }: ViewTicketButtonProps) {
   return (
     <button
       type="button"
-      className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
+      className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
       onClick={handleClick}
     >
       View Ticket

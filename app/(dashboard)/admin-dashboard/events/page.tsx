@@ -1,6 +1,8 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
+import { Search, Filter, Grid3X3, Menu } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const revalidate = 0;
 
@@ -319,128 +321,205 @@ export default async function AdminEventsPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-gray-900">Events</h1>
-        <p className="mt-1 text-sm text-gray-600">
-          Manage events, approvals, registrations, and capacity.
-        </p>
+      {/* Header with search and controls */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Events</h1>
+          <p className="text-gray-600 mt-1">Manage events, approvals, registrations, and capacity.</p>
+        </div>
+        <div className="flex items-center gap-4">
+          {/* Search bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <input
+              type="text"
+              placeholder="Search event, location, etc"
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm w-64"
+            />
+          </div>
+
+          {/* Filter button */}
+          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+            <Filter className="w-4 h-4 text-white" />
+          </button>
+
+          {/* Category dropdown */}
+          <Select>
+            <SelectTrigger className="w-32 border-gray-300 text-sm">
+              <SelectValue placeholder="All Category" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Category</SelectItem>
+              <SelectItem value="conference">Conference</SelectItem>
+              <SelectItem value="workshop">Workshop</SelectItem>
+              <SelectItem value="meetup">Meetup</SelectItem>
+              <SelectItem value="webinar">Webinar</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Month dropdown */}
+          <Select>
+            <SelectTrigger className="w-28 border-gray-300 text-sm">
+              <SelectValue placeholder="This Month" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="this-month">This Month</SelectItem>
+              <SelectItem value="last-month">Last Month</SelectItem>
+              <SelectItem value="this-year">This Year</SelectItem>
+              <SelectItem value="all-time">All Time</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Grid view button */}
+          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+            <Grid3X3 className="w-4 h-4 text-white" />
+          </button>
+
+          {/* Menu button */}
+          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <Menu className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
       </div>
       {events.length === 0 ? (
         <p className="text-sm text-gray-500">No events found.</p>
       ) : (
-        <div className="space-y-3 text-sm">
+        <div className="space-y-4">
           {events.map((event: any) => (
-            <details
+            <div
               key={event.id}
-              className="rounded-xl border border-gray-200 bg-white shadow-sm p-4"
+              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
             >
-              <summary className="cursor-pointer list-none">
-                <div className="flex items-center justify-between gap-3">
-                  <div>
-                    <h2 className="text-sm font-semibold text-gray-900">{event.title}</h2>
-                    <p className="text-xs text-gray-600">
-                      {event.location || 'No location'} ·{' '}
-                      {new Date(event.event_date).toLocaleDateString()} · {event.start_time} -{' '}
-                      {event.end_time}
-                    </p>
-                  </div>
-                  <div className="flex flex-col items-end gap-1 text-[11px]">
-                    <span className="inline-flex items-center rounded-full bg-purple-100 px-2 py-0.5 font-medium uppercase tracking-wide text-purple-800">
-                      {event.status}
-                    </span>
-                    <span
-                      className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${
-                        event.is_registration_open
-                          ? 'bg-emerald-800/50 text-emerald-200'
-                          : 'bg-red-800/40 text-red-200'
-                      }`}
-                    >
-                      {event.is_registration_open ? 'Registrations Open' : 'Registrations Closed'}
-                    </span>
+              <div className="flex justify-between items-start mb-4">
+                {/* Event Title and Details */}
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h2>
+                  <p className="text-gray-600 text-sm">
+                    {event.location || 'No location'} - {new Date(event.event_date).toLocaleDateString('en-US', { 
+                      month: 'numeric', 
+                      day: 'numeric', 
+                      year: 'numeric' 
+                    })} - {event.start_time} - {event.end_time}
+                  </p>
+                  <div className="mt-2">
+                    <span className="text-sm text-gray-600">Organizer: </span>
+                    <span className="text-sm font-medium text-gray-900">{event.organizerName}</span>
                   </div>
                 </div>
-              </summary>
-              <div className="mt-4 space-y-3 text-xs">
-                <div className="grid gap-3 md:grid-cols-3">
-                  <div>
-                    <p className="text-slate-400">Organizer</p>
-                    <p className="font-medium text-slate-100">{event.organizerName}</p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Capacity / Seats Left</p>
-                    <p className="font-medium text-slate-100">
-                      {event.capacity ?? 0} / {event.seatsLeft}
-                    </p>
-                  </div>
-                  <div>
-                    <p className="text-slate-400">Registrations</p>
-                    <p className="font-medium text-slate-100">
-                      {event.confirmedCount} confirmed, {event.pendingCount} pending
-                    </p>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  <form action={handleEventAction} className="flex flex-wrap gap-2">
-                    <input type="hidden" name="eventId" value={event.id} />
-                    {event.status === 'pending_approval' && (
-                      <button
-                        type="submit"
-                        name="action"
-                        value="approve"
-                        className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
-                      >
-                        Approve Event
-                      </button>
-                    )}
-                    <Link
-                      href={`/admin-dashboard/events/${event.id}/preview`}
-                      className="rounded-md bg-slate-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-slate-600 inline-block"
-                    >
-                      Preview
-                    </Link>
-                    <Link
-                      href={`/admin-dashboard/events/${event.id}/edit`}
-                      className="rounded-md bg-purple-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-purple-700 inline-block"
-                    >
-                      Edit Event
-                    </Link>
-                    <button
-                      type="submit"
-                      name="action"
-                      value="clone_event"
-                      className="rounded-md bg-blue-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-blue-700"
-                    >
-                      Clone Event
-                    </button>
-                    <button
-                      type="submit"
-                      name="action"
-                      value={event.is_registration_open ? 'close_reg' : 'open_reg'}
-                      className="rounded-md bg-green-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-green-700"
-                    >
-                      {event.is_registration_open ? 'Close Registrations' : 'Open Registrations'}
-                    </button>
-                    <button
-                      type="submit"
-                      name="action"
-                      value="cancel"
-                      className="rounded-md bg-amber-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-amber-700"
-                    >
-                      Cancel Event
-                    </button>
-                    <button
-                      type="submit"
-                      name="action"
-                      value="delete"
-                      data-event-title={event.title}
-                      className="rounded-md bg-red-600 px-3 py-1 text-[11px] font-medium text-white hover:bg-red-700"
-                    >
-                      Delete Event
-                    </button>
-                  </form>
+
+                {/* Status Badges */}
+                <div className="flex flex-col gap-2">
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                    event.status === 'approved' 
+                      ? 'bg-green-100 text-green-800' 
+                      : event.status === 'cancelled'
+                      ? 'bg-red-100 text-red-800'
+                      : event.status === 'draft'
+                      ? 'bg-gray-100 text-gray-800'
+                      : 'bg-yellow-100 text-yellow-800'
+                  }`}>
+                    {event.status === 'approved' ? 'APPROVED' : 
+                     event.status === 'cancelled' ? 'CANCELLED' :
+                     event.status === 'draft' ? 'DRAFT' : 
+                     event.status.toUpperCase()}
+                  </span>
+                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                    event.is_registration_open
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-red-100 text-red-800'
+                  }`}>
+                    {event.is_registration_open ? 'REGISTRATIONS OPEN' : 'REGISTRATIONS CLOSED'}
+                  </span>
                 </div>
               </div>
-            </details>
+
+              {/* Key Metrics */}
+              <div className="grid grid-cols-3 gap-4 mb-6">
+                <div>
+                  <p className="text-sm text-gray-600">Capacity / Seats Left</p>
+                  <p className="text-lg font-semibold text-gray-900">{event.capacity ?? 0} / {event.seatsLeft}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">Registrations</p>
+                  <p className="text-lg font-semibold text-gray-900">{event.confirmedCount} confirmed, {event.pendingCount} pending</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-3">
+                <form action={handleEventAction} className="flex flex-wrap gap-3">
+                  <input type="hidden" name="eventId" value={event.id} />
+                  
+                  {/* Preview Button */}
+                  <Link
+                    href={`/admin-dashboard/events/${event.id}/preview`}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    Preview
+                  </Link>
+                  
+                  {/* Edit Event Button */}
+                  <Link
+                    href={`/admin-dashboard/events/${event.id}/edit`}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    Edit Event
+                  </Link>
+                  
+                  {/* Clone Event Button */}
+                  <button
+                    type="submit"
+                    name="action"
+                    value="clone_event"
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    Clone Event
+                  </button>
+                  
+                  {/* Close/Open Registrations Button */}
+                  <button
+                    type="submit"
+                    name="action"
+                    value={event.is_registration_open ? 'close_reg' : 'open_reg'}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
+                  >
+                    {event.is_registration_open ? 'Close Registrations' : 'Open Registrations'}
+                  </button>
+                  
+                  {/* Cancel Event Button */}
+                  <button
+                    type="submit"
+                    name="action"
+                    value="cancel"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  >
+                    Cancel Event
+                  </button>
+                  
+                  {/* Delete Event Button */}
+                  <button
+                    type="submit"
+                    name="action"
+                    value="delete"
+                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                  >
+                    Delete Event
+                  </button>
+                  
+                  {/* Approve Button (if pending) */}
+                  {event.status === 'pending_approval' && (
+                    <button
+                      type="submit"
+                      name="action"
+                      value="approve"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                    >
+                      Approve Event
+                    </button>
+                  )}
+                </form>
+              </div>
+            </div>
           ))}
         </div>
       )}

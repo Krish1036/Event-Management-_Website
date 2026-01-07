@@ -1,6 +1,8 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import { ViewTicketButton } from './ViewTicketButton';
+import { Search, Filter, Grid3X3, List, CalendarDays } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export const revalidate = 0;
 
@@ -186,87 +188,140 @@ export default async function AdminRegistrationsPage({
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+      {/* Header */}
+      <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-white">Registrations</h1>
-          <p className="mt-1 text-sm text-slate-400">
-            View and manage registrations. Confirm, cancel, and inspect tickets.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">Registrations</h1>
+          <p className="text-gray-600 mt-1">View and manage registrations. Confirm, cancel, and inspect tickets.</p>
         </div>
-        <form className="w-full max-w-xs">
-          <input
-            type="text"
-            name="search"
-            defaultValue={search ?? ''}
-            placeholder="Search by name, email, or entry code"
-            className="w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-          />
-        </form>
       </div>
 
-      {/* Filters */}
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <form className="grid gap-3 md:grid-cols-5">
+      {/* Top Search and Filter Bar */}
+      <div className="flex items-center gap-4">
+        {/* Search bar */}
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+          <form className="w-full">
+            <input
+              type="text"
+              name="search"
+              defaultValue={search ?? ''}
+              placeholder="Search by name, email, or entry code"
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+            />
+          </form>
+        </div>
+
+        {/* Filter button */}
+        <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+          <Filter className="w-4 h-4 text-white" />
+        </button>
+
+        {/* Category dropdown */}
+        <Select>
+          <SelectTrigger className="w-32 border-gray-300 text-sm">
+            <SelectValue placeholder="All Category" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Category</SelectItem>
+            <SelectItem value="conference">Conference</SelectItem>
+            <SelectItem value="workshop">Workshop</SelectItem>
+            <SelectItem value="meetup">Meetup</SelectItem>
+            <SelectItem value="webinar">Webinar</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* Month dropdown */}
+        <Select>
+          <SelectTrigger className="w-28 border-gray-300 text-sm">
+            <SelectValue placeholder="This Month" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="this-month">This Month</SelectItem>
+            <SelectItem value="last-month">Last Month</SelectItem>
+            <SelectItem value="this-year">This Year</SelectItem>
+            <SelectItem value="all-time">All Time</SelectItem>
+          </SelectContent>
+        </Select>
+
+        {/* View toggle buttons */}
+        <div className="flex gap-2">
+          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
+            <Grid3X3 className="w-4 h-4 text-white" />
+          </button>
+          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
+            <List className="w-4 h-4 text-gray-600" />
+          </button>
+        </div>
+      </div>
+
+      {/* Main Filter Section */}
+      <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
+        <form className="grid gap-4 md:grid-cols-5">
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Event</label>
-            <select
-              name="event"
-              defaultValue={eventId ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Events</option>
-              {events.map((event: any) => (
-                <option key={event.id} value={event.id}>
-                  {event.title}
-                </option>
-              ))}
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Event</label>
+            <Select name="event" defaultValue={eventId ?? 'all'}>
+              <SelectTrigger className="w-full border-gray-300 text-sm">
+                <SelectValue placeholder="All Events" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Events</SelectItem>
+                {events.map((event: any) => (
+                  <SelectItem key={event.id} value={event.id}>
+                    {event.title}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Status</label>
-            <select
-              name="status"
-              defaultValue={status ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Status</option>
-              <option value="PENDING">Pending</option>
-              <option value="CONFIRMED">Confirmed</option>
-              <option value="CANCELLED">Cancelled</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
+            <Select name="status" defaultValue={status ?? 'all'}>
+              <SelectTrigger className="w-full border-gray-300 text-sm">
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Status</SelectItem>
+                <SelectItem value="PENDING">Pending</SelectItem>
+                <SelectItem value="CONFIRMED">Confirmed</SelectItem>
+                <SelectItem value="CANCELLED">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Payment Type</label>
-            <select
-              name="paymentType"
-              defaultValue={paymentType ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Types</option>
-              <option value="free">Free</option>
-              <option value="paid">Paid</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Payment Type</label>
+            <Select name="paymentType" defaultValue={paymentType ?? 'all'}>
+              <SelectTrigger className="w-full border-gray-300 text-sm">
+                <SelectValue placeholder="All Types" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="free">Free</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div>
-            <label className="block text-[11px] font-medium text-slate-400 mb-1">Source</label>
-            <select
-              name="sourceType"
-              defaultValue={sourceType ?? 'all'}
-              className="w-full rounded-md border border-slate-700 bg-slate-800 px-2 py-1.5 text-xs text-slate-100 focus:outline-none focus:ring-1 focus:ring-sky-500"
-            >
-              <option value="all">All Sources</option>
-              <option value="auto">Auto</option>
-              <option value="manual">Manual</option>
-            </select>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Source</label>
+            <Select name="sourceType" defaultValue={sourceType ?? 'all'}>
+              <SelectTrigger className="w-full border-gray-300 text-sm">
+                <SelectValue placeholder="All Sources" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Sources</SelectItem>
+                <SelectItem value="auto">Auto</SelectItem>
+                <SelectItem value="manual">Manual</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
           
           <div className="flex items-end">
             <button
               type="submit"
-              className="w-full rounded-md bg-sky-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-sky-600"
+              className="w-full px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
             >
               Apply Filters
             </button>
@@ -275,81 +330,91 @@ export default async function AdminRegistrationsPage({
       </div>
 
       {registrations.length === 0 ? (
-        <p className="text-sm text-slate-400">No registrations found.</p>
+        <p className="text-sm text-gray-500 text-center py-8">No registrations found.</p>
       ) : (
-        <div className="space-y-3 text-sm">
+        <div className="space-y-4">
           {registrations.map((reg: any) => (
             <div
               key={reg.id}
-              className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
             >
-              <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h2 className="text-sm font-semibold text-white">
-                      {reg.event?.title ?? 'Event'}
-                    </h2>
-                    <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-slate-200 bg-slate-800">
+              <div className="flex justify-between items-start mb-4">
+                {/* Event Name and Status */}
+                <div className="flex-1">
+                  <h2 className="text-xl font-bold text-gray-900 mb-2">
+                    {reg.event?.title ?? 'Event'}
+                  </h2>
+                  
+                  {/* Status Badge */}
+                  <div className="mb-3">
+                    <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
+                      reg.status === 'CONFIRMED' 
+                        ? 'bg-green-100 text-green-800' 
+                        : reg.status === 'CANCELLED'
+                        ? 'bg-red-100 text-red-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
                       {reg.status}
                     </span>
-                    {reg.event?.is_paid && (
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-amber-100 bg-amber-900/60">
-                        Paid
-                      </span>
-                    )}
-                    {reg.entry_code?.startsWith('MANUAL-') && (
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide text-blue-100 bg-blue-900/60">
-                        Manual
-                      </span>
-                    )}
                   </div>
-                  <p className="text-xs text-slate-300">
-                    {reg.user?.full_name ?? 'User'} · {reg.user?.email ?? 'No email'} · Entry code:{' '}
-                    {reg.entry_code ?? 'N/A'}
-                  </p>
-                  <p className="text-[11px] text-slate-400">
-                    Registered on {new Date(reg.created_at).toLocaleString()}
-                    {reg.event?.price && reg.event.is_paid && ` · Price: ₹${reg.event.price}`}
-                  </p>
+                  
+                  {/* Registrant Details */}
+                  <div className="text-sm text-gray-600 mb-2">
+                    <span className="font-medium">{reg.user?.full_name ?? 'User'}</span>
+                    {' - '}
+                    <span>{reg.user?.email ?? 'No email'}</span>
+                    {' - '}
+                    <span>Entry code: {reg.entry_code ?? 'N/A'}</span>
+                  </div>
+                  
+                  {/* Registration Date */}
+                  <div className="text-sm text-gray-500">
+                    Registered on {new Date(reg.created_at).toLocaleDateString('en-US', {
+                      month: 'numeric',
+                      day: 'numeric', 
+                      year: 'numeric'
+                    })}, {new Date(reg.created_at).toLocaleTimeString('en-US', {
+                      hour: 'numeric',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: true
+                    })}
+                  </div>
                 </div>
-                <div className="flex flex-wrap items-center gap-2 md:justify-end">
-                  <form action={registrationsAction}>
-                    <input type="hidden" name="registrationId" value={reg.id} />
-                    <div className="flex flex-wrap gap-2">
-                      {reg.status !== 'CONFIRMED' && (
-                        <button
-                          type="submit"
-                          name="action"
-                          value="confirm"
-                          className="rounded-md bg-emerald-700 px-3 py-1 text-[11px] font-medium text-white hover:bg-emerald-600"
-                        >
-                          Confirm
-                        </button>
-                      )}
-                      {reg.status !== 'CANCELLED' && (
-                        <button
-                          type="submit"
-                          name="action"
-                          value="cancel"
-                          className="rounded-md bg-red-800 px-3 py-1 text-[11px] font-medium text-red-50 hover:bg-red-700"
-                        >
-                          Cancel
-                        </button>
-                      )}
-                      {reg.status === 'PENDING' && (
-                        <button
-                          type="submit"
-                          name="action"
-                          value="force_confirm"
-                          className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
-                        >
-                          Force Confirm
-                        </button>
-                      )}
-                    </div>
-                  </form>
-                  <ViewTicketButton registration={reg} />
-                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3">
+                <form action={registrationsAction} className="flex gap-3">
+                  <input type="hidden" name="registrationId" value={reg.id} />
+                  
+                  {/* Cancel Button */}
+                  {reg.status !== 'CANCELLED' && (
+                    <button
+                      type="submit"
+                      name="action"
+                      value="cancel"
+                      className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  
+                  {/* Confirm Button (if not confirmed) */}
+                  {reg.status !== 'CONFIRMED' && (
+                    <button
+                      type="submit"
+                      name="action"
+                      value="confirm"
+                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
+                    >
+                      Confirm
+                    </button>
+                  )}
+                </form>
+                
+                {/* View Ticket Button */}
+                <ViewTicketButton registration={reg} />
               </div>
             </div>
           ))}
