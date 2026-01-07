@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Search, Users, Calendar, Trophy, Shield, UserPlus, UserMinus, Crown } from 'lucide-react';
 
 export default function AdminUsersPage() {
   const [users, setUsers] = useState<any[]>([]);
@@ -228,57 +233,65 @@ export default function AdminUsersPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-white">Loading...</div>
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">Loading users...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Users & Roles</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          View all users, promote or demote roles, and see user statistics.
-        </p>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Users & Roles</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            View all users, promote or demote roles, and see user statistics.
+          </p>
+        </div>
       </div>
 
       {/* Search Bar */}
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search by name or email..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full rounded-lg border border-slate-700 bg-slate-800 px-4 py-3 pl-10 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-        />
-        <svg
-          className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-          />
-        </svg>
-      </div>
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <Input
+              type="text"
+              placeholder="Search by name or email..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10 border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Results count */}
-      <div className="text-sm text-slate-400">
+      <div className="text-sm text-gray-600">
         {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'} found
         {searchTerm && ` (searching for "${searchTerm}")`}
       </div>
 
+      {/* Users List */}
       {filteredUsers.length === 0 ? (
-        <p className="text-sm text-slate-400">
-          {searchTerm ? 'No users found matching your search.' : 'No users found.'}
-        </p>
+        <Card>
+          <CardContent className="p-12">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Users className="w-8 h-8 text-gray-400" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm ? 'No users found' : 'No users available'}
+              </h3>
+              <p className="text-gray-500">
+                {searchTerm ? 'No users match your search criteria.' : 'There are no users in the system yet.'}
+              </p>
+            </div>
+          </CardContent>
+        </Card>
       ) : (
-        <div className="space-y-3 text-sm">
+        <div className="space-y-4">
           {filteredUsers.map((user: any) => {
             const canPromoteStudentToOrganizer = user.role === 'student';
             const canPromoteOrganizerToAdmin = user.role === 'organizer';
@@ -286,74 +299,107 @@ export default function AdminUsersPage() {
             const canDemoteAdminToOrganizer = user.role === 'admin';
 
             return (
-              <div
+              <Card 
                 key={user.id}
-                className="rounded-xl border border-slate-800 bg-slate-900/60 p-4"
+                className="hover:shadow-md transition-shadow"
               >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-semibold text-white">
-                        {user.full_name || 'Unnamed User'}
-                      </h2>
-                      <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide ${
-                        user.role === 'admin'
-                          ? 'bg-red-700/30 text-red-300'
-                          : user.role === 'organizer'
-                          ? 'bg-amber-700/30 text-amber-300'
-                          : 'bg-slate-700 text-slate-300'
-                      }`}>
-                        {user.role}
-                      </span>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 bg-gray-200 rounded-full flex items-center justify-center">
+                          <Users className="w-5 h-5 text-gray-500" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-semibold text-gray-900">
+                            {user.full_name || 'Unnamed User'}
+                          </h3>
+                          <p className="text-sm text-gray-500">{user.email}</p>
+                        </div>
+                        <Badge className={
+                          user.role === 'admin'
+                            ? 'bg-red-100 text-red-800 border-red-200'
+                            : user.role === 'organizer'
+                            ? 'bg-amber-100 text-amber-800 border-amber-200'
+                            : 'bg-gray-100 text-gray-800 border-gray-200'
+                        }>
+                          {user.role === 'admin' && <Crown className="w-3 h-3 mr-1" />}
+                          {user.role === 'organizer' && <Shield className="w-3 h-3 mr-1" />}
+                          {user.role === 'student' && <Users className="w-3 h-3 mr-1" />}
+                          {user.role}
+                        </Badge>
+                      </div>
+                      
+                      <div className="space-y-2 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Calendar className="w-4 h-4" />
+                          Joined {new Date(user.created_at).toLocaleDateString()}
+                        </div>
+                        <div className="flex items-center gap-4 text-xs">
+                          <div className="flex items-center gap-1">
+                            <Trophy className="w-3 h-3" />
+                            <span className="font-medium">{user.stats.eventsCreated}</span>
+                            <span className="text-gray-500">Events</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Users className="w-3 h-3" />
+                            <span className="font-medium">{user.stats.registrationsCount}</span>
+                            <span className="text-gray-500">Registrations</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Shield className="w-3 h-3" />
+                            <span className="font-medium">{user.stats.attendanceCount}</span>
+                            <span className="text-gray-500">Attendance</span>
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                    <p className="text-xs text-slate-300">{user.email}</p>
-                    <p className="text-[11px] text-slate-400">
-                      Joined {new Date(user.created_at).toLocaleDateString()}
-                    </p>
-                    <div className="flex flex-wrap gap-3 text-[11px] text-slate-500">
-                      <span>Events created: {user.stats.eventsCreated}</span>
-                      <span>Registrations: {user.stats.registrationsCount}</span>
-                      <span>Attendance: {user.stats.attendanceCount}</span>
-                    </div>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 md:justify-end">
+                    
                     <div className="flex flex-wrap gap-2">
                       {canPromoteStudentToOrganizer && (
-                        <button
+                        <Button
+                          size="sm"
                           onClick={() => handleRoleAction('promote_student_to_organizer', user.id)}
-                          className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
+                          className="bg-amber-600 text-white hover:bg-amber-700"
                         >
+                          <UserPlus className="w-3 h-3 mr-1" />
                           Promote to Organizer
-                        </button>
+                        </Button>
                       )}
                       {canPromoteOrganizerToAdmin && (
-                        <button
+                        <Button
+                          size="sm"
                           onClick={() => handleRoleAction('promote_organizer_to_admin', user.id)}
-                          className="rounded-md bg-red-700 px-3 py-1 text-[11px] font-medium text-red-50 hover:bg-red-600"
+                          className="bg-red-600 text-white hover:bg-red-700"
                         >
+                          <Crown className="w-3 h-3 mr-1" />
                           Promote to Admin
-                        </button>
+                        </Button>
                       )}
                       {canDemoteOrganizerToStudent && (
-                        <button
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleRoleAction('demote_organizer_to_student', user.id)}
-                          className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
                         >
+                          <UserMinus className="w-3 h-3 mr-1" />
                           Demote to Student
-                        </button>
+                        </Button>
                       )}
                       {canDemoteAdminToOrganizer && (
-                        <button
+                        <Button
+                          size="sm"
+                          variant="outline"
                           onClick={() => handleRoleAction('demote_admin_to_organizer', user.id)}
-                          className="rounded-md border border-slate-600 px-3 py-1 text-[11px] font-medium text-slate-100 hover:border-slate-400"
                         >
+                          <UserMinus className="w-3 h-3 mr-1" />
                           Demote to Organizer
-                        </button>
+                        </Button>
                       )}
                     </div>
                   </div>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
