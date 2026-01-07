@@ -188,11 +188,12 @@ export default async function AdminRegistrationsPage({
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Registrations</h1>
-          <p className="text-gray-600 mt-1">View and manage registrations. Confirm, cancel, and inspect tickets.</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-white">Registrations</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            View and manage registrations. Confirm, cancel, and inspect tickets.
+          </p>
         </div>
       </div>
 
