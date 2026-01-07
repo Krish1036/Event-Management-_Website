@@ -1,5 +1,11 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertTriangle, CheckCircle, Users, Calendar, DollarSign, Settings, Wrench, Plus } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -280,230 +286,314 @@ export default async function AdminManualFixesPage({
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight text-white">Manual Fixes</h1>
-        <p className="mt-1 text-sm text-slate-400">
-          Fix payment-success-but-registration-missing issues, add users manually, and generate entry codes.
-        </p>
+      {/* Header */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900">Manual Fixes</h1>
+          <p className="mt-1 text-sm text-gray-500">
+            Fix payment-success-but-registration-missing issues, add users manually, and generate entry codes.
+          </p>
+        </div>
       </div>
 
+      {/* Status Messages */}
       {statusParam === 'manual_add_success' && (
-        <div className="rounded-md border border-emerald-700 bg-emerald-900/40 px-4 py-2 text-xs text-emerald-50">
-          User was registered to the selected event successfully.
-        </div>
+        <Card className="bg-green-50 border border-green-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-green-600" />
+              </div>
+              <p className="text-green-800 font-medium">User was registered to the selected event successfully.</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {statusParam === 'offline_add_success' && (
-        <div className="rounded-md border border-amber-700 bg-amber-900/40 px-4 py-2 text-xs text-amber-50">
-          Offline registration was created successfully.
-        </div>
+        <Card className="bg-amber-50 border border-amber-200">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-amber-100 rounded-full flex items-center justify-center">
+                <CheckCircle className="w-4 h-4 text-amber-600" />
+              </div>
+              <p className="text-amber-800 font-medium">Offline registration was created successfully.</p>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Suspicious payments section */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-medium text-white">Suspicious Payments</h2>
-        {suspiciousPayments.length === 0 ? (
-          <p className="text-sm text-slate-400">No suspicious payments found.</p>
-        ) : (
-          <div className="space-y-3 text-sm">
-            {suspiciousPayments.map((payment: any) => (
-              <div
-                key={payment.id}
-                className="rounded-xl border border-red-700/50 bg-red-900/20 p-4"
-              >
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-sm font-semibold text-white">
-                        ₹{payment.amount}
-                      </h2>
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-red-700/30 text-red-300">
-                        SUCCESS
-                      </span>
-                      <span className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-medium uppercase tracking-wide bg-amber-700/30 text-amber-300">
-                        Missing Registration
-                      </span>
-                    </div>
-                    <p className="text-xs text-slate-300">
-                      {payment.event?.title ?? 'Event'} · {payment.user?.full_name ?? 'Unknown'} ({payment.user?.email})
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Payment ID: {payment.razorpay_payment_id ?? 'N/A'}
-                    </p>
-                    <p className="text-[11px] text-slate-400">
-                      Created: {new Date(payment.created_at).toLocaleString()}
-                    </p>
-                  </div>
-                  <form action={handleManualFix}>
-                    <input type="hidden" name="paymentId" value={payment.id} />
-                    <button
-                      type="submit"
-                      name="action"
-                      value="fix_payment_success_but_registration_missing"
-                      className="rounded-md bg-amber-700 px-3 py-1 text-[11px] font-medium text-amber-50 hover:bg-amber-600"
-                    >
-                      Fix Registration
-                    </button>
-                    <script
-                      dangerouslySetInnerHTML={{
-                        __html: `
-                          document.querySelector('[name="action"][value="fix_payment_success_but_registration_missing"]').addEventListener('click', function(e) {
-                            if (!confirm('Fix registration for ${payment.user?.full_name || payment.user?.email}?\\n\\nThis will create a manual registration and attach payment reference.')) {
-                              e.preventDefault();
-                            }
-                          });
-                        `,
-                      }}
-                    />
-                  </form>
-                </div>
+      <Card className="bg-white border border-gray-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <AlertTriangle className="h-5 w-5" />
+            Suspicious Payments
+          </CardTitle>
+          <CardDescription>
+            Payment success but registration missing issues that need manual fixing
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          {suspiciousPayments.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <DollarSign className="w-8 h-8 text-gray-400" />
               </div>
-            ))}
-          </div>
-        )}
-      </div>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">No suspicious payments found</h3>
+              <p className="text-gray-500">All payments have proper registrations.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {suspiciousPayments.map((payment: any) => (
+                <Card 
+                  key={payment.id}
+                  className="border-red-200 bg-red-50 hover:shadow-md transition-shadow"
+                >
+                  <CardContent className="p-4">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 bg-red-100 rounded-full flex items-center justify-center">
+                            <DollarSign className="w-5 h-5 text-red-600" />
+                          </div>
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-900">
+                              ₹{payment.amount}
+                            </h3>
+                            <p className="text-sm text-gray-600">
+                              {payment.event?.title ?? 'Event'} · {payment.user?.full_name ?? 'Unknown'} ({payment.user?.email})
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Badge className="bg-green-100 text-green-800 border-green-200">
+                              SUCCESS
+                            </Badge>
+                            <Badge className="bg-red-100 text-red-800 border-red-200">
+                              Missing Registration
+                            </Badge>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-1 text-sm text-gray-500">
+                          <div className="flex items-center gap-2">
+                            <Calendar className="w-4 h-4" />
+                            Created: {new Date(payment.created_at).toLocaleString()}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <AlertTriangle className="w-4 h-4" />
+                            Payment ID: {payment.razorpay_payment_id ?? 'N/A'}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-shrink-0">
+                        <form action={handleManualFix}>
+                          <input type="hidden" name="paymentId" value={payment.id} />
+                          <Button
+                            type="submit"
+                            name="action"
+                            value="fix_payment_success_but_registration_missing"
+                            size="sm"
+                            className="bg-amber-600 text-white hover:bg-amber-700"
+                          >
+                            <Wrench className="w-3 h-3 mr-1" />
+                            Fix Registration
+                          </Button>
+                          <script
+                            dangerouslySetInnerHTML={{
+                              __html: `
+                                document.querySelector('[name="action"][value="fix_payment_success_but_registration_missing"]').addEventListener('click', function(e) {
+                                  if (!confirm('Fix registration for ${payment.user?.full_name || payment.user?.email}?\\n\\nThis will create a manual registration and attach payment reference.')) {
+                                    e.preventDefault();
+                                  }
+                                });
+                              `,
+                            }}
+                          />
+                        </form>
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Manual user addition section */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-medium text-white">Add User Manually (Internet Failed)</h2>
-        <form action={handleManualFix} className="space-y-3">
-          <div className="grid gap-3 md:grid-cols-2">
-            <div>
-              <label htmlFor="userEmail" className="block text-xs font-medium text-slate-300">
-                User Email
-              </label>
-              <input
-                type="email"
-                id="userEmail"
-                name="userEmail"
-                required
-                placeholder="user@example.com"
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              />
+      <Card className="bg-white border border-gray-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Users className="h-5 w-5" />
+            Add User Manually (Internet Failed)
+          </CardTitle>
+          <CardDescription>
+            Create manual registration for users who paid but internet failed during registration
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handleManualFix} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="userEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                  User Email
+                </label>
+                <Input
+                  type="email"
+                  id="userEmail"
+                  name="userEmail"
+                  required
+                  placeholder="user@example.com"
+                  className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="eventId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event
+                </label>
+                <Select name="eventId" required>
+                  <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                    <SelectValue placeholder="Select event" className="text-black" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <SelectItem value="" className="text-black hover:bg-gray-100">Select event</SelectItem>
+                    {events.map((event: any) => (
+                      <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
+                        {event.title} ({new Date(event.event_date).toLocaleDateString()})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <label htmlFor="eventId" className="block text-xs font-medium text-slate-300">
-                Event
-              </label>
-              <select
-                id="eventId"
-                name="eventId"
-                required
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              >
-                <option value="">Select event</option>
-                {events.map((event: any) => (
-                  <option key={event.id} value={event.id}>
-                    {event.title} ({new Date(event.event_date).toLocaleDateString()})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button
-            type="submit"
-            name="action"
-            value="add_user_manually"
-            className="rounded-md bg-emerald-700 px-4 py-2 text-xs font-medium text-white hover:bg-emerald-600"
-          >
-            Add User Manually
-          </button>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                document.querySelector('[name="action"][value="add_user_manually"]').addEventListener('click', function(e) {
-                  if (!confirm('Add user manually?\\n\\nThis will create a manual registration for a user who paid but internet failed.')) {
-                    e.preventDefault();
-                  }
-                });
-              `,
-            }}
-          />
-        </form>
-      </div>
+            <Button
+              type="submit"
+              name="action"
+              value="add_user_manually"
+              className="bg-purple-600 text-white hover:bg-purple-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add User Manually
+            </Button>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  document.querySelector('[name="action"][value="add_user_manually"]').addEventListener('click', function(e) {
+                    if (!confirm('Add user manually?\\n\\nThis will create a manual registration for a user who paid but internet failed.')) {
+                      e.preventDefault();
+                    }
+                  });
+                `,
+              }}
+            />
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Offline registration section */}
-      <div className="space-y-3">
-        <h2 className="text-lg font-medium text-white">Add Offline Registration</h2>
-        <form action={handleManualFix} className="space-y-3">
-          <div className="grid gap-3 md:grid-cols-3">
-            <div>
-              <label htmlFor="offlineUserName" className="block text-xs font-medium text-slate-300">
-                Full Name
-              </label>
-              <input
-                type="text"
-                id="offlineUserName"
-                name="offlineUserName"
-                required
-                placeholder="John Doe"
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="offlineUserEmail" className="block text-xs font-medium text-slate-300">
-                Email
-              </label>
-              <input
-                type="email"
-                id="offlineUserEmail"
-                name="offlineUserEmail"
-                required
-                placeholder="user@example.com"
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              />
-            </div>
-            <div>
-              <label htmlFor="offlineEventId" className="block text-xs font-medium text-slate-300">
-                Event
-              </label>
-              <select
-                id="offlineEventId"
-                name="offlineEventId"
-                required
-                className="mt-1 w-full rounded-md border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-100 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              >
-                <option value="">Select event</option>
-                {events.map((event: any) => (
-                  <option key={event.id} value={event.id}>
-                    {event.title} ({new Date(event.event_date).toLocaleDateString()})
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-          <button
-            type="submit"
-            name="action"
-            value="add_offline_registration"
-            className="rounded-md bg-amber-700 px-4 py-2 text-xs font-medium text-amber-50 hover:bg-amber-600"
-          >
+      <Card className="bg-white border border-gray-200">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Plus className="h-5 w-5" />
             Add Offline Registration
-          </button>
-          <script
-            dangerouslySetInnerHTML={{
-              __html: `
-                document.querySelector('[name="action"][value="add_offline_registration"]').addEventListener('click', function(e) {
-                  if (!confirm('Add offline registration?\\n\\nThis will create a new user profile and manual registration for offline participants.')) {
-                    e.preventDefault();
-                  }
-                });
-              `,
-            }}
-          />
-        </form>
-      </div>
+          </CardTitle>
+          <CardDescription>
+            Create new user profile and manual registration for offline participants
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form action={handleManualFix} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-3">
+              <div>
+                <label htmlFor="offlineUserName" className="block text-sm font-medium text-gray-700 mb-2">
+                  Full Name
+                </label>
+                <Input
+                  type="text"
+                  id="offlineUserName"
+                  name="offlineUserName"
+                  required
+                  placeholder="John Doe"
+                  className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="offlineUserEmail" className="block text-sm font-medium text-gray-700 mb-2">
+                  Email
+                </label>
+                <Input
+                  type="email"
+                  id="offlineUserEmail"
+                  name="offlineUserEmail"
+                  required
+                  placeholder="user@example.com"
+                  className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+              <div>
+                <label htmlFor="offlineEventId" className="block text-sm font-medium text-gray-700 mb-2">
+                  Event
+                </label>
+                <Select name="offlineEventId" required>
+                  <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                    <SelectValue placeholder="Select event" className="text-black" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+                    <SelectItem value="" className="text-black hover:bg-gray-100">Select event</SelectItem>
+                    {events.map((event: any) => (
+                      <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
+                        {event.title} ({new Date(event.event_date).toLocaleDateString()})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <Button
+              type="submit"
+              name="action"
+              value="add_offline_registration"
+              className="bg-amber-600 text-white hover:bg-amber-700"
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Add Offline Registration
+            </Button>
+            <script
+              dangerouslySetInnerHTML={{
+                __html: `
+                  document.querySelector('[name="action"][value="add_offline_registration"]').addEventListener('click', function(e) {
+                    if (!confirm('Add offline registration?\\n\\nThis will create a new user profile and manual registration for offline participants.')) {
+                      e.preventDefault();
+                    }
+                  });
+                `,
+              }}
+            />
+          </form>
+        </CardContent>
+      </Card>
 
       {/* Instructions */}
-      <div className="rounded-lg border border-slate-700 bg-slate-900/40 p-4 text-xs text-slate-400">
-        <p className="font-semibold text-slate-300 mb-2">Manual Fix Guidelines:</p>
-        <ul className="space-y-1 list-disc list-inside">
-          <li>Only use manual fixes for verified edge cases (e.g., payment success but registration failed)</li>
-          <li>All manual fixes are logged in admin logs with full details</li>
-          <li>Manual registrations are marked with "MANUAL-" prefix in entry codes</li>
-          <li>Verify user identity and payment status before creating manual registrations</li>
-        </ul>
-      </div>
+      <Card className="bg-blue-50 border border-blue-200">
+        <CardContent className="p-4">
+          <div className="flex items-start gap-3">
+            <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center flex-shrink-0">
+              <Settings className="w-4 h-4 text-blue-600" />
+            </div>
+            <div>
+              <h4 className="font-semibold text-gray-900 mb-2">Manual Fix Guidelines:</h4>
+              <ul className="space-y-1 text-sm text-gray-600 list-disc list-inside">
+                <li>Only use manual fixes for verified edge cases (e.g., payment success but registration failed)</li>
+                <li>All manual fixes are logged in admin logs with full details</li>
+                <li>Manual registrations are marked with "MANUAL-" prefix in entry codes</li>
+                <li>Verify user identity and payment status before creating manual registrations</li>
+              </ul>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

@@ -252,7 +252,7 @@ export default function AdminUsersPage() {
       </div>
 
       {/* Search Bar */}
-      <Card>
+      <Card className="bg-white border border-gray-200">
         <CardContent className="p-4">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
@@ -275,7 +275,7 @@ export default function AdminUsersPage() {
 
       {/* Users List */}
       {filteredUsers.length === 0 ? (
-        <Card>
+        <Card className="bg-white border border-gray-200">
           <CardContent className="p-12">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -301,7 +301,7 @@ export default function AdminUsersPage() {
             return (
               <Card 
                 key={user.id}
-                className="hover:shadow-md transition-shadow"
+                className="bg-white hover:shadow-md transition-shadow border border-gray-200"
               >
                 <CardContent className="p-4">
                   <div className="flex items-start justify-between">
