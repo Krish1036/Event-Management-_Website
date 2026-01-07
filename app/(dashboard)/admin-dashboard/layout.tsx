@@ -33,9 +33,9 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const { user, profile } = await requireAdmin();
 
   return (
-    <div className="min-h-screen bg-gray-50 flex text-gray-900">
+    <div className="min-h-screen bg-[#F3F9F9] flex text-gray-900">
       {/* Sidebar */}
-      <div className="w-64 bg-white shadow-md relative min-h-screen overflow-y-auto border-r border-gray-200">
+      <div className="w-64 bg-gradient-to-b from-indigo-50 via-violet-50 to-orange-50 shadow-md relative min-h-screen overflow-y-auto">
         <AdminSidebar />
       </div>
 
@@ -45,7 +45,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         <AdminHeader userName={profile?.full_name || 'Admin'} />
         
         {/* Page Content */}
-        <main className="flex-1 p-6 bg-gray-50">
+        <main className="flex-1 p-8">
           {children}
         </main>
       </div>

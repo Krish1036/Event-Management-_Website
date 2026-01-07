@@ -2,13 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Filter, Grid3X3, Menu, Bell, Settings } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Bell, Settings } from "lucide-react";
 
 export default function AdminHeader({ userName }: { userName: string }) {
   const [currentTime, setCurrentTime] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const router = useRouter();
 
   useEffect(() => {
@@ -66,75 +64,18 @@ export default function AdminHeader({ userName }: { userName: string }) {
   };
 
   return (
-    <header className="bg-white shadow-sm px-6 py-4 border-b border-gray-200">
+    <header className="bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 shadow-sm px-8 py-5 rounded-lg">
       <div className="flex items-center justify-between">
-        {/* Left side - Search and controls */}
-        <div className="flex items-center gap-4 flex-1">
-          {/* Search bar */}
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search event, location, etc"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
-            />
-          </div>
-
-          {/* Filter button */}
-          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
-            <Filter className="w-4 h-4 text-white" />
-          </button>
-
-          {/* Category dropdown */}
-          <Select>
-            <SelectTrigger className="w-32 border-gray-300 text-sm">
-              <SelectValue placeholder="All Category" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Category</SelectItem>
-              <SelectItem value="conference">Conference</SelectItem>
-              <SelectItem value="workshop">Workshop</SelectItem>
-              <SelectItem value="meetup">Meetup</SelectItem>
-              <SelectItem value="webinar">Webinar</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Month dropdown */}
-          <Select>
-            <SelectTrigger className="w-28 border-gray-300 text-sm">
-              <SelectValue placeholder="This Month" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="this-month">This Month</SelectItem>
-              <SelectItem value="last-month">Last Month</SelectItem>
-              <SelectItem value="this-year">This Year</SelectItem>
-              <SelectItem value="all-time">All Time</SelectItem>
-            </SelectContent>
-          </Select>
-
-          {/* Grid view button */}
-          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
-            <Grid3X3 className="w-4 h-4 text-white" />
-          </button>
-
-          {/* Menu button */}
-          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-            <Menu className="w-4 h-4 text-gray-600" />
-          </button>
-        </div>
-
-        {/* Right side - User controls */}
-        <div className="flex items-center gap-4">
+        <div></div>
+        <div className="flex items-center gap-6">
           {/* Date/Time */}
-          <span className="text-sm text-gray-600 font-medium">{currentTime}</span>
+          <span className="text-sm text-gray-700 font-medium">{currentTime}</span>
           
           {/* Icons */}
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="text-gray-700 hover:text-gray-900 transition-colors">
             <Bell className="w-5 h-5" />
           </button>
-          <button className="text-gray-600 hover:text-gray-900 transition-colors">
+          <button className="text-gray-700 hover:text-gray-900 transition-colors">
             <Settings className="w-5 h-5" />
           </button>
           
