@@ -204,7 +204,7 @@ export default async function EditEventPage({
         </Link>
         <div>
           <h1 className="text-3xl font-bold">Edit Event</h1>
-          <p className="text-gray-600">Modify event details and settings</p>
+          <p className="text-gray-600">Update details based on approval status</p>
         </div>
       </div>
 

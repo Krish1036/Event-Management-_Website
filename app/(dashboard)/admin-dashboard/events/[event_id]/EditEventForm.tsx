@@ -187,66 +187,76 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
 
   return (
     <div className="space-y-6">
+      {/* Status Helper Section */}
+      <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
+        <p className="font-semibold text-gray-900">Status: {initialData.status}</p>
+        <p className="mt-1 text-[11px] text-gray-600">
+          {initialData.status === 'approved' 
+            ? 'Approved event: you can edit all event details.' 
+            : 'Draft/Pending: you can edit all event details. You can publish when ready.'}
+        </p>
+      </div>
+
       {/* Section 1: Event Basics */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Event Basics</CardTitle>
-          <CardDescription>Basic information about your event</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Event Basics</CardTitle>
+          <CardDescription className="text-gray-500">Basic information about your event</CardDescription>
         </CardHeader>
         <CardContent>
-          <EventBasicsSection />
+          <EventBasicsSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 2: Capacity & Registration */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Capacity & Registration</CardTitle>
-          <CardDescription>Set capacity and registration options</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Capacity & Registration</CardTitle>
+          <CardDescription className="text-gray-500">Set capacity and registration options</CardDescription>
         </CardHeader>
         <CardContent>
-          <CapacitySection />
+          <CapacitySection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 3: Pricing & Payment */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Pricing & Payment</CardTitle>
-          <CardDescription>Configure pricing and payment options</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Pricing & Payment</CardTitle>
+          <CardDescription className="text-gray-500">Configure pricing and payment options</CardDescription>
         </CardHeader>
         <CardContent>
-          <PricingSection />
+          <PricingSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 4: Registration Form Builder */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Registration Form Builder</CardTitle>
-          <CardDescription>Customize the registration form</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Registration Form Builder</CardTitle>
+          <CardDescription className="text-gray-500">Customize registration form</CardDescription>
         </CardHeader>
         <CardContent>
-          <FormBuilderSection />
+          <FormBuilderSection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 5: Visibility & Publishing */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Visibility & Publishing</CardTitle>
-          <CardDescription>Control event visibility and publishing</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Visibility</CardTitle>
+          <CardDescription className="text-gray-500">Control event visibility in public listings</CardDescription>
         </CardHeader>
         <CardContent>
-          <VisibilitySection />
+          <VisibilitySection variant="light" />
         </CardContent>
       </Card>
 
       {/* Section 6: Organizer Assignment */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Organizer Assignment</CardTitle>
-          <CardDescription>Assign an organizer (optional)</CardDescription>
+      <Card variant="light" className="border-gray-200">
+        <CardHeader className="pb-4">
+          <CardTitle className="text-lg font-semibold text-black">Organizer Assignment</CardTitle>
+          <CardDescription className="text-gray-500">Assign an organizer (optional)</CardDescription>
         </CardHeader>
         <CardContent>
           <OrganizerSection organizers={organizers} />
@@ -254,103 +264,45 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
       </Card>
 
       {/* Primary submit action */}
-      <div className="flex justify-end">
+      <div className="flex flex-col gap-2 sm:flex-row sm:justify-end">
+        <Button variant="outline" onClick={toggleConfirmation} disabled={state.isSubmitting || !hasChanges}>
+          Save Changes
+        </Button>
         <Button 
           onClick={toggleConfirmation} 
           disabled={state.isSubmitting || !hasChanges}
+          className="bg-purple-600 hover:bg-purple-700 text-white"
         >
           {state.isSubmitting ? 'Updating Event...' : hasChanges ? 'Update Event' : 'No Changes to Save'}
         </Button>
       </div>
 
-      {/* Diff-style Confirmation Dialog */}
+      {/* Confirmation Dialog */}
       {state.showConfirmation && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-2xl max-h-[80vh] overflow-y-auto bg-slate-800 border-slate-700">
-            <CardHeader>
-              <CardTitle>Review Event Changes</CardTitle>
-              <CardDescription>
-                Review the changes before updating the event
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <Card variant="light" className="w-full max-w-md border-gray-200">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-lg font-semibold text-black">Confirm</CardTitle>
+              <CardDescription className="text-gray-500">
+                Save these changes now?
               </CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              {hasChanges ? (
-                <>
-                  <div className="space-y-3">
-                    {differences.map((diff, index) => (
-                      <div key={index} className="border border-slate-600 rounded-lg p-4 bg-slate-700/50">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-medium text-white">{diff.label}</h4>
-                          <Badge variant="secondary">Modified</Badge>
-                        </div>
-                        {diff.field === 'form_fields' ? (
-                          <div className="text-sm">
-                            <p className="text-slate-300 mb-2">Custom form fields have been modified</p>
-                            <div className="grid grid-cols-2 gap-4">
-                              <div>
-                                <p className="text-slate-300 mb-1">Original fields:</p>
-                                <div className="bg-red-50 border border-red-200 rounded p-2 text-red-800">
-                                  {Array.isArray(diff.original) ? diff.original.length : 0} fields
-                                </div>
-                              </div>
-                              <div>
-                                <p className="text-slate-300 mb-1">New fields:</p>
-                                <div className="bg-green-50 border border-green-200 rounded p-2 text-green-800">
-                                  {Array.isArray(diff.current) ? diff.current.length : 0} fields
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        ) : (
-                          <div className="grid grid-cols-2 gap-4 text-sm">
-                            <div>
-                              <p className="text-slate-300 mb-1">Original:</p>
-                              <div className="bg-red-50 border border-red-200 rounded p-2 text-red-800">
-                                {diff.type === 'boolean' 
-                                  ? (diff.original ? 'Yes' : 'No')
-                                  : (diff.original || 'Empty')
-                                }
-                              </div>
-                            </div>
-                            <div>
-                              <p className="text-slate-300 mb-1">New:</p>
-                              <div className="bg-green-50 border border-green-200 rounded p-2 text-green-800">
-                                {diff.type === 'boolean' 
-                                  ? (diff.current ? 'Yes' : 'No')
-                                  : (diff.current || 'Empty')
-                                }
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                  <div className="bg-slate-700 border border-slate-600 rounded-lg p-4">
-                    <h4 className="font-medium text-white mb-2">Summary</h4>
-                    <p className="text-sm text-slate-300">
-                      You are making {differences.length} change{differences.length !== 1 ? 's' : ''} to this event.
-                      The event will be updated as {state.data.save_mode === 'publish' ? 'PUBLISHED' : 'DRAFT'}.
-                    </p>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <p className="text-slate-400">No changes detected</p>
-                </div>
-              )}
-              
-              <div className="flex justify-end space-x-4 pt-4">
-                <Button variant="outline" onClick={toggleConfirmation} disabled={state.isSubmitting}>
-                  Cancel
-                </Button>
-                <Button 
-                  onClick={handleSubmit} 
-                  disabled={state.isSubmitting || !hasChanges}
-                >
-                  {state.isSubmitting ? 'Updating...' : 'Confirm & Update'}
-                </Button>
-              </div>
+            <CardContent className="flex justify-end space-x-4">
+              <Button 
+                variant="outline" 
+                onClick={toggleConfirmation} 
+                disabled={state.isSubmitting}
+                className="border-gray-300 text-gray-700 hover:bg-gray-50"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSubmit} 
+                disabled={state.isSubmitting || !hasChanges}
+                className="bg-purple-600 hover:bg-purple-700 text-white"
+              >
+                {state.isSubmitting ? 'Saving...' : 'Confirm'}
+              </Button>
             </CardContent>
           </Card>
         </div>
