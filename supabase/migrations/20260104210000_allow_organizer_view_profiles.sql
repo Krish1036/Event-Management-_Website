@@ -10,11 +10,6 @@ CREATE POLICY "Organizer view profiles for registered users"
     is_admin_by_email()
     -- Users can view their own profile
     OR id = auth.uid()
-    -- Organizers can view profiles of users who have registrations for events they created or are assigned to
-    OR EXISTS (
-      SELECT 1 FROM public.registrations r
-      JOIN public.events e ON e.id = r.event_id
-      WHERE r.user_id = public.profiles.id
-        AND (e.created_by = auth.uid() OR e.assigned_organizer = auth.uid())
-    )
+    -- Organizers can view via helper function that bypasses RLS during the check
+    OR can_organizer_view_profile(id)
   );

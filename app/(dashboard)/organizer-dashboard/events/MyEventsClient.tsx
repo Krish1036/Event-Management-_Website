@@ -121,11 +121,11 @@ function EventCard({ event, onDelete }: EventCardProps) {
                 <MoreVertical className="w-5 h-5 text-gray-500" />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
+            <DropdownMenuContent align="end" className="w-48 bg-white !important border-gray-200 shadow-lg z-[9999]">
               <DropdownMenuItem asChild>
                 <Link 
                   href={`/organizer-dashboard/events/${event.id}/edit`}
-                  className="flex items-center gap-2 w-full"
+                  className="flex items-center gap-2 w-full px-2 py-2 text-gray-700 hover:bg-gray-100 focus:text-gray-900 focus:bg-gray-100 cursor-pointer"
                 >
                   <Edit className="w-4 h-4" />
                   Edit
@@ -134,7 +134,7 @@ function EventCard({ event, onDelete }: EventCardProps) {
               <DropdownMenuItem asChild>
                 <Link 
                   href={`/organizer-dashboard/registrations?event_id=${event.id}`}
-                  className="flex items-center gap-2 w-full"
+                  className="flex items-center gap-2 w-full px-2 py-2 text-gray-700 hover:bg-gray-100 focus:text-gray-900 focus:bg-gray-100 cursor-pointer"
                 >
                   <Users className="w-4 h-4" />
                   View Registrations
@@ -145,7 +145,7 @@ function EventCard({ event, onDelete }: EventCardProps) {
                   <DropdownMenuSeparator />
                   <DropdownMenuItem
                     onClick={() => onDelete(event.id)}
-                    className="flex items-center gap-2 text-red-600 focus:text-red-600"
+                    className="flex items-center gap-2 px-2 py-2 text-red-600 hover:bg-red-50 focus:text-red-700 focus:bg-red-50 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />
                     Delete

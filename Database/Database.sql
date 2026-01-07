@@ -315,23 +315,20 @@ alter table admin_logs enable row level security;
 -- SIMPLE ADMIN CHECK FOR MANUAL ADMIN CREATION
 -- ===============================
 
--- Function to check if user is admin based on email OR role
+-- Function to check if user is admin based on email (avoid querying profiles to prevent RLS recursion)
 create or replace function is_admin_by_email()
 returns boolean
 language sql
 security definer
 as $$
-  -- Check if user is admin by email OR by role in profiles
-  -- This avoids recursion by checking email first, then role
+  -- Check if user is admin by email only.
+  -- Note: avoiding a SELECT from `profiles` here prevents infinite recursion when this
+  -- function is used by RLS policies on the `profiles` table.
   select 
     case 
       when (
         select email from auth.users where id = auth.uid()
       ) in ('krshthakore@gmail.com', 'admin@university.edu') then true
-      when exists (
-        select 1 from profiles p 
-        where p.id = auth.uid() and p.role = 'admin'
-      ) then true
       else false
     end;
 $$;
