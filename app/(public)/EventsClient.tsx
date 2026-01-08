@@ -37,6 +37,14 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
 
+  // Debug: Log events data to see what image URLs we have
+  console.log('🏠 Landing page events data:', events.map(e => ({ 
+    id: e.id, 
+    title: e.title, 
+    image_url: e.image_url,
+    hasImage: !!e.image_url 
+  })));
+
   const handleLogout = async () => {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
@@ -299,28 +307,39 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                 {/* Event Image */}
                 <div className="event-image">
                   {event.image_url ? (
-                    <img 
-                      src={event.image_url} 
-                      alt={event.title}
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        // Fallback to placeholder if image fails to load
-                        const target = e.target as HTMLImageElement;
-                        target.style.display = 'none';
-                        target.nextElementSibling?.classList.remove('hidden');
-                      }}
-                    />
-                  ) : null}
-                  <div className={`image-placeholder ${event.image_url ? 'hidden' : ''}`}>
-                    <ImageIcon className="placeholder-icon" />
-                  </div>
-                  
-                  {/* Category Badge */}
-                  <div className="category-badge">
-                    General
-                  </div>
-                  
-                  {/* Active Badge */}
+                    <>
+                      <img 
+                        src={event.image_url} 
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                        onLoad={() => {
+                          console.log('✅ Landing page: Image loaded successfully:', event.image_url);
+                        }}
+                        onError={(e) => {
+                          console.error('❌ Landing page: Image failed to load:', {
+                            url: event.image_url,
+                            eventTitle: event.title,
+                            eventId: event.id,
+                            error: e
+                          });
+                          // Fallback to placeholder if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          const placeholder = target.nextElementSibling as HTMLElement;
+                          if (placeholder) {
+                            placeholder.classList.remove('hidden');
+                          }
+                        }}
+                      />
+                      <div className="image-placeholder hidden">
+                        <ImageIcon className="placeholder-icon" />
+                      </div>
+                    </>
+                  ) : (
+                    <div className="image-placeholder">
+                      <ImageIcon className="placeholder-icon" />
+                    </div>
+                  )}
                   <div className="active-badge">
                     <span className="active-dot"></span>
                     Active
