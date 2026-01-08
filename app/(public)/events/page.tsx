@@ -10,7 +10,7 @@ async function getEvents(params: { paid?: 'free' | 'paid' }) {
 
   let query = supabase
     .from('events')
-    .select('id,title,description,event_date,location,price,is_paid,capacity,is_registration_open,status')
+    .select('id,title,description,event_date,location,price,is_paid,capacity,is_registration_open,status,image_url')
     .gte('event_date', new Date().toISOString().slice(0, 10))
     .eq('status', 'approved')
     .order('event_date', { ascending: true });
@@ -65,6 +65,26 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
             className="group flex flex-col rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm hover:border-slate-600"
           >
             <div className="mb-2 flex items-center justify-between">
+              {/* Event Image */}
+              <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden mb-3">
+                {event.image_url ? (
+                  <img 
+                    src={event.image_url} 
+                    alt={event.title}
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      // Fallback to placeholder if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.nextElementSibling?.classList.remove('hidden');
+                    }}
+                  />
+                ) : null}
+                <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
+                  <div className="text-purple-400 text-2xl">📅</div>
+                </div>
+              </div>
+              
               <h2 className="font-medium text-white group-hover:text-sky-300">
                 {event.title}
               </h2>

@@ -39,6 +39,7 @@ async function getOrganizerEvents(organizerId: string) {
       visibility,
       created_by,
       assigned_organizer,
+      image_url,
       created_at
     `)
     .or(`created_by.eq.${organizerId},assigned_organizer.eq.${organizerId}`)

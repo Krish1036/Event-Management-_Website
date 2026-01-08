@@ -34,7 +34,7 @@ async function getEventsWithUsage() {
 
   const { data: events } = await supabase
     .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,created_by')
+    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,created_by,image_url')
     .order('event_date', { ascending: true });
 
   const { data: registrations } = await supabase
@@ -391,6 +391,28 @@ export default async function AdminEventsPage({
               className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
             >
               <div className="flex justify-between items-start mb-4">
+                {/* Event Image */}
+                <div className="flex-shrink-0 mr-4">
+                  <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
+                    {event.image_url ? (
+                      <img 
+                        src={event.image_url} 
+                        alt={event.title}
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          // Fallback to placeholder if image fails to load
+                          const target = e.target as HTMLImageElement;
+                          target.style.display = 'none';
+                          target.nextElementSibling?.classList.remove('hidden');
+                        }}
+                      />
+                    ) : null}
+                    <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
+                      <div className="text-purple-400 text-2xl font-bold">📅</div>
+                    </div>
+                  </div>
+                </div>
+
                 {/* Event Title and Details */}
                 <div className="flex-1">
                   <h2 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h2>

@@ -17,6 +17,7 @@ interface Event {
   is_paid: boolean;
   capacity: number;
   registered_count?: number;
+  image_url?: string | null;
 }
 
 interface EventsClientProps {
@@ -297,7 +298,20 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
               <Link key={event.id} href={`/events/${event.id}`} className="event-card">
                 {/* Event Image */}
                 <div className="event-image">
-                  <div className="image-placeholder">
+                  {event.image_url ? (
+                    <img 
+                      src={event.image_url} 
+                      alt={event.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        // Fallback to placeholder if image fails to load
+                        const target = e.target as HTMLImageElement;
+                        target.style.display = 'none';
+                        target.nextElementSibling?.classList.remove('hidden');
+                      }}
+                    />
+                  ) : null}
+                  <div className={`image-placeholder ${event.image_url ? 'hidden' : ''}`}>
                     <ImageIcon className="placeholder-icon" />
                   </div>
                   

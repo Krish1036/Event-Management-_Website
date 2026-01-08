@@ -29,6 +29,7 @@ interface Event {
   visibility?: 'public' | 'hidden';
   created_by: string;
   assigned_organizer?: string;
+  image_url?: string | null;
 }
 
 interface EventCardProps {
@@ -86,7 +87,20 @@ function EventCard({ event, onDelete }: EventCardProps) {
         {/* Event Image */}
         <div className="flex-shrink-0">
           <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+            {event.image_url ? (
+              <img 
+                src={event.image_url} 
+                alt={event.title}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  // Fallback to placeholder if image fails to load
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.nextElementSibling?.classList.remove('hidden');
+                }}
+              />
+            ) : null}
+            <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
               <Calendar className="w-8 h-8 text-purple-400" />
             </div>
           </div>
