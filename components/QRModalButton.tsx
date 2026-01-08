@@ -18,21 +18,46 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
   const [error, setError] = useState<string | null>(null);
   const [debugLogs, setDebugLogs] = useState<string[]>([]);
   const [scanSuccessful, setScanSuccessful] = useState(false);
-
-  const addDebugLog = (message: string) => {
-    const timestamp = new Date().toLocaleTimeString();
-    setDebugLogs(prev => [...prev, `[${timestamp}] ${message}`]);
-    console.log(`[QR Debug] ${message}`);
-  };
+  const [userToConfirm, setUserToConfirm] = useState<{name: string, email: string, event: string} | null>(null);
+  const [registrationData, setRegistrationData] = useState<any>(null);
   const [confirming, setConfirming] = useState(false);
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState<string | null>(null);
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const scannerMountRef = useRef<HTMLDivElement | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [userToConfirm, setUserToConfirm] = useState<{name: string, email: string, event: string} | null>(null);
-  const [registrationData, setRegistrationData] = useState<any>(null);
 
+  const addDebugLog = (message: string) => {
+    const timestamp = new Date().toLocaleTimeString();
+    setDebugLogs(prev => [...prev, `[${timestamp}] ${message}`]);
+    console.log(`[QR Debug] ${message}`);
+  };
+
+  const resetScanner = () => {
+    setScanned(null);
+    setPreview(null);
+    setError(null);
+    setScanSuccessful(false);
+    // Re-initialize the scanner
+    if (open) {
+      const initScanner = async () => {
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({ 
+            video: { 
+              facingMode: 'environment' 
+            } 
+          });
+          const videoElement = document.querySelector('video');
+          if (videoElement) {
+            videoElement.srcObject = stream;
+          }
+        } catch (err) {
+          setError('Failed to reinitialize camera');
+        }
+      };
+      initScanner();
+    }
+  };
   useEffect(() => {
     // discover devices when modal opens
     if (!open) return;
@@ -106,16 +131,13 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
         setShowConfirmation(true);
       }
     } catch (err: any) {
-      setError(err?.message ?? String(err));
+      const errorMessage = err?.message ?? 'Failed to scan QR code';
+      setError(errorMessage);
       setScanned(null);
-    } finally {
-      setLoadingPreview(false);
-    }
+      setPreview(null);
       setTimeout(() => {
-        alert(`Error: ${err?.message ?? 'Failed to scan QR code'}`);
-        setScanned(null);
-        setPreview(null);
-      }, 500);
+        alert(`Error: ${errorMessage}`);
+      }, 100);
     } finally {
       setLoadingPreview(false);
     }
@@ -181,7 +203,7 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
   };
 
   return (
-    <>
+    <div>
       <button
         type="button"
         onClick={() => {
@@ -199,16 +221,19 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
             <div className="flex items-center justify-between mb-3">
               <h3 className="text-sm font-semibold text-gray-900">Scan QR to Check In</h3>
               <div className="flex items-center gap-2">
-                <button className="text-sm text-gray-600" onClick={() => { 
-                setOpen(false); 
-                resetScanner();
-                // Close any video streams
-                const videoElement = document.querySelector('video');
-                if (videoElement && videoElement.srcObject) {
-                  const stream = videoElement.srcObject as MediaStream;
-                  stream.getTracks().forEach(track => track.stop());
-                }
-              }}>
+                <button 
+                  className="text-sm text-gray-600" 
+                  onClick={() => { 
+                    setOpen(false); 
+                    resetScanner();
+                    // Close any video streams
+                    const videoElement = document.querySelector('video');
+                    if (videoElement && videoElement.srcObject) {
+                      const stream = videoElement.srcObject as MediaStream;
+                      stream.getTracks().forEach(track => track.stop());
+                    }
+                  }}
+                >
                   <X />
                 </button>
               </div>
@@ -219,7 +244,7 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
                 <div className="flex-1">
                   <QRScanner
                     onScan={handleScan}
-                    onDetect={(t) => { /* could highlight briefly */ }}
+                    onDetect={() => {}}
                     onError={(err) => setError(err.message)}
                     preferredDeviceId={deviceId}
                   />
@@ -234,17 +259,26 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
                     >
                       {devices.length === 0 && <option value="">No camera detected</option>}
                       {devices.map((d) => (
-                        <option key={d.deviceId} value={d.deviceId}>{d.label || d.deviceId}</option>
+                        <option key={d.deviceId} value={d.deviceId}>
+                          {d.label || d.deviceId}
+                        </option>
                       ))}
                     </select>
                   </div>
 
                   <div className="mb-2">
                     <label className="text-xs font-medium text-gray-600">Upload</label>
-                    <input className="mt-1 w-full text-xs" type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files?.[0] ?? null)} />
+                    <input 
+                      className="mt-1 w-full text-xs" 
+                      type="file" 
+                      accept="image/*" 
+                      onChange={(e) => handleImageUpload(e.target.files?.[0] ?? null)} 
+                    />
                   </div>
 
-                  {permissionError && <p className="text-xs text-red-600">{permissionError}</p>}
+                  {permissionError && (
+                    <p className="text-xs text-red-600">{permissionError}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -252,133 +286,103 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
             <div className="mt-3">
               {loadingPreview && <p className="text-sm text-gray-600">Scanning…</p>}
               {error && <p className="text-sm text-red-600">{error}</p>}
-          </div>
-
-          <div className="h-72 bg-gray-100 rounded-md overflow-hidden">
-            <div className="flex h-full">
-              <div className="flex-1">
-                <QRScanner
-                  onScan={handleScan}
-                  onDetect={(t) => { /* could highlight briefly */ }}
-                  onError={(err) => setError(err.message)}
-                  preferredDeviceId={deviceId}
-                />
-              </div>
-              <div className="w-44 p-2">
-                <div className="mb-2">
-                  <label className="text-xs font-medium text-gray-600">Camera</label>
-                  <select
-                    value={deviceId ?? ''}
-                    onChange={(e) => setDeviceId(e.target.value)}
-                    className="w-full mt-1 rounded-md border border-gray-300 bg-white px-2 py-1 text-sm"
-                  >
-                    {devices.length === 0 && <option value="">No camera detected</option>}
-                    {devices.map((d) => (
-                      <option key={d.deviceId} value={d.deviceId}>{d.label || d.deviceId}</option>
-                    ))}
-                  </select>
+              
+              {!loadingPreview && !error && !scanSuccessful && (
+                <p className="text-sm text-gray-600">
+                  Point camera at attendee's QR code. The scanner requires two quick consecutive 
+                  detections to reduce false positives. You can also upload an image.
+                </p>
+              )}
+              
+              {scanSuccessful && (
+                <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
+                  <p className="font-medium">✓ Check-in successful!</p>
+                  <p className="text-sm">The attendee has been checked in successfully.</p>
                 </div>
-
-                <div className="mb-2">
-                  <label className="text-xs font-medium text-gray-600">Upload</label>
-                  <input className="mt-1 w-full text-xs" type="file" accept="image/*" onChange={(e) => handleImageUpload(e.target.files?.[0] ?? null)} />
-                </div>
-
-                {permissionError && <p className="text-xs text-red-600">{permissionError}</p>}
-              </div>
+              )}
             </div>
           </div>
-
-          <div className="mt-3">
-            {loadingPreview && <p className="text-sm text-gray-600">Scanning…</p>}
-            {error && <p className="text-sm text-red-600">{error}</p>}
-
-            {!loadingPreview && !error && !scanSuccessful && (
-              <p className="text-sm text-gray-600 mt-2">Point camera at attendee's QR code. The scanner requires two quick consecutive detections to reduce false positives. You can also upload an image.</p>
-            )}
-            {scanSuccessful && (
-              <div className="mt-4 p-3 bg-green-100 border border-green-400 text-green-700 rounded">
-                <p className="font-medium">✓ Check-in successful!</p>
-                <p className="text-sm">The attendee has been checked in successfully.</p>
-              </div>
-            )}
-          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Confirm Check-in</DialogTitle>
-          <DialogDescription>
-            Please confirm the following user's attendance
-          </DialogDescription>
-        </DialogHeader>
-        
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <p className="font-medium">Name: <span className="font-normal">{userToConfirm?.name}</span></p>
-            <p className="font-medium">Email: <span className="font-normal">{userToConfirm?.email}</span></p>
-            <p className="font-medium">Event: <span className="font-normal">{userToConfirm?.event}</span></p>
+      <Dialog open={showConfirmation} onOpenChange={setShowConfirmation}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirm Check-in</DialogTitle>
+            <DialogDescription>
+              Please confirm the following user's attendance
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <p className="font-medium">
+                Name: <span className="font-normal">{userToConfirm?.name}</span>
+              </p>
+              <p className="font-medium">
+                Email: <span className="font-normal">{userToConfirm?.email}</span>
+              </p>
+              <p className="font-medium">
+                Event: <span className="font-normal">{userToConfirm?.event}</span>
+              </p>
+            </div>
           </div>
-        </div>
-        
-        <DialogFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => {
-              setShowConfirmation(false);
-              setScanned(null);
-              setPreview(null);
-              setRegistrationData(null);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button 
-            onClick={async () => {
-              if (!registrationData) return;
-              
-              try {
-                setLoadingPreview(true);
-                const res = await fetch('/api/checkin', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ 
-                    action: 'confirm', 
-                    registrationId: registrationData.registrationId 
-                  })
-                });
-                
-                const result = await res.json();
-                if (!res.ok) throw new Error(result?.message || 'Check-in failed');
-                
-                // Show success message and set success state
+          
+          <DialogFooter>
+            <Button 
+              variant="outline" 
+              onClick={() => {
                 setShowConfirmation(false);
-                setScanSuccessful(true);
                 setScanned(null);
                 setPreview(null);
                 setRegistrationData(null);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button 
+              onClick={async () => {
+                if (!registrationData) return;
                 
-                // Auto-close after 2 seconds
-                setTimeout(() => {
-                  setOpen(false);
-                  // Reset success state after closing
-                  setTimeout(() => setScanSuccessful(false), 300);
-                }, 2000);
-              } catch (err: any) {
-                alert('Check-in failed: ' + (err.message || 'Unknown error'));
-              } finally {
-                setLoadingPreview(false);
-              }
-            }}
-            className="bg-green-600 hover:bg-green-700"
-          >
-            {loadingPreview ? 'Processing...' : 'Confirm Check-in'}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  </div>
-);
+                try {
+                  setLoadingPreview(true);
+                  const res = await fetch('/api/checkin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                      action: 'confirm', 
+                      registrationId: registrationData.registrationId 
+                    })
+                  });
+                  
+                  const result = await res.json();
+                  if (!res.ok) throw new Error(result?.message || 'Check-in failed');
+                  
+                  // Show success message and set success state
+                  setShowConfirmation(false);
+                  setScanSuccessful(true);
+                  setScanned(null);
+                  setPreview(null);
+                  setRegistrationData(null);
+                  
+                  // Auto-close after 2 seconds
+                  setTimeout(() => {
+                    setOpen(false);
+                    // Reset success state after closing
+                    setTimeout(() => setScanSuccessful(false), 300);
+                  }, 2000);
+                } catch (err: any) {
+                  alert('Check-in failed: ' + (err.message || 'Unknown error'));
+                } finally {
+                  setLoadingPreview(false);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              {loadingPreview ? 'Processing...' : 'Confirm Check-in'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
