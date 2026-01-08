@@ -20,7 +20,11 @@ export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn
   
   if (!isLoggedIn) {
     return (
-      <p className="text-[11px] text-slate-400">Login to register for this event.</p>
+      <div className="text-center py-4">
+        <p className="text-sm text-gray-600 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+          🔐 Please login to register for this event
+        </p>
+      </div>
     );
   }
   

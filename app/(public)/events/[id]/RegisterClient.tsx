@@ -3,6 +3,9 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 const FILES_BUCKET = 'registration-files';
@@ -129,70 +132,70 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
 
   if (!formFields || formFields.length === 0) {
     return (
-      <button
-        type="button"
+      <Button 
         onClick={(e) => handleRegister(e as any)}
         disabled={loading}
-        className="inline-flex items-center justify-center rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-500 disabled:opacity-60"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
       >
         {loading ? 'Processing…' : 'Register'}
-      </button>
+      </Button>
     );
   }
 
   return (
-    <form onSubmit={handleRegister} className="space-y-3">
+    <form onSubmit={handleRegister} className="space-y-4">
       {formFields.map((field) => {
         const isFile = field.field_type === 'file';
         const isSelect = field.field_type === 'select' && field.options && field.options.length > 0;
         const inputType = field.field_type === 'number' ? 'number' : field.field_type === 'email' ? 'email' : field.field_type === 'phone' ? 'tel' : 'text';
 
         return (
-          <div key={field.id} className="flex flex-col gap-1 text-[11px] text-slate-200">
-            <label className="flex items-center justify-between">
-              <span>
-                {field.label}
-                {field.required && <span className="ml-1 text-red-400">*</span>}
-              </span>
+          <div key={field.id} className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {field.label}
+              {field.required && <span className="ml-1 text-red-500">*</span>}
             </label>
             {isFile ? (
-              <input
+              <Input
                 type="file"
+                variant="light"
                 onChange={(e) => handleFileChange(field.id, e.target.files?.[0] || null)}
-                className="block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100 file:text-[11px]"
+                className="w-full"
               />
             ) : isSelect ? (
-              <select
-                value={textValues[field.id] ?? ''}
-                onChange={(e) => handleTextChange(field.id, e.target.value)}
-                className="block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100"
-              >
-                <option value="">Select</option>
-                {field.options!.map((opt) => (
-                  <option key={opt} value={opt}>
-                    {opt}
-                  </option>
-                ))}
-              </select>
+              <Select value={textValues[field.id] ?? ''} onValueChange={(value) => handleTextChange(field.id, value)}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select" />
+                </SelectTrigger>
+                <SelectContent>
+                  {field.options!.map((opt) => (
+                    <SelectItem key={opt} value={opt} className="text-black hover:bg-purple-100">
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             ) : (
-              <input
+              <Input
                 type={inputType}
+                variant="light"
                 value={textValues[field.id] ?? ''}
                 onChange={(e) => handleTextChange(field.id, e.target.value)}
-                className="block w-full rounded border border-slate-700 bg-slate-900 px-2 py-1 text-[11px] text-slate-100"
+                placeholder={`Enter ${field.label.toLowerCase()}`}
+                className="w-full"
               />
             )}
           </div>
         );
       })}
 
-      <button
+      <Button
         type="submit"
         disabled={loading}
-        className="inline-flex items-center justify-center rounded bg-sky-600 px-4 py-2 text-xs font-medium text-white hover:bg-sky-500 disabled:opacity-60"
+        className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors"
       >
         {loading ? 'Processing…' : 'Register'}
-      </button>
+      </Button>
     </form>
   );
 }
