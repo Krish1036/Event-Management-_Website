@@ -32,15 +32,33 @@ export async function POST(request: NextRequest) {
       
       // Parse QR data to get registration_id
       let registration_id;
+      console.log('[checkin] Raw QR text:', text);
+      
       try {
-        const parsed = JSON.parse(atob(text));
-        registration_id = parsed.registration_id;
-      } catch {
+        // Try to parse as signed token first
+        const { verifyToken } = await import('@/lib/qr');
+        const verification = verifyToken(text);
+        console.log('[checkin] Token verification:', verification);
+        
+        if (verification.valid) {
+          registration_id = verification.payload.registration_id;
+          console.log('[checkin] Extracted registration_id from token:', registration_id);
+        } else {
+          // Try to parse as base64 JSON
+          console.log('[checkin] Trying base64 JSON parse...');
+          const parsed = JSON.parse(atob(text));
+          registration_id = parsed.registration_id;
+          console.log('[checkin] Extracted registration_id from base64:', registration_id);
+        }
+      } catch (err) {
         // Fallback: treat text as registration_id directly
         registration_id = text;
+        console.log('[checkin] QR text fallback, using as registration_id:', registration_id);
+        console.log('[checkin] Parse error:', err);
       }
 
       // Get registration with user and event details
+      console.log('[checkin] Looking up registration with ID:', registration_id);
       const { data: registration, error: registrationError } = await supabase
         .from('registrations')
         .select(`
@@ -51,7 +69,10 @@ export async function POST(request: NextRequest) {
         .eq('id', registration_id)
         .single();
 
+      console.log('[checkin] Registration lookup result:', { registration, registrationError });
+
       if (registrationError || !registration) {
+        console.log('[checkin] Registration not found. Error:', registrationError);
         return NextResponse.json({ success: false, error: 'Registration not found' }, { status: 404 });
       }
 
