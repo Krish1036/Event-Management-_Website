@@ -31,6 +31,7 @@ export default function QRScanner({ onScan, onDetect, onError, paused, constrain
           if (!active) return;
           if (result) {
             const text = result.getText();
+            console.log('[QR Scanner] Detected text:', text);
             onDetect?.(text);
 
             const now = Date.now();
@@ -43,8 +44,11 @@ export default function QRScanner({ onScan, onDetect, onError, paused, constrain
             entry.last = now;
             lastSeenRef.current[text] = entry;
 
+            console.log('[QR Scanner] Detection count for', text, ':', entry.count);
+
             // require at least 2 detections within the time window to reduce false positives
             if (entry.count >= 2) {
+              console.log('[QR Scanner] Scanning confirmed for:', text);
               // call onScan and clear the counts for this value
               onScan(text);
               lastSeenRef.current = {};
@@ -52,6 +56,7 @@ export default function QRScanner({ onScan, onDetect, onError, paused, constrain
           }
 
           if (err && err.name !== 'NotFoundException') {
+            console.error('[QR Scanner] Error:', err);
             onError?.(err as Error);
           }
         };
@@ -81,8 +86,32 @@ export default function QRScanner({ onScan, onDetect, onError, paused, constrain
   }, [onScan, onDetect, onError, paused, preferredDeviceId, constraints]);
 
   return (
-    <div className="w-full h-full flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center relative">
       <video ref={videoRef} className="w-full h-full rounded-md object-cover" />
+      
+      {/* Corner Markers Overlay */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="relative w-full h-full">
+          {/* Top-left corner */}
+          <div className="absolute top-4 left-4 w-12 h-12 border-t-4 border-l-4 border-white rounded-tl-lg"></div>
+          
+          {/* Top-right corner */}
+          <div className="absolute top-4 right-4 w-12 h-12 border-t-4 border-r-4 border-white rounded-tr-lg"></div>
+          
+          {/* Bottom-left corner */}
+          <div className="absolute bottom-4 left-4 w-12 h-12 border-b-4 border-l-4 border-white rounded-bl-lg"></div>
+          
+          {/* Bottom-right corner */}
+          <div className="absolute bottom-4 right-4 w-12 h-12 border-b-4 border-r-4 border-white rounded-br-lg"></div>
+          
+          {/* Center guide text */}
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <div className="bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              Position QR code here
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -22,16 +22,24 @@ export async function POST(req: Request) {
     const t = (text ?? '').trim();
     if (!t) return null;
 
+    console.log('[Checkin API] Processing scanned text:', t);
+
     // If the token looks signed (b64.sig) and we have a verifier, verify it first
     try {
       const { verifyToken } = await import('@/lib/qr');
       const verification = verifyToken(t);
+      console.log('[Checkin API] Token verification result:', verification);
       if (verification.valid && verification.payload && verification.payload.registration_id) {
         const rid = verification.payload.registration_id as string;
+        console.log('[Checkin API] Looking up registration by ID:', rid);
         const { data: regById } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('id', rid).limit(1).single();
-        if (regById) return regById;
+        if (regById) {
+          console.log('[Checkin API] Found registration by signed token:', regById);
+          return regById;
+        }
       }
     } catch (e) {
+      console.log('[Checkin API] Token verification failed, trying fallback methods:', e);
       // verification failed or no secret configured — fall back to legacy methods
     }
 
@@ -39,23 +47,38 @@ export async function POST(req: Request) {
     if (t.startsWith('{') && t.endsWith('}')) {
       try {
         const parsed = JSON.parse(t);
+        console.log('[Checkin API] Parsed JSON:', parsed);
         if (parsed.registration_id) {
+          console.log('[Checkin API] Looking up registration by parsed ID:', parsed.registration_id);
           const { data: regById } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('id', parsed.registration_id).limit(1).single();
-          if (regById) return regById;
+          if (regById) {
+            console.log('[Checkin API] Found registration by JSON:', regById);
+            return regById;
+          }
         }
       } catch (e) {
+        console.log('[Checkin API] JSON parsing failed:', e);
         // Invalid JSON, continue to other methods
       }
     }
 
     // try by entry_code first
+    console.log('[Checkin API] Looking up by entry_code:', t);
     let { data: regs } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('entry_code', t).limit(1).single();
-    if (regs) return regs;
+    if (regs) {
+      console.log('[Checkin API] Found registration by entry_code:', regs);
+      return regs;
+    }
 
     // else try by id
+    console.log('[Checkin API] Looking up by ID:', t);
     const { data: regById } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('id', t).limit(1).single();
-    if (regById) return regById;
+    if (regById) {
+      console.log('[Checkin API] Found registration by ID:', regById);
+      return regById;
+    }
 
+    console.log('[Checkin API] No registration found for:', t);
     return null;
   }
 
