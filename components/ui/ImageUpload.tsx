@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Image as ImageIcon } from 'lucide-react';
 
 interface ImageUploadProps {
@@ -21,6 +21,28 @@ export function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(value || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Debug: Log initial value and preview state
+  console.log('🖼️ ImageUpload: Initial state:', {
+    value,
+    preview,
+    hasValue: !!value,
+    hasPreview: !!preview
+  });
+
+  // Sync preview with value prop changes
+  useEffect(() => {
+    console.log('🖼️ ImageUpload: Value prop changed:', {
+      newValue: value,
+      currentPreview: preview,
+      hasNewValue: !!value,
+      willUpdate: value !== preview
+    });
+    
+    if (value !== preview) {
+      setPreview(value || null);
+    }
+  }, [value]);
 
   const isLight = variant === 'light';
   const containerClass = isLight 
@@ -97,7 +119,26 @@ export function ImageUpload({
               src={preview}
               alt="Event preview"
               className="w-full h-48 object-cover"
+              onLoad={() => {
+                console.log('✅ Admin Edit: Event image loaded successfully:', preview);
+              }}
+              onError={(e) => {
+                console.error('❌ Admin Edit: Event image failed to load:', {
+                  url: preview,
+                  error: e
+                });
+                // Fallback to placeholder if image fails to load
+                const target = e.target as HTMLImageElement;
+                target.style.display = 'none';
+                const placeholder = target.nextElementSibling as HTMLElement;
+                if (placeholder) {
+                  placeholder.classList.remove('hidden');
+                }
+              }}
             />
+            <div className="w-full h-48 bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden">
+              <ImageIcon className="w-8 h-8 text-purple-400" />
+            </div>
             <button
               type="button"
               onClick={handleRemove}
