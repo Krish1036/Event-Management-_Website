@@ -14,23 +14,10 @@ export function getSupabaseServerClient(): SupabaseClient {
           return cookieStore.get(name)?.value;
         },
         set(name: string, value: string, options: any) {
-          try {
-            // cookies.set is only allowed in Route Handlers or Server Actions.
-            // When called during normal server rendering it throws; swallow and warn instead
-            // so that reads (which are common in pages) do not crash.
-            cookieStore.set({ name, value, ...options });
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn('[supabase] cookies.set skipped outside Route Handler/Server Action', e);
-          }
+          cookieStore.set({ name, value, ...options });
         },
         remove(name: string, options: any) {
-          try {
-            cookieStore.set({ name, value: '', ...options });
-          } catch (e) {
-            // eslint-disable-next-line no-console
-            console.warn('[supabase] cookies.remove skipped outside Route Handler/Server Action', e);
-          }
+          cookieStore.set({ name, value: '', ...options });
         }
       }
     }

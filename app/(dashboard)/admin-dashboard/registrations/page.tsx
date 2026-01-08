@@ -67,16 +67,13 @@ async function getRegistrations(search: string | null, eventId: string | null, s
   }
 
   if (search && search.trim().length > 0) {
-    // Search by entry code, user full name, or email — trim whitespace to avoid malformed REST encoding
-    const q = search.trim();
-    const orFilter = `entry_code.ilike.%${q}%,profiles.full_name.ilike.%${q}%,profiles.email.ilike.%${q}%`;
-    // Helpful debug for failing REST queries
-    console.log('DEBUG: Admin registrations orFilter', { q, orFilter });
-    query = query.or(orFilter) as any;
+    // Search by entry code, user full name, or email
+    query = query.or(
+      `entry_code.ilike.%${search}%,user.full_name.ilike.%${search}%,user.email.ilike.%${search}%`
+    );
   }
 
   const { data } = await query;
-  console.log('DEBUG: Admin registrations query', { search, eventId, status, paymentType, sourceType, returned: (data ?? []).length });
   return data ?? [];
 }
 

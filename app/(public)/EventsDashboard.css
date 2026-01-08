@@ -1,7 +1,7 @@
 /* Dashboard Container */
 .dashboard-container {
   min-height: 100vh;
-  background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
+  background: linear-gradient(to bottom right, #f3f9f9, #faf5ff);
 }
 
 /* Header */
@@ -79,7 +79,7 @@
 
 .icon-button {
   border-radius: 9999px;
-  background-color: #f1f5f9;
+  background-color: #faf5ff;
   padding: 0.5rem;
   border: none;
   cursor: pointer;
@@ -87,7 +87,7 @@
 }
 
 .icon-button:hover {
-  background-color: #e2e8f0;
+  background-color: #f3e8ff;
 }
 
 .icon {
@@ -100,7 +100,7 @@
   align-items: center;
   gap: 0.5rem;
   border-radius: 9999px;
-  background-color: #f1f5f9;
+  background: linear-gradient(to bottom right, #a855f7, #ec4899);
   padding: 0.5rem 0.75rem;
 }
 

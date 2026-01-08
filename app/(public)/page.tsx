@@ -13,10 +13,26 @@ export default async function HomePage() {
   
   const { data: events } = await supabase
     .from('events')
-    .select('id,title,description,event_date,location,price,is_paid,category,image_url,capacity,registered_count')
+    .select('id,title,description,event_date,start_time,end_time,location,price,is_paid,capacity')
     .eq('status', 'approved')
     .order('event_date', { ascending: true })
     .limit(8);
+
+  // Get registration counts for each event
+  const eventsWithCounts = await Promise.all(
+    (events || []).map(async (event) => {
+      const { count } = await supabase
+        .from('registrations')
+        .select('*', { count: 'exact', head: true })
+        .eq('event_id', event.id)
+        .in('status', ['PENDING', 'CONFIRMED']);
+      
+      return {
+        ...event,
+        registered_count: count || 0
+      };
+    })
+  );
 
   const calculateProgress = (registered = 0, capacity = 100) => {
     return Math.round((registered / capacity) * 100);
@@ -122,29 +138,20 @@ export default async function HomePage() {
 
         {/* Events Grid */}
         <div className="events-grid">
-          {events?.map((event) => {
+          {eventsWithCounts?.map((event) => {
             const progress = calculateProgress(event.registered_count, event.capacity);
             
             return (
               <Link key={event.id} href={`/events/${event.id}`} className="event-card">
                 {/* Event Image */}
                 <div className="event-image">
-                  {event.image_url ? (
-                    <Image
-                      src={event.image_url}
-                      alt={event.title}
-                      fill
-                      className="image-content"
-                    />
-                  ) : (
-                    <div className="image-placeholder">
-                      <ImageIcon className="placeholder-icon" />
-                    </div>
-                  )}
+                  <div className="image-placeholder">
+                    <ImageIcon className="placeholder-icon" />
+                  </div>
                   
                   {/* Category Badge */}
                   <div className="category-badge">
-                    {event.category || 'General'}
+                    General
                   </div>
                   
                   {/* Active Badge */}
@@ -157,7 +164,7 @@ export default async function HomePage() {
                 {/* Event Details */}
                 <div className="event-details">
                   <div className="event-date">
-                    {formatEventDate(event.event_date)} — {formatEventTime(event.event_date)}
+                    {formatEventDate(event.event_date)} — {event.start_time}
                   </div>
                   
                   <h3 className="event-title">{event.title}</h3>
