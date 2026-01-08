@@ -31,49 +31,57 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
   const events = await getEvents({ paid: filterPaid });
 
   return (
-    <div className="mx-auto max-w-6xl px-4 py-8">
-      <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">Upcoming events</h1>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-slate-400">Filter:</span>
-          <Link
-            href="/events"
-            className={`rounded-full px-3 py-1 ${!filterPaid ? 'bg-sky-600 text-white' : 'border border-slate-700 text-slate-300'}`}
-          >
-            All
-          </Link>
-          <Link
-            href="/events?paid=free"
-            className={`rounded-full px-3 py-1 ${filterPaid === 'free' ? 'bg-sky-600 text-white' : 'border border-slate-700 text-slate-300'}`}
-          >
-            Free
-          </Link>
-          <Link
-            href="/events?paid=paid"
-            className={`rounded-full px-3 py-1 ${filterPaid === 'paid' ? 'bg-sky-600 text-white' : 'border border-slate-700 text-slate-300'}`}
-          >
-            Paid
-          </Link>
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-orange-50">
+      <div className="mx-auto max-w-6xl px-4 py-8">
+        <div className="mb-8 text-center">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4">
+            <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+            </svg>
+          </div>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Upcoming Events</h1>
+          <p className="text-gray-600">Discover and join amazing events at Ganpat University</p>
         </div>
-      </div>
+        
+        <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-center">
+          <div className="flex items-center gap-2 text-sm">
+            <span className="text-gray-600">Filter:</span>
+            <Link
+              href="/events"
+              className={`rounded-full px-4 py-2 font-medium transition-all duration-200 ${!filterPaid ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+            >
+              All Events
+            </Link>
+            <Link
+              href="/events?paid=free"
+              className={`rounded-full px-4 py-2 font-medium transition-all duration-200 ${filterPaid === 'free' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+            >
+              Free Events
+            </Link>
+            <Link
+              href="/events?paid=paid"
+              className={`rounded-full px-4 py-2 font-medium transition-all duration-200 ${filterPaid === 'paid' ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg' : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+            >
+              Paid Events
+            </Link>
+          </div>
+        </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {events.map((event) => (
-          <Link
-            key={event.id as string}
-            href={`/events/${event.id}`}
-            className="group flex flex-col rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm hover:border-slate-600"
-          >
-            <div className="mb-2 flex items-center justify-between">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {events.map((event) => (
+            <Link
+              key={event.id as string}
+              href={`/events/${event.id}`}
+              className="group flex flex-col bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
+            >
               {/* Event Image */}
-              <div className="w-full h-32 bg-gray-200 rounded-lg overflow-hidden mb-3">
+              <div className="w-full h-48 bg-gray-100 overflow-hidden">
                 {event.image_url ? (
                   <img 
                     src={event.image_url} 
                     alt={event.title}
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     onError={(e) => {
-                      // Fallback to placeholder if image fails to load
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       target.nextElementSibling?.classList.remove('hidden');
@@ -81,27 +89,54 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
                   />
                 ) : null}
                 <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
-                  <div className="text-purple-400 text-2xl">📅</div>
+                  <div className="text-purple-400 text-4xl">📅</div>
                 </div>
               </div>
               
-              <h2 className="font-medium text-white group-hover:text-sky-300">
-                {event.title}
-              </h2>
-              <span className="rounded-full bg-slate-800 px-2 py-0.5 text-[10px] text-slate-300">
-                {event.is_paid ? `₹${event.price}` : 'Free'}
-                {!PAYMENTS_ENABLED && event.is_paid && ' · payments disabled (test mode)'}
-              </span>
-            </div>
-            <p className="mb-3 line-clamp-3 text-xs text-slate-300">{event.description}</p>
-            <div className="mt-auto flex items-center justify-between text-[11px] text-slate-400">
-              <span>{new Date(event.event_date as string).toLocaleDateString()}</span>
-              <span className="truncate">{event.location}</span>
-            </div>
-          </Link>
-        ))}
+              {/* Event Content */}
+              <div className="p-6 flex-1 flex flex-col">
+                <div className="mb-3 flex items-center justify-between">
+                  <h2 className="font-semibold text-lg text-gray-900 group-hover:text-purple-700 transition-colors">
+                    {event.title}
+                  </h2>
+                  <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
+                    {event.is_paid ? `₹${event.price}` : 'Free'}
+                    {!PAYMENTS_ENABLED && event.is_paid && ' · Test Mode'}
+                  </span>
+                </div>
+                
+                <p className="mb-4 text-gray-600 line-clamp-2 flex-1">{event.description}</p>
+                
+                <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
+                  <div className="flex items-center gap-1">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    <span>{new Date(event.event_date as string).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  <div className="flex items-center gap-1 truncate">
+                    <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    <span className="truncate">{event.location}</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+
         {events.length === 0 && (
-          <p className="text-sm text-slate-400">No upcoming events match your filters.</p>
+          <div className="text-center py-12">
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-gray-100 rounded-full mb-4">
+              <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+              </svg>
+            </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">No events found</h3>
+            <p className="text-gray-600">No upcoming events match your filters. Try adjusting your filter criteria.</p>
+          </div>
         )}
       </div>
     </div>
