@@ -20,6 +20,7 @@ interface Event {
   capacity: number;
   is_registration_open: boolean;
   price: number;
+  image_url?: string;
   status: 'approved' | 'draft' | 'pending_approval' | 'cancelled';
   visibility?: 'public' | 'hidden';
   assigned_organizer: string | null;
@@ -55,7 +56,7 @@ export default async function OrganizerEditEventPage({ params }: { params: { eve
   const { data: event, error } = await admin
     .from('events')
     .select(
-      'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,visibility,assigned_organizer,created_by,created_at'
+      'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,visibility,assigned_organizer,created_by,created_at,image_url'
     )
     .eq('id', params.event_id)
     .single();

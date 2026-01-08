@@ -24,6 +24,7 @@ interface Event {
   capacity: number;
   is_registration_open: boolean;
   price: number;
+  image_url?: string;
   status: 'approved' | 'draft' | 'pending_approval' | 'cancelled';
   visibility?: 'public' | 'hidden';
   assigned_organizer: string | null;
@@ -47,7 +48,8 @@ function mapInitialData(event: Event): Partial<EventData> {
     currency: 'INR',
     form_fields: event.form_fields || [],
     visibility: (event.visibility ?? 'public') as any,
-    save_mode: 'draft'
+    save_mode: 'draft',
+    image_url: event.image_url || null,
   };
 }
 
