@@ -1,6 +1,9 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 export const revalidate = 0;
 
@@ -96,66 +99,126 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-8">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight">My registrations</h1>
-          <p className="text-sm text-slate-300">View and access your event tickets.</p>
+    <div className="min-h-screen bg-[#F3F9F9] p-8">
+      <div className="mx-auto max-w-6xl">
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Registrations</h1>
+          <p className="text-gray-600">View and access your event tickets and QR codes.</p>
         </div>
-      </div>
 
-      <div className="space-y-3 text-sm">
-        {registrations.length === 0 && (
-          <p className="text-slate-400">You have not registered for any events yet.</p>
-        )}
-        {registrations.map((r: any) => (
-          <div
-            key={r.id}
-            className="flex flex-col gap-2 rounded-xl border border-slate-800 bg-slate-900/60 p-4 md:flex-row md:items-center md:justify-between"
-          >
-            <div>
-              <h2 className="text-sm font-semibold text-white">{r.event?.title ?? 'Event'}</h2>
-              <p className="text-xs text-slate-300">
-                {r.event?.event_date
-                  ? new Date(r.event.event_date as string).toLocaleDateString()
-                  : 'Date TBA'}{' '}
-                {r.event?.is_paid ? `• Paid • ₹${r.event.price}` : '• Free'}
-                {!PAYMENTS_ENABLED && r.event?.is_paid && ' · payments disabled (test mode)'}
-              </p>
-              <p className="mt-1 text-[11px] text-slate-400">Registered on {new Date(r.created_at).toLocaleString()}</p>
-            </div>
-            <div className="flex flex-col items-start gap-2 md:items-end">
-              <span
-                className={`inline-flex items-center rounded-full px-2 py-0.5 text-[11px] ${
-                  r.status === 'CONFIRMED'
-                    ? 'bg-emerald-600/20 text-emerald-300'
-                    : r.status === 'PENDING'
-                    ? 'bg-amber-600/20 text-amber-300'
-                    : 'bg-red-900/30 text-red-300'
-                }`}
-              >
-                {r.status}
-              </span>
-              <Link
-                href={`/tickets/${r.id}`}
-                className="inline-flex items-center rounded border border-slate-700 px-3 py-1 text-xs text-slate-100 hover:border-slate-500"
-              >
-                View ticket
-              </Link>
-              {r.status !== 'CANCELLED' && (
-                <form action={leaveEventAction}>
-                  <input type="hidden" name="registrationId" value={r.id} />
-                  <button
-                    type="submit"
-                    className="mt-1 inline-flex items-center rounded bg-red-900/40 px-3 py-1 text-[11px] font-medium text-red-200 hover:bg-red-900/60"
-                  >
-                    Leave event
-                  </button>
-                </form>
-              )}
-            </div>
-          </div>
-        ))}
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          <Card variant="light" className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-700">Total Events</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-600">{registrations.length}</div>
+            </CardContent>
+          </Card>
+          
+          <Card variant="light" className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-700">Confirmed</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-600">
+                {registrations.filter(r => r.status === 'CONFIRMED').length}
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card variant="light" className="shadow-sm">
+            <CardHeader>
+              <CardTitle className="text-lg font-semibold text-gray-700">Pending</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-amber-600">
+                {registrations.filter(r => r.status === 'PENDING').length}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Registrations List */}
+        <Card variant="light" className="shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-xl font-semibold text-gray-900">Your Event Registrations</CardTitle>
+          </CardHeader>
+          <CardContent>
+            {registrations.length === 0 ? (
+              <div className="text-center py-12">
+                <div className="text-gray-500 mb-4">You have not registered for any events yet.</div>
+                <Link href="/events">
+                  <Button className="bg-purple-600 hover:bg-purple-700">
+                    Browse Events
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {registrations.map((r: any) => (
+                  <div key={r.id} className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                      <div className="flex-1">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                          {r.event?.title ?? 'Event'}
+                        </h3>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800">
+                            📅 {r.event?.event_date
+                              ? new Date(r.event.event_date as string).toLocaleDateString()
+                              : 'Date TBA'}
+                            </div>
+                          <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800">
+                            {r.event?.is_paid ? `💰 Paid • ₹${r.event.price}` : '🆓 Free'}
+                            {!PAYMENTS_ENABLED && r.event?.is_paid && ' · payments disabled (test mode)'}
+                          </div>
+                        </div>
+                        <p className="text-sm text-gray-600">
+                          Registered on {new Date(r.created_at).toLocaleString()}
+                        </p>
+                      </div>
+                      
+                      <div className="flex flex-col items-start gap-2 md:items-end">
+                        <div className={r.status === 'CONFIRMED' 
+                          ? "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800"
+                          : r.status === 'PENDING'
+                          ? "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-amber-100 text-amber-800"
+                          : "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-red-100 text-red-800"
+                        }>
+                          {r.status}
+                        </div>
+                        
+                        <div className="flex gap-2">
+                          <Link href={`/tickets/${r.id}`}>
+                            <Button className="bg-purple-600 hover:bg-purple-700 text-white">
+                              View QR Code
+                            </Button>
+                          </Link>
+                          
+                          {r.status !== 'CANCELLED' && (
+                            <form action={leaveEventAction}>
+                              <input type="hidden" name="registrationId" value={r.id} />
+                              <Button
+                                type="submit"
+                                variant="outline"
+                                className="border-red-300 text-red-600 hover:bg-red-50"
+                              >
+                                Leave Event
+                              </Button>
+                            </form>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );
