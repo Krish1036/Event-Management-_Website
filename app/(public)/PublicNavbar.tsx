@@ -60,29 +60,34 @@ export default function PublicNavbar() {
       <div className="header-content">
         <div className="header-left">
           <div className="logo-section">
-            <div className="logo-icon"></div>
-            <span className="logo-text">Ganpat University</span>
+            <div className="h-12 flex items-center">
+              <img 
+                src="/icon/U.V.-Patel-College-of-Engineering.png" 
+                alt="Ganpat University Logo" 
+                className="h-full w-auto object-contain"
+              />
+            </div>
+            <span className="logo-text text-gray-800 text-xl">Ganpat University</span>
           </div>
           <nav className="main-nav">
-            <Link href="/" className={`nav-link ${pathname === '/' ? 'active' : ''}`}>Home</Link>
-            <Link href="/events" className={`nav-link ${pathname === '/events' ? 'active' : ''}`}>Events</Link>
+            <Link href="/" className={`nav-link text-base ${pathname === '/' ? 'active' : ''}`}>Home</Link>
+            <Link href="/events" className={`nav-link text-base ${pathname === '/events' ? 'active' : ''}`}>Events</Link>
           </nav>
         </div>
         <div className="header-right">
-          <button className="icon-button">
-            <Bell className="icon" />
+          <button className="icon-button text-gray-700 hover:text-gray-900 p-3">
+            <Bell className="icon w-6 h-6" />
           </button>
-          <button className="icon-button">
-            <Settings className="icon" />
+          <button className="icon-button text-gray-700 hover:text-gray-900 p-3">
+            <Settings className="icon w-6 h-6" />
           </button>
           <div className="relative">
             <button 
               className="admin-profile flex items-center gap-2 hover:opacity-80 transition-opacity"
               onClick={() => setShowProfileDropdown(!showProfileDropdown)}
             >
-              <div className="admin-avatar"></div>
-              <span className="admin-label">{userName}</span>
-              <ChevronDown className="w-4 h-4 text-gray-600" />
+              <span className="admin-label text-gray-800 text-base">Hi, {userName}</span>
+              <ChevronDown className="w-5 h-5 text-gray-600" />
             </button>
             
             {showProfileDropdown && (

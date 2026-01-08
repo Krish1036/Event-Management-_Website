@@ -83,17 +83,12 @@ export default function AdminHeader({ userName }: { userName: string }) {
           <div className="profile-dropdown relative">
             <button
               onClick={() => setDropdownOpen(!dropdownOpen)}
-              className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+              className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                <span className="text-white text-sm font-medium">
-                  {userName?.charAt(0) || 'A'}
-                </span>
-              </div>
-              <span className="text-sm font-medium text-gray-900">
-                {userName || 'Admin User'}
+              <span className="text-sm font-medium text-gray-800">
+                Hi, {userName || 'Admin'}
               </span>
-              <span className="text-gray-400 hover:text-gray-600">
+              <span className="text-gray-500 hover:text-gray-700">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>

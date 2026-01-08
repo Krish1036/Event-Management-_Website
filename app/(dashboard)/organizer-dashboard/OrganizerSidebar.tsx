@@ -20,10 +20,12 @@ export default function OrganizerSidebar() {
     <div className="p-6">
       {/* Logo */}
       <div className="flex items-center gap-2 mb-8">
-        <div className="w-8 h-8 bg-purple-600 rounded-lg flex items-center justify-center">
-          <div className="w-4 h-4 bg-white rounded-sm"></div>
-        </div>
-        <span className="text-xl font-bold text-gray-900">UnivEvents</span>
+        <img 
+          src="/icon/U.V.-Patel-College-of-Engineering.png" 
+          alt="Ganpat University Logo" 
+          className="h-12 w-auto object-contain"
+        />
+        <span className="text-2xl font-bold text-gray-900">UnivEvents</span>
       </div>
 
       {/* Panel Title */}
