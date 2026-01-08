@@ -1,6 +1,7 @@
 'use client';
 
 import { useCreateEvent } from './CreateEventProvider';
+import { ImageUpload } from '@/components/ui/ImageUpload';
 
 export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, updateField, setError, clearError } = useCreateEvent();
@@ -13,6 +14,16 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
   const inputBase = isLight
     ? 'w-full rounded-lg border bg-white px-3 py-2 text-sm text-gray-700 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-sky-500'
     : 'w-full rounded-lg border bg-slate-800 px-3 py-2 text-sm text-white placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500';
+
+  const handleImageChange = (url: string | null) => {
+    updateField('image_url', url);
+    
+    if (!url) {
+      setError('image_url', 'Event image is required');
+    } else {
+      clearError('image_url');
+    }
+  };
 
   const handleInputChange = (field: string, value: string) => {
     updateField(field as any, value);
@@ -83,6 +94,19 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
       </div>
 
       <div className="grid gap-4">
+        {/* Event Image */}
+        <div>
+          <ImageUpload
+            value={state.data.image_url || undefined}
+            onChange={handleImageChange}
+            required={true}
+            variant={variant}
+          />
+          {state.errors.image_url && (
+            <p className="mt-1 text-sm text-red-400">{state.errors.image_url}</p>
+          )}
+        </div>
+
         {/* Event Title */}
         <div>
           <label htmlFor="title" className={labelClass}>

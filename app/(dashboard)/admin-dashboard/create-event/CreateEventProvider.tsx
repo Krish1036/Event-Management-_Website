@@ -25,6 +25,7 @@ export interface EventData {
   event_date: string;
   start_time: string;
   end_time: string;
+  image_url?: string | null;
   
   // Section 2: Capacity & Registration
   total_capacity: number;
@@ -74,6 +75,7 @@ const initialState: EventState = {
     event_date: '',
     start_time: '',
     end_time: '',
+    image_url: null,
     total_capacity: 1,
     registration_status: 'open',
     auto_close_when_full: true,
@@ -271,6 +273,9 @@ export function CreateEventProvider({
     }
     if (!state.data.location.trim()) {
       errors.location = 'Location is required';
+    }
+    if (!state.data.image_url) {
+      errors.image_url = 'Event image is required';
     }
     if (!state.data.event_date) {
       errors.event_date = 'Event date is required';

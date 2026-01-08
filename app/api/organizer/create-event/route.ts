@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Missing event payload' }, { status: 400 });
     }
 
-    if (!eventInput.title || !eventInput.event_date || !eventInput.start_time || !eventInput.end_time) {
+    if (!eventInput.title || !eventInput.event_date || !eventInput.start_time || !eventInput.end_time || !eventInput.image_url) {
       return NextResponse.json({ success: false, error: 'Missing required event fields' }, { status: 400 });
     }
 
@@ -84,6 +84,7 @@ export async function POST(request: NextRequest) {
         event_date: eventInput.event_date,
         start_time: eventInput.start_time,
         end_time: eventInput.end_time,
+        image_url: eventInput.image_url,
         capacity,
         is_registration_open: false,
         price,

@@ -39,6 +39,7 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
             event_date: state.data.event_date,
             start_time: state.data.start_time,
             end_time: state.data.end_time,
+            image_url: state.data.image_url,
             capacity: state.data.total_capacity,
             is_registration_open: state.data.registration_status === 'open',
             price: state.data.event_type === 'paid' ? state.data.price : 0,
