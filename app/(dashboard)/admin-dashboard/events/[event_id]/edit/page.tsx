@@ -107,21 +107,11 @@ export default async function EditEventPage({
 
   const eventId = params.event_id;
 
-  console.log(logPrefix, 'fetch.event', { eventId });
-
   const { data: event, error } = await admin
     .from('events')
     .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at,image_url')
     .eq('id', eventId)
     .single();
-
-  console.log(logPrefix, 'fetch.event.result', {
-    found: !!event,
-    error: error?.message ?? null,
-    eventId: eventId,
-    imageUrl: event?.image_url,
-    hasImage: !!event?.image_url
-  });
 
   if (error) {
     return (
@@ -170,33 +160,17 @@ export default async function EditEventPage({
     .eq('event_id', eventId)
     .order('created_at', { ascending: true });
 
-  console.log(logPrefix, 'fetch.formFields', {
-    count: (formFields ?? []).length
-  });
-
   const { data: organizers } = await admin
     .from('profiles')
     .select('id,full_name,email')
     .eq('role', 'organizer')
     .order('full_name');
 
-  console.log(logPrefix, 'fetch.organizers', {
-    count: (organizers ?? []).length
-  });
-
   const initialData = {
     ...(event as any),
     form_fields: formFields ?? [],
     visibility: 'public'
   };
-
-  console.log(logPrefix, 'initialData.created', {
-    eventId,
-    imageUrl: initialData.image_url,
-    hasImage: !!initialData.image_url,
-    formFieldsCount: (formFields ?? []).length,
-    organizersCount: (organizers ?? []).length
-  });
 
   return (
     <div className="container mx-auto py-8 space-y-6">

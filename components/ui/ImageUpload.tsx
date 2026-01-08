@@ -22,23 +22,8 @@ export function ImageUpload({
   const [preview, setPreview] = useState<string | null>(value || null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Debug: Log initial value and preview state
-  console.log('🖼️ ImageUpload: Initial state:', {
-    value,
-    preview,
-    hasValue: !!value,
-    hasPreview: !!preview
-  });
-
   // Sync preview with value prop changes
   useEffect(() => {
-    console.log('🖼️ ImageUpload: Value prop changed:', {
-      newValue: value,
-      currentPreview: preview,
-      hasNewValue: !!value,
-      willUpdate: value !== preview
-    });
-    
     if (value !== preview) {
       setPreview(value || null);
     }
@@ -119,14 +104,7 @@ export function ImageUpload({
               src={preview}
               alt="Event preview"
               className="w-full h-48 object-cover"
-              onLoad={() => {
-                console.log('✅ Admin Edit: Event image loaded successfully:', preview);
-              }}
               onError={(e) => {
-                console.error('❌ Admin Edit: Event image failed to load:', {
-                  url: preview,
-                  error: e
-                });
                 // Fallback to placeholder if image fails to load
                 const target = e.target as HTMLImageElement;
                 target.style.display = 'none';

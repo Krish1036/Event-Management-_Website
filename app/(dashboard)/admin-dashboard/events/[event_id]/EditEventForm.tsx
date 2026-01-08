@@ -13,7 +13,7 @@ import { OrganizerSection } from '../../create-event/OrganizerSection';
 import { CreateEventProvider, useCreateEvent, FormField, EventData } from '../../create-event/CreateEventProvider';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Check, X, ArrowRight } from 'lucide-react';
+import { Check, X, ArrowRight, Calendar } from 'lucide-react';
 import { updateEventAction } from './edit/actions';
 
 interface Event {
@@ -52,20 +52,6 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
   const { state, setSubmitting, toggleConfirmation, validateForm } = useCreateEvent();
   const router = useRouter();
   const logPrefix = '[EDIT_EVENT:client]';
-
-  // Debug: Log initial image URL data and current state
-  console.log('🔧 Admin Edit Event: Initial data:', {
-    eventId: initialData.id,
-    title: initialData.title,
-    image_url: initialData.image_url,
-    hasImage: !!initialData.image_url
-  });
-
-  console.log('🔧 Admin Edit Event: Provider state:', {
-    image_url: state.data.image_url,
-    hasStateImage: !!state.data.image_url,
-    stateDataKeys: Object.keys(state.data)
-  });
 
   // Map initial event data to form data structure
   const mapInitialData = (event: Event): Partial<EventData> => ({
@@ -202,6 +188,56 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
 
   return (
     <div className="space-y-6">
+      {/* Event Image Display - Using same logic as AdminEventCard */}
+      <div className="mb-6">
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
+              {initialData.image_url ? (
+                <>
+                  <img 
+                    src={initialData.image_url} 
+                    alt={initialData.title}
+                    className="w-full h-full object-cover"
+                    onLoad={() => {
+                      console.log('✅ Admin Edit: Event image loaded successfully:', initialData.image_url);
+                    }}
+                    onError={(e) => {
+                      console.error('❌ Admin Edit: Event image failed to load:', {
+                        url: initialData.image_url,
+                        eventTitle: initialData.title,
+                        eventId: initialData.id,
+                        error: e
+                      });
+                      // Fallback to placeholder if image fails to load
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      const placeholder = target.nextElementSibling as HTMLElement;
+                      if (placeholder) {
+                        placeholder.classList.remove('hidden');
+                      }
+                    }}
+                  />
+                  <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden">
+                    <Calendar className="w-8 h-8 text-purple-400" />
+                  </div>
+                </>
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                  <Calendar className="w-8 h-8 text-purple-400" />
+                </div>
+              )}
+            </div>
+          </div>
+          <div>
+            <h3 className="text-lg font-semibold text-gray-900">Current Event Image</h3>
+            <p className="text-sm text-gray-600">
+              {initialData.image_url ? 'Image is displayed above' : 'No image uploaded yet'}
+            </p>
+          </div>
+        </div>
+      </div>
+
       {/* Status Helper Section */}
       <div className="rounded-lg border border-gray-200 bg-white p-4 text-xs text-gray-600">
         <p className="font-semibold text-gray-900">Status: {initialData.status}</p>
@@ -327,14 +363,6 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
 }
 
 export default function EditEventForm({ initialData, organizers }: EditEventFormProps) {
-  // Debug: Log what we're receiving and mapping
-  console.log('🔧 EditEventForm: Input initialData:', {
-    eventId: initialData.id,
-    title: initialData.title,
-    image_url: initialData.image_url,
-    hasImage: !!initialData.image_url
-  });
-
   const mappedInitialData = {
     title: initialData.title,
     description: initialData.description,
@@ -354,12 +382,6 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     assigned_organizer: initialData.assigned_organizer ?? null,
     image_url: initialData.image_url || null,
   };
-
-  console.log('🔧 EditEventForm: Mapped data for provider:', {
-    image_url: mappedInitialData.image_url,
-    hasMappedImage: !!mappedInitialData.image_url,
-    mappedKeys: Object.keys(mappedInitialData)
-  });
 
   return (
     <CreateEventProvider initialData={mappedInitialData}>
