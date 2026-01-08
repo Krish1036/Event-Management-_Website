@@ -87,9 +87,40 @@ function EventCard({ event, onEdit }: EventCardProps) {
         {/* Event Image */}
         <div className="flex-shrink-0">
           <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
-            <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
-              <Calendar className="w-8 h-8 text-purple-400" />
-            </div>
+            {event.image_url ? (
+              <>
+                <img 
+                  src={event.image_url} 
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                  onLoad={() => {
+                    console.log('✅ Admin Edit Selection: Image loaded successfully:', event.image_url);
+                  }}
+                  onError={(e) => {
+                    console.error('❌ Admin Edit Selection: Image failed to load:', {
+                      url: event.image_url,
+                      eventTitle: event.title,
+                      eventId: event.id,
+                      error: e
+                    });
+                    // Fallback to placeholder if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    const placeholder = target.nextElementSibling as HTMLElement;
+                    if (placeholder) {
+                      placeholder.classList.remove('hidden');
+                    }
+                  }}
+                />
+                <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden">
+                  <Calendar className="w-8 h-8 text-purple-400" />
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-purple-400" />
+              </div>
+            )}
           </div>
         </div>
 
