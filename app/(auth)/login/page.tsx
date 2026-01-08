@@ -29,7 +29,7 @@ export default function LoginPage() {
 
       if (error) throw error;
       toast.success("Logged in successfully");
-      router.push("/events");
+      router.push("/");
     } catch (err: any) {
       toast.error(err.message ?? "Unable to log in");
     } finally {

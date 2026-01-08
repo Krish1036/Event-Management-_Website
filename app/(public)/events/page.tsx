@@ -1,6 +1,8 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
 import EventImage from './EventImage';
+import PublicNavbar from '../PublicNavbar';
+import '../EventsDashboard.css';
 
 export const revalidate = 30;
 
@@ -32,8 +34,13 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
   const events = await getEvents({ paid: filterPaid });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-orange-50">
-      <div className="mx-auto max-w-6xl px-4 py-8">
+    <div className="dashboard-container">
+      <PublicNavbar />
+      
+      {/* Main Content */}
+      <div className="main-content">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-violet-50 to-orange-50">
+          <div className="mx-auto max-w-6xl px-4 py-8">
         <div className="mb-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl mb-4">
             <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -129,6 +136,8 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
             <p className="text-gray-600">No upcoming events match your filters. Try adjusting your filter criteria.</p>
           </div>
         )}
+      </div>
+    </div>
       </div>
     </div>
   );
