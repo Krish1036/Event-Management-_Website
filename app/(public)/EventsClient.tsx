@@ -36,54 +36,6 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
 
-  // Function to resize images to fit container
-  const resizeImageToFit = (imgElement: HTMLImageElement, targetHeight: number = 192) => {
-    const img = new Image();
-    img.onload = () => {
-      img.src = imgElement.src;
-      // Get original image dimensions after loading
-      img.onload = () => {
-        const originalWidth = img.width;
-        const originalHeight = img.height;
-        
-        // Calculate aspect ratio
-        const aspectRatio = originalWidth / originalHeight;
-        
-        // Calculate dimensions to fit target height while maintaining aspect ratio
-        let newWidth, newHeight;
-        if (aspectRatio > 0) {
-          newHeight = targetHeight;
-          newWidth = targetHeight * aspectRatio;
-        } else {
-          // If no valid aspect ratio, use container dimensions
-          newHeight = targetHeight;
-          newWidth = imgElement.parentElement?.clientWidth || targetHeight;
-        }
-        
-        // Create canvas to resize image
-        const canvas = document.createElement('canvas');
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-        
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(img, 0, 0, newWidth, newHeight);
-          
-          // Convert canvas to blob and create new URL
-          canvas.toBlob((blob) => {
-            if (blob) {
-              const resizedUrl = URL.createObjectURL(blob);
-              imgElement.src = resizedUrl;
-              imgElement.style.width = '100%';
-              imgElement.style.height = '100%';
-              imgElement.style.objectFit = 'cover';
-            }
-          });
-        }
-      };
-    };
-  };
-
   // Debug: Log events data to see what image URLs we have
   console.log('🏠 Landing page events data:', events.map(e => ({ 
     id: e.id, 
@@ -264,8 +216,16 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                       <img 
                         src={event.image_url} 
                         alt={event.title} 
-                        className="event-image-src"
-                        onError={(e) => {
+                        className="event-image-src image-content"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'fill'
+                        }}
+                        onLoad={(e: React.ChangeEvent<HTMLImageElement>) => {
+                          console.log('✅ Landing page: Image loaded successfully:', event.image_url);
+                        }}
+                        onError={(e: React.ChangeEvent<HTMLImageElement>) => {
                           console.error('❌ Landing page: Image failed to load:', {
                             url: event.image_url,
                             eventTitle: event.title,
