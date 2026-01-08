@@ -117,7 +117,10 @@ export default async function EditEventPage({
 
   console.log(logPrefix, 'fetch.event.result', {
     found: !!event,
-    error: error?.message ?? null
+    error: error?.message ?? null,
+    eventId: eventId,
+    imageUrl: event?.image_url,
+    hasImage: !!event?.image_url
   });
 
   if (error) {
@@ -187,8 +190,10 @@ export default async function EditEventPage({
     visibility: 'public'
   };
 
-  console.log(logPrefix, 'render', {
+  console.log(logPrefix, 'initialData.created', {
     eventId,
+    imageUrl: initialData.image_url,
+    hasImage: !!initialData.image_url,
     formFieldsCount: (formFields ?? []).length,
     organizersCount: (organizers ?? []).length
   });

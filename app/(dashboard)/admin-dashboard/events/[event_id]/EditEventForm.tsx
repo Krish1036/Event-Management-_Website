@@ -53,12 +53,18 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
   const router = useRouter();
   const logPrefix = '[EDIT_EVENT:client]';
 
-  // Debug: Log initial image URL data
+  // Debug: Log initial image URL data and current state
   console.log('🔧 Admin Edit Event: Initial data:', {
     eventId: initialData.id,
     title: initialData.title,
     image_url: initialData.image_url,
     hasImage: !!initialData.image_url
+  });
+
+  console.log('🔧 Admin Edit Event: Provider state:', {
+    image_url: state.data.image_url,
+    hasStateImage: !!state.data.image_url,
+    stateDataKeys: Object.keys(state.data)
   });
 
   // Map initial event data to form data structure
@@ -321,6 +327,14 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
 }
 
 export default function EditEventForm({ initialData, organizers }: EditEventFormProps) {
+  // Debug: Log what we're receiving and mapping
+  console.log('🔧 EditEventForm: Input initialData:', {
+    eventId: initialData.id,
+    title: initialData.title,
+    image_url: initialData.image_url,
+    hasImage: !!initialData.image_url
+  });
+
   const mappedInitialData = {
     title: initialData.title,
     description: initialData.description,
@@ -340,6 +354,12 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     assigned_organizer: initialData.assigned_organizer ?? null,
     image_url: initialData.image_url || null,
   };
+
+  console.log('🔧 EditEventForm: Mapped data for provider:', {
+    image_url: mappedInitialData.image_url,
+    hasMappedImage: !!mappedInitialData.image_url,
+    mappedKeys: Object.keys(mappedInitialData)
+  });
 
   return (
     <CreateEventProvider initialData={mappedInitialData}>
