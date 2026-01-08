@@ -1,5 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import Link from 'next/link';
+import EventImage from './EventImage';
 
 export const revalidate = 30;
 
@@ -76,21 +77,11 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
             >
               {/* Event Image */}
               <div className="w-full h-48 bg-gray-100 overflow-hidden">
-                {event.image_url ? (
-                  <img 
-                    src={event.image_url} 
-                    alt={event.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-                    onError={(e) => {
-                      const target = e.target as HTMLImageElement;
-                      target.style.display = 'none';
-                      target.nextElementSibling?.classList.remove('hidden');
-                    }}
-                  />
-                ) : null}
-                <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
-                  <div className="text-purple-400 text-4xl">📅</div>
-                </div>
+                <EventImage 
+                  src={event.image_url}
+                  alt={event.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                />
               </div>
               
               {/* Event Content */}
