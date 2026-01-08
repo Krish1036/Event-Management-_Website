@@ -111,7 +111,7 @@ export default async function EditEventPage({
 
   const { data: event, error } = await admin
     .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at')
+    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,price,status,assigned_organizer,created_at,image_url')
     .eq('id', eventId)
     .single();
 

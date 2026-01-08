@@ -2,12 +2,14 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { Bell, Settings, Grid, ChevronDown } from 'lucide-react';
 import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 
 export default function PublicNavbar() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const [userName, setUserName] = useState('User');
+  const pathname = usePathname();
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -62,8 +64,8 @@ export default function PublicNavbar() {
             <span className="logo-text">Ganpat University</span>
           </div>
           <nav className="main-nav">
-            <Link href="/" className="nav-link">Home</Link>
-            <Link href="/events" className="nav-link active">Events</Link>
+            <Link href="/" className={`nav-link ${pathname === '/' ? 'active' : ''}`}>Home</Link>
+            <Link href="/events" className={`nav-link ${pathname === '/events' ? 'active' : ''}`}>Events</Link>
           </nav>
         </div>
         <div className="header-right">

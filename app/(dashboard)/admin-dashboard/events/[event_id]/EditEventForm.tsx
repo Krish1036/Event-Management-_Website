@@ -53,6 +53,14 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
   const router = useRouter();
   const logPrefix = '[EDIT_EVENT:client]';
 
+  // Debug: Log initial image URL data
+  console.log('🔧 Admin Edit Event: Initial data:', {
+    eventId: initialData.id,
+    title: initialData.title,
+    image_url: initialData.image_url,
+    hasImage: !!initialData.image_url
+  });
+
   // Map initial event data to form data structure
   const mapInitialData = (event: Event): Partial<EventData> => ({
     title: event.title,
@@ -71,6 +79,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
     visibility: event.visibility ?? 'public',
     save_mode: event.status === 'approved' ? 'publish' : 'draft',
     assigned_organizer: event.assigned_organizer,
+    image_url: event.image_url || null,
   });
 
   const handleSubmit = async () => {
@@ -329,6 +338,7 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     visibility: initialData.visibility ?? 'public',
     save_mode: initialData.status === 'approved' ? 'publish' as const : 'draft' as const,
     assigned_organizer: initialData.assigned_organizer ?? null,
+    image_url: initialData.image_url || null,
   };
 
   return (
