@@ -386,3 +386,5 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
       </Dialog>
     </div>
   );
+}
+
