@@ -60,21 +60,21 @@ export default async function EventDetailPage({ params }: { params: { id: string
   return (
     <div className="mx-auto max-w-4xl px-4 py-8">
       <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-        <div>
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight">{event.title}</h1>
-          <p className="mb-3 text-sm text-slate-300 line-clamp-3 text-ellipsis overflow-hidden">{event.description}</p>
+        <div className="flex-1 min-w-0">
+          <h1 className="mb-2 text-2xl font-semibold tracking-tight break-words">{event.title}</h1>
+          <p className="mb-3 text-sm text-slate-300 line-clamp-3 overflow-hidden break-words">{event.description}</p>
           <div className="flex flex-wrap gap-3 text-xs text-slate-300">
-            <span className="rounded-full bg-slate-800 px-3 py-1">
+            <span className="rounded-full bg-slate-800 px-3 py-1 whitespace-nowrap">
               {new Date(event.event_date as string).toLocaleDateString()} {event.start_time}–{event.end_time}
             </span>
-            <span className="rounded-full bg-slate-800 px-3 py-1">{event.location}</span>
-            <span className="rounded-full bg-slate-800 px-3 py-1">
+            <span className="rounded-full bg-slate-800 px-3 py-1 whitespace-nowrap">{event.location}</span>
+            <span className="rounded-full bg-slate-800 px-3 py-1 whitespace-nowrap">
               {event.is_paid ? `Paid • ₹${event.price}` : 'Free event'}
               {!PAYMENTS_ENABLED && event.is_paid && ' · payments disabled (test mode)'}
             </span>
           </div>
         </div>
-        <div className="w-full max-w-xs rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm">
+        <div className="w-full md:w-auto md:max-w-xs rounded-xl border border-slate-800 bg-slate-900/60 p-4 text-sm">
           <div className="mb-3 flex items-center justify-between">
             <span className="text-xs text-slate-400">Capacity</span>
             <span className="text-xs font-medium text-slate-100">
@@ -87,12 +87,12 @@ export default async function EventDetailPage({ params }: { params: { id: string
               style={{ width: `${(used / event.capacity) * 100}%` }}
             />
           </div>
-          <p className="mb-4 text-xs text-slate-300">
+          <p className="mb-4 text-xs text-slate-300 break-words">
             {remaining > 0 ? `${remaining} seats left` : 'Event is full'}
           </p>
           <div className="flex flex-col gap-2 text-xs">
             <span
-              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] ${registrationOpen ? 'bg-emerald-600/20 text-emerald-300' : 'bg-red-900/30 text-red-300'}`}
+              className={`inline-flex w-fit items-center rounded-full px-2 py-0.5 text-[11px] whitespace-nowrap ${registrationOpen ? 'bg-emerald-600/20 text-emerald-300' : 'bg-red-900/30 text-red-300'}`}
             >
               {registrationOpen ? 'Registration open' : 'Registration closed'}
             </span>
