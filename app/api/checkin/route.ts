@@ -35,6 +35,19 @@ export async function POST(req: Request) {
       // verification failed or no secret configured — fall back to legacy methods
     }
 
+    // Try to parse as JSON (fallback when no secret is configured)
+    if (t.startsWith('{') && t.endsWith('}')) {
+      try {
+        const parsed = JSON.parse(t);
+        if (parsed.registration_id) {
+          const { data: regById } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('id', parsed.registration_id).limit(1).single();
+          if (regById) return regById;
+        }
+      } catch (e) {
+        // Invalid JSON, continue to other methods
+      }
+    }
+
     // try by entry_code first
     let { data: regs } = await admin.from('registrations').select('id,status,entry_code,event_id,user_id,created_at').eq('entry_code', t).limit(1).single();
     if (regs) return regs;

@@ -13,7 +13,8 @@ import {
   FileQuestion, 
   Wrench, 
   FileText as FileLog, 
-  Download 
+  Download,
+  QrCode 
 } from 'lucide-react';
 import Link from 'next/link';
 
@@ -28,6 +29,7 @@ const navigationItems = [
   { href: '/admin-dashboard/users', label: 'Users', icon: Users },
   { href: '/admin-dashboard/form-control', label: 'Form Control', icon: Settings },
   { href: '/admin-dashboard/manual-fixes', label: 'Manual Fixes', icon: Wrench },
+  { href: '/admin-dashboard/regenerate-qr-codes', label: 'Regenerate QR Codes', icon: QrCode },
   { href: '/admin-dashboard/logs', label: 'Logs / Audit', icon: FileLog },
   { href: '/admin-dashboard/exports', label: 'Exports', icon: Download },
 ];
