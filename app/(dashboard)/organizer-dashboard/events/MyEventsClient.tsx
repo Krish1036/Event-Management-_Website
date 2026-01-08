@@ -88,21 +88,31 @@ function EventCard({ event, onDelete }: EventCardProps) {
         <div className="flex-shrink-0">
           <div className="w-20 h-20 bg-gray-200 rounded-lg overflow-hidden">
             {event.image_url ? (
-              <img 
-                src={event.image_url} 
-                alt={event.title}
-                className="w-full h-full object-cover"
-                onError={(e) => {
-                  // Fallback to placeholder if image fails to load
-                  const target = e.target as HTMLImageElement;
-                  target.style.display = 'none';
-                  target.nextElementSibling?.classList.remove('hidden');
-                }}
-              />
-            ) : null}
-            <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
-              <Calendar className="w-8 h-8 text-purple-400" />
-            </div>
+              <>
+                <img 
+                  src={event.image_url} 
+                  alt={event.title}
+                  className="w-full h-full object-cover"
+                  onLoad={() => {
+                    console.log('Image loaded successfully:', event.image_url);
+                  }}
+                  onError={(e) => {
+                    console.error('Image failed to load:', event.image_url);
+                    // Fallback to placeholder if image fails to load
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.nextElementSibling?.classList.remove('hidden');
+                  }}
+                />
+                <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden`}>
+                  <Calendar className="w-8 h-8 text-purple-400" />
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center">
+                <Calendar className="w-8 h-8 text-purple-400" />
+              </div>
+            )}
           </div>
         </div>
 
@@ -184,6 +194,14 @@ export default function MyEventsClient({ events }: MyEventsClientProps) {
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [eventToDelete, setEventToDelete] = useState<string | null>(null);
+
+  // Debug: Log events data to see what image URLs we have
+  console.log('Events data:', events.map(e => ({ 
+    id: e.id, 
+    title: e.title, 
+    image_url: e.image_url,
+    hasImage: !!e.image_url 
+  })));
 
   const filteredEvents = events.filter((event) => {
     const matchesSearch = event.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
