@@ -94,14 +94,22 @@ function EventCard({ event, onDelete }: EventCardProps) {
                   alt={event.title}
                   className="w-full h-full object-cover"
                   onLoad={() => {
-                    console.log('Image loaded successfully:', event.image_url);
+                    console.log('✅ Image loaded successfully:', event.image_url);
                   }}
                   onError={(e) => {
-                    console.error('Image failed to load:', event.image_url);
+                    console.error('❌ Image failed to load:', {
+                      url: event.image_url,
+                      eventTitle: event.title,
+                      eventId: event.id,
+                      error: e
+                    });
                     // Fallback to placeholder if image fails to load
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
-                    target.nextElementSibling?.classList.remove('hidden');
+                    const placeholder = target.nextElementSibling as HTMLElement;
+                    if (placeholder) {
+                      placeholder.classList.remove('hidden');
+                    }
                   }}
                 />
                 <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden`}>

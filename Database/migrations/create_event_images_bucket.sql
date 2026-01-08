@@ -8,8 +8,14 @@ VALUES (
   ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif']
 ) ON CONFLICT (id) DO NOTHING;
 
+-- Drop existing policies to avoid conflicts
+DROP POLICY IF EXISTS "Public images are viewable by everyone" ON storage.objects;
+DROP POLICY IF EXISTS "Authenticated users can upload images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can update their own images" ON storage.objects;
+DROP POLICY IF EXISTS "Users can delete their own images" ON storage.objects;
+
 -- Set up public access policies for the event-images bucket
--- Allow anyone to view images
+-- Allow ANYONE (including anonymous) to view images
 CREATE POLICY "Public images are viewable by everyone" ON storage.objects
   FOR SELECT USING (bucket_id = 'event-images');
 

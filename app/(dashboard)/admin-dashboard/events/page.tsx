@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Search, Filter, Grid3X3, Menu } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import AdminEventCard from './AdminEventCard';
 
 export const revalidate = 0;
 
@@ -386,89 +387,10 @@ export default async function AdminEventsPage({
       ) : (
         <div className="space-y-4">
           {events.map((event: any) => (
-            <div
-              key={event.id}
-              className="bg-white rounded-xl shadow-sm p-6 border border-gray-100"
-            >
-              <div className="flex justify-between items-start mb-4">
-                {/* Event Image */}
-                <div className="flex-shrink-0 mr-4">
-                  <div className="w-24 h-24 bg-gray-200 rounded-lg overflow-hidden">
-                    {event.image_url ? (
-                      <img 
-                        src={event.image_url} 
-                        alt={event.title}
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          // Fallback to placeholder if image fails to load
-                          const target = e.target as HTMLImageElement;
-                          target.style.display = 'none';
-                          target.nextElementSibling?.classList.remove('hidden');
-                        }}
-                      />
-                    ) : null}
-                    <div className={`w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center ${event.image_url ? 'hidden' : ''}`}>
-                      <div className="text-purple-400 text-2xl font-bold">📅</div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Event Title and Details */}
-                <div className="flex-1">
-                  <h2 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h2>
-                  <p className="text-gray-600 text-sm">
-                    {event.location || 'No location'} - {new Date(event.event_date).toLocaleDateString('en-US', { 
-                      month: 'numeric', 
-                      day: 'numeric', 
-                      year: 'numeric' 
-                    })} - {event.start_time} - {event.end_time}
-                  </p>
-                  <div className="mt-2">
-                    <span className="text-sm text-gray-600">Organizer: </span>
-                    <span className="text-sm font-medium text-gray-900">{event.organizerName}</span>
-                  </div>
-                </div>
-
-                {/* Status Badges */}
-                <div className="flex flex-col gap-2">
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                    event.status === 'approved' 
-                      ? 'bg-green-100 text-green-800' 
-                      : event.status === 'cancelled'
-                      ? 'bg-red-100 text-red-800'
-                      : event.status === 'draft'
-                      ? 'bg-gray-100 text-gray-800'
-                      : 'bg-yellow-100 text-yellow-800'
-                  }`}>
-                    {event.status === 'approved' ? 'APPROVED' : 
-                     event.status === 'cancelled' ? 'CANCELLED' :
-                     event.status === 'draft' ? 'DRAFT' : 
-                     event.status.toUpperCase()}
-                  </span>
-                  <span className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-medium ${
-                    event.is_registration_open
-                      ? 'bg-green-100 text-green-800'
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {event.is_registration_open ? 'REGISTRATIONS OPEN' : 'REGISTRATIONS CLOSED'}
-                  </span>
-                </div>
-              </div>
-
-              {/* Key Metrics */}
-              <div className="grid grid-cols-3 gap-4 mb-6">
-                <div>
-                  <p className="text-sm text-gray-600">Capacity / Seats Left</p>
-                  <p className="text-lg font-semibold text-gray-900">{event.capacity ?? 0} / {event.seatsLeft}</p>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Registrations</p>
-                  <p className="text-lg font-semibold text-gray-900">{event.confirmedCount} confirmed, {event.pendingCount} pending</p>
-                </div>
-              </div>
-
+            <div key={event.id}>
+              <AdminEventCard event={event} />
               {/* Action Buttons */}
-              <div className="flex flex-wrap gap-3">
+              <div className="px-6 pb-6 -mt-4">
                 <form action={handleEventAction} className="flex flex-wrap gap-3">
                   <input type="hidden" name="eventId" value={event.id} />
                   
