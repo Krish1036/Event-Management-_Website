@@ -18,11 +18,11 @@ export function TicketQr({ data }: { data: string }) {
         height: SIZE,
         data: data,
         dotsOptions: {
-          color: '#0ea5e9',
+          color: '#7c3aed',
           type: 'rounded'
         },
         backgroundOptions: {
-          color: '#020617'
+          color: '#ffffff'
         }
       });
       qrRef.current.append(ref.current);
