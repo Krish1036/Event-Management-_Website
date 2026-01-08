@@ -74,9 +74,28 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
       setPreview(json);
       // play a short detect sound
       playBeep();
+      
+      // Show confirmation popup immediately
+      if (json.success) {
+        setTimeout(() => {
+          const confirmMessage = `User Found:\n\nName: ${json.user?.full_name || 'Unknown'}\nEmail: ${json.user?.email || 'No email'}\nEvent: ${json.event?.title || 'Unknown'}\n\nMark this user as attended?`;
+          if (confirm(confirmMessage)) {
+            handleConfirm();
+          } else {
+            // Reset for next scan
+            setScanned(null);
+            setPreview(null);
+          }
+        }, 500);
+      }
     } catch (err: any) {
       setError(err?.message ?? String(err));
-      setScanned(null);
+      // Show error popup
+      setTimeout(() => {
+        alert(`Error: ${err?.message ?? 'Failed to scan QR code'}`);
+        setScanned(null);
+        setPreview(null);
+      }, 500);
     } finally {
       setLoadingPreview(false);
     }
@@ -95,13 +114,19 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json?.message || 'Check-in failed');
+      
+      playBeep();
+      // Show success popup
+      const userName = preview.user?.full_name || 'User';
+      alert(`✅ Successfully checked in: ${userName}`);
+      
+      // Close modal and reset
       setOpen(false);
       setScanned(null);
       setPreview(null);
-      playBeep();
-      // small visual feedback
-      alert('Checked in: ' + (json.user?.full_name ?? json.registrationId));
     } catch (err: any) {
+      // Show error popup
+      alert(`❌ Check-in failed: ${err?.message ?? 'Unknown error'}`);
       setError(err?.message ?? String(err));
     } finally {
       setConfirming(false);
@@ -196,23 +221,8 @@ export default function QRModalButton({ eventId, buttonLabel, className }: { eve
               {loadingPreview && <p className="text-sm text-gray-600">Scanning…</p>}
               {error && <p className="text-sm text-red-600">{error}</p>}
 
-              {preview && (
-                <div className="mt-2 rounded-md border border-gray-200 bg-white p-3">
-                  <p className="text-sm font-medium">{preview.user?.full_name ?? 'User'}</p>
-                  <p className="text-xs text-gray-600">{preview.user?.email ?? 'No email'}</p>
-                  <p className="text-xs text-gray-600">Event: {preview.event?.title ?? 'N/A'}</p>
-                  <p className="text-xs text-gray-600">Status: {preview.registrationStatus}</p>
-                  <div className="mt-3 flex gap-3">
-                    <button onClick={handleConfirm} disabled={confirming} className="rounded-full bg-purple-600 px-4 py-1 text-xs font-medium text-white hover:bg-purple-700">
-                      {confirming ? 'Checking in…' : 'Confirm Check In'}
-                    </button>
-                    <button onClick={() => { setScanned(null); setPreview(null); setError(null); }} className="rounded-full border px-4 py-1 text-xs">Cancel</button>
-                  </div>
-                </div>
-              )}
-
-              {!loadingPreview && !preview && !error && (
-                <p className="text-sm text-gray-600 mt-2">Point the camera at the attendee's QR code. The scanner requires two quick consecutive detections to reduce false positives. You can also upload an image.</p>
+              {!loadingPreview && !error && (
+                <p className="text-sm text-gray-600 mt-2">Point camera at attendee's QR code. The scanner requires two quick consecutive detections to reduce false positives. You can also upload an image.</p>
               )}
             </div>
           </div>
