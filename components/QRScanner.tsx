@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BrowserMultiFormatReader, NotFoundException } from '@zxing/browser';
+import { BrowserMultiFormatReader } from '@zxing/browser';
 
 export type QRScannerProps = {
   onScan: (text: string) => void;
@@ -51,7 +51,7 @@ export default function QRScanner({ onScan, onDetect, onError, paused, constrain
             }
           }
 
-          if (err && !(err instanceof NotFoundException)) {
+          if (err && err.name !== 'NotFoundException') {
             onError?.(err as Error);
           }
         };
