@@ -750,27 +750,32 @@ export const AdvancedRichTextEditor = ({
 
         {/* Special Characters */}
         <div className="flex gap-1 border-r pr-2">
-          <div className="relative">
-            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Emoji Picker">
-              <SmileIcon size={16} />
-            </button>
-            {showEmojiPicker && (
-              <div className="fixed z-[9999] mt-1">
-                <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-80">
-                  <EmojiPicker 
-                    onEmojiClick={handleEmojiSelect}
-                    width="100%"
-                    height={400}
-                    searchPlaceholder="Search emojis..."
-                    previewConfig={{
-                      showPreview: false
-                    }}
-                    skinTonesDisabled
-                  />
-                </div>
+          <CustomPopover
+            open={showEmojiPicker}
+            onOpenChange={setShowEmojiPicker}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Emoji Picker">
+                <SmileIcon size={16} />
+              </button>
+            }
+            content={
+              <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-80">
+                <EmojiPicker 
+                  onEmojiClick={handleEmojiSelect}
+                  width="100%"
+                  height={400}
+                  searchPlaceholder="Search emojis..."
+                  previewConfig={{
+                    showPreview: false
+                  }}
+                  skinTonesDisabled
+                />
               </div>
-            )}
-          </div>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
           <div className="relative">
             <button onClick={() => setShowSpecialChars(!showSpecialChars)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Special Characters">
               <ZapIcon size={16} />
