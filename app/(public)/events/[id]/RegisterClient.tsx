@@ -113,6 +113,49 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         theme: {
           color: '#9333ea'
         },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: 'UPI',
+                instruments: [
+                  {
+                    method: 'upi',
+                    apps: ['google_pay', 'phonepe', 'paytm', 'bhim']
+                  }
+                ]
+              },
+              card: {
+                name: 'Credit/Debit Card',
+                instruments: [
+                  {
+                    method: 'card'
+                  }
+                ]
+              },
+              netbanking: {
+                name: 'Net Banking',
+                instruments: [
+                  {
+                    method: 'netbanking'
+                  }
+                ]
+              },
+              wallet: {
+                name: 'Wallet',
+                instruments: [
+                  {
+                    method: 'wallet'
+                  }
+                ]
+              }
+            },
+            sequence: ['block.upi', 'block.card', 'block.netbanking', 'block.wallet'],
+            preferences: {
+              show_default_blocks: true
+            }
+          }
+        },
         modal: {
           ondismiss: function () {
             toast('You can reopen your ticket later once payment is processed.');
