@@ -84,7 +84,13 @@ export function AdvancedRichTextEditor({
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
   const [showFontDropdown, setShowFontDropdown] = useState(false);
-  const [showTextSizeDropdown, setShowTextSizeDropdown] = useState(false);
+  const [showBulletListDropdown, setShowBulletListDropdown] = useState(false);
+  const [showNumberedListDropdown, setShowNumberedListDropdown] = useState(false);
+  const [showTableDialog, setShowTableDialog] = useState(false);
+  const [tableRows, setTableRows] = useState(3);
+  const [tableCols, setTableCols] = useState(3);
+  const [showTextSizeInput, setShowTextSizeInput] = useState(false);
+  const [customTextSize, setCustomTextSize] = useState('16');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showSpecialChars, setShowSpecialChars] = useState(false);
   const [showFindReplace, setShowFindReplace] = useState(false);
@@ -125,6 +131,24 @@ export function AdvancedRichTextEditor({
   const highlightColors = [
     '#ffff00', '#00ff00', '#00ffff', '#ff00ff', '#ff8800', '#8800ff',
     '#ffcccc', '#ccffcc', '#ccccff', '#ffffcc', '#ffccff', '#ccffff'
+  ];
+
+  const bulletListStyles = [
+    { name: 'Disc', value: 'disc', icon: '•' },
+    { name: 'Circle', value: 'circle', icon: '○' },
+    { name: 'Square', value: 'square', icon: '■' },
+    { name: 'Diamond', value: 'diamond', icon: '◆' },
+    { name: 'Dash', value: 'dash', icon: '–' },
+    { name: 'Arrow', value: 'arrow', icon: '→' }
+  ];
+
+  const numberedListStyles = [
+    { name: 'Decimal', value: 'decimal', icon: '1.' },
+    { name: 'Alpha Lower', value: 'lower-alpha', icon: 'a.' },
+    { name: 'Alpha Upper', value: 'upper-alpha', icon: 'A.' },
+    { name: 'Roman Lower', value: 'lower-roman', icon: 'i.' },
+    { name: 'Roman Upper', value: 'upper-roman', icon: 'I.' },
+    { name: 'Decimal Leading Zero', value: 'decimal-leading-zero', icon: '01.' }
   ];
 
   const specialChars = [
@@ -377,7 +401,8 @@ export function AdvancedRichTextEditor({
   };
 
   const insertTable = () => {
-    editor?.chain().focus().insertTable({ rows: 3, cols: 3, withHeaderRow: true }).run();
+    editor?.chain().focus().insertTable({ rows: tableRows, cols: tableCols, withHeaderRow: true }).run();
+    setShowTableDialog(false);
   };
 
   if (!editor) return null;
@@ -406,16 +431,24 @@ export function AdvancedRichTextEditor({
         {/* Text Size & Style */}
         <div className="flex gap-1 border-r pr-2">
           <div className="relative">
-            <button onClick={() => setShowTextSizeDropdown(!showTextSizeDropdown)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Text Size">
+            <button onClick={() => setShowTextSizeInput(!showTextSizeInput)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Text Size">
               <TextIcon size={16} />
             </button>
-            {showTextSizeDropdown && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                {textSizes.map((size) => (
-                  <button 
-                    key={size.value} 
-                    onClick={() => { 
-                      // Simple approach: insert HTML with inline style
+            {showTextSizeInput && (
+              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min="8"
+                    max="72"
+                    value={customTextSize}
+                    onChange={(e) => setCustomTextSize(e.target.value)}
+                    className={`w-20 px-2 py-1 border rounded text-sm ${variant === 'light' ? 'border-gray-300 text-gray-900' : 'border-slate-600 text-white bg-slate-800'}`}
+                    placeholder="px"
+                  />
+                  <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>px</span>
+                  <button
+                    onClick={() => {
                       const selectedText = editor?.state.doc.textBetween(
                         editor.state.selection.from,
                         editor.state.selection.to
@@ -423,22 +456,21 @@ export function AdvancedRichTextEditor({
                       
                       if (selectedText) {
                         editor?.chain().focus()
-                          .insertContent(`<span style="font-size: ${size.value}">${selectedText}</span>`)
+                          .insertContent(`<span style="font-size: ${customTextSize}px">${selectedText}</span>`)
                           .run();
                       } else {
                         editor?.chain().focus()
-                          .insertContent(`<span style="font-size: ${size.value}">Sample text</span>`)
+                          .insertContent(`<span style="font-size: ${customTextSize}px">Sample text</span>`)
                           .run();
                       }
                       
-                      setShowTextSizeDropdown(false); 
-                    }} 
-                    className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`} 
-                    style={{ fontSize: size.value }}
+                      setShowTextSizeInput(false);
+                    }}
+                    className={`px-3 py-1 text-sm rounded ${variant === 'light' ? 'bg-purple-600 text-white hover:bg-purple-700' : 'bg-purple-500 text-white hover:bg-purple-600'}`}
                   >
-                    {size.name}
+                    Apply
                   </button>
-                ))}
+                </div>
               </div>
             )}
           </div>
@@ -465,11 +497,29 @@ export function AdvancedRichTextEditor({
               <ColorIcon size={16} />
             </button>
             {showColorPicker && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-6 gap-1">
+              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <div className="grid grid-cols-6 gap-2 mb-2">
                   {colors.map((color) => (
-                    <button key={color} onClick={() => { editor.chain().focus().setColor(color).run(); setShowColorPicker(false); }} className="w-6 h-6 rounded border border-gray-300" style={{ backgroundColor: color }} title={color} />
+                    <button
+                      key={color}
+                      onClick={() => {
+                        editor?.chain().focus().setColor(color).run();
+                        setShowColorPicker(false);
+                      }}
+                      className={`w-8 h-8 rounded border-2 hover:scale-110 transition-transform ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
                   ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={editor?.getAttributes('textStyle').color || '#000000'}
+                    onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
+                    className={`w-12 h-8 border rounded cursor-pointer ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                  />
+                  <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>Custom</span>
                 </div>
               </div>
             )}
@@ -479,11 +529,29 @@ export function AdvancedRichTextEditor({
               <HighlighterIcon size={16} />
             </button>
             {showHighlightPicker && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-6 gap-1">
+              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <div className="grid grid-cols-6 gap-2 mb-2">
                   {highlightColors.map((color) => (
-                    <button key={color} onClick={() => { editor.chain().focus().toggleHighlight({ color }).run(); setShowHighlightPicker(false); }} className="w-6 h-6 rounded border border-gray-300" style={{ backgroundColor: color }} title={color} />
+                    <button
+                      key={color}
+                      onClick={() => { 
+                        editor?.chain().focus().toggleHighlight({ color }).run(); 
+                        setShowHighlightPicker(false); 
+                      }}
+                      className={`w-8 h-8 rounded border-2 hover:scale-110 transition-transform ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                      style={{ backgroundColor: color }}
+                      title={color}
+                    />
                   ))}
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="color"
+                    value={editor?.getAttributes('highlight').color || '#ffff00'}
+                    onChange={(e) => editor?.chain().focus().toggleHighlight({ color: e.target.value }).run()}
+                    className={`w-12 h-8 border rounded cursor-pointer ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                  />
+                  <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>Custom</span>
                 </div>
               </div>
             )}
@@ -515,12 +583,54 @@ export function AdvancedRichTextEditor({
 
         {/* Lists */}
         <div className="flex gap-1 border-r pr-2">
-          <button onClick={() => editor.chain().focus().toggleBulletList().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Bullet List">
-            <ListIcon size={16} />
-          </button>
-          <button onClick={() => editor.chain().focus().toggleOrderedList().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Numbered List">
-            <OrderedListIcon size={16} />
-          </button>
+          <div className="relative">
+            <button onClick={() => setShowBulletListDropdown(!showBulletListDropdown)} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Bullet List">
+              <ListIcon size={16} />
+            </button>
+            {showBulletListDropdown && (
+              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <div className="grid grid-cols-2 gap-1">
+                  {bulletListStyles.map((style) => (
+                    <button
+                      key={style.value}
+                      onClick={() => {
+                        editor?.chain().focus().toggleBulletList().updateAttributes('bulletList', { type: style.value }).run();
+                        setShowBulletListDropdown(false);
+                      }}
+                      className={`px-3 py-2 text-left rounded text-sm hover:bg-gray-100 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
+                    >
+                      <span className="mr-2">{style.icon}</span>
+                      {style.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button onClick={() => setShowNumberedListDropdown(!showNumberedListDropdown)} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Numbered List">
+              <OrderedListIcon size={16} />
+            </button>
+            {showNumberedListDropdown && (
+              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <div className="grid grid-cols-2 gap-1">
+                  {numberedListStyles.map((style) => (
+                    <button
+                      key={style.value}
+                      onClick={() => {
+                        editor?.chain().focus().toggleOrderedList().updateAttributes('orderedList', { type: style.value }).run();
+                        setShowNumberedListDropdown(false);
+                      }}
+                      className={`px-3 py-2 text-left rounded text-sm hover:bg-gray-100 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
+                    >
+                      <span className="mr-2">{style.icon}</span>
+                      {style.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Headings */}
@@ -538,9 +648,46 @@ export function AdvancedRichTextEditor({
 
         {/* Advanced Content */}
         <div className="flex gap-1 border-r pr-2">
-          <button onClick={insertTable} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Insert Table">
-            <TableIcon size={16} />
-          </button>
+          <div className="relative">
+            <button onClick={() => setShowTableDialog(!showTableDialog)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Insert Table">
+              <TableIcon size={16} />
+            </button>
+            {showTableDialog && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+                <div className={`rounded-lg p-4 w-80 ${variant === 'light' ? 'bg-white' : 'bg-slate-800'}`}>
+                  <h3 className={`font-semibold mb-3 ${variant === 'light' ? 'text-gray-900' : 'text-white'}`}>Insert Table</h3>
+                  <div className="flex gap-4 mb-3">
+                    <div className="flex-1">
+                      <label className={`block text-sm font-medium mb-1 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Rows</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={tableRows}
+                        onChange={(e) => setTableRows(parseInt(e.target.value) || 1)}
+                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300 bg-white text-gray-900' : 'border-slate-600 bg-slate-700 text-white'}`}
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <label className={`block text-sm font-medium mb-1 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Columns</label>
+                      <input
+                        type="number"
+                        min="1"
+                        max="20"
+                        value={tableCols}
+                        onChange={(e) => setTableCols(parseInt(e.target.value) || 1)}
+                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300 bg-white text-gray-900' : 'border-slate-600 bg-slate-700 text-white'}`}
+                      />
+                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setShowTableDialog(false)} className={`px-3 py-1 rounded ${variant === 'light' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-slate-600 text-white hover:bg-slate-500'}`}>Cancel</button>
+                    <button onClick={insertTable} className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700">Insert Table</button>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
           <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('blockquote') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Block Quote">
             <QuoteIcon size={16} />
           </button>
@@ -556,7 +703,7 @@ export function AdvancedRichTextEditor({
               <SmileIcon size={16} />
             </button>
             {showEmojiPicker && (
-              <div className="absolute top-full left-0 mt-1 z-20">
+              <div className="absolute top-full right-0 mt-1 z-50">
                 <EmojiPicker onEmojiClick={handleEmojiSelect} />
               </div>
             )}
@@ -566,9 +713,9 @@ export function AdvancedRichTextEditor({
               <ZapIcon size={16} />
             </button>
             {showSpecialChars && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 w-64 max-h-48 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`absolute top-full right-0 mt-1 p-2 rounded shadow-lg border z-50 w-64 max-h-48 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-8 gap-1">
-                  {specialChars.map((char, index) => (
+                  {specialChars.map((char: string, index: number) => (
                     <button key={index} onClick={() => handleSpecialCharSelect(char)} className={`p-1 rounded text-sm hover:bg-gray-200 ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>
                       {char}
                     </button>
@@ -596,7 +743,7 @@ export function AdvancedRichTextEditor({
               <DownloadIcon size={16} />
             </button>
             {showExportOptions && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`absolute top-full right-0 mt-1 p-2 rounded shadow-lg border z-50 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <button onClick={exportToPDF} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to PDF</button>
                 <button onClick={exportToWord} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to Word</button>
                 <button onClick={copyAsHTML} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Copy as HTML</button>
@@ -608,7 +755,7 @@ export function AdvancedRichTextEditor({
               <UploadIcon size={16} />
             </button>
             {showImportOptions && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`absolute top-full right-0 mt-1 p-2 rounded shadow-lg border z-50 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <button onClick={pasteFromWord} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Paste from Word</button>
                 <button onClick={() => fileInputRef.current?.click()} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import HTML</button>
                 <button onClick={() => docxInputRef.current?.click()} className={`block w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import DOCX</button>
