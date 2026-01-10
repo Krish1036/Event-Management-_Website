@@ -41,6 +41,7 @@ function OrganizerCreateEventFormContent() {
             image_url: state.data.image_url,
             capacity: state.data.total_capacity,
             is_registration_open: false,
+            event_type: state.data.event_type,
             price: state.data.event_type === 'paid' ? state.data.price : 0,
             save_mode: intent === 'submit' ? 'submit_for_approval' : 'draft'
           },
