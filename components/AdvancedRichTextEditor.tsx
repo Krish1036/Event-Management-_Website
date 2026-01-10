@@ -776,30 +776,35 @@ export const AdvancedRichTextEditor = ({
             side="bottom"
             sideOffset={4}
           />
-          <div className="relative">
-            <button onClick={() => setShowSpecialChars(!showSpecialChars)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Special Characters">
-              <ZapIcon size={16} />
-            </button>
-            {showSpecialChars && (
-              <div className={`fixed z-[9999] mt-1 p-3 rounded shadow-xl border w-72 max-h-64 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+          <CustomPopover
+            open={showSpecialChars}
+            onOpenChange={setShowSpecialChars}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Special Characters">
+                <ZapIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-3 rounded shadow-xl border w-72 max-h-64 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Special Characters</h4>
                 <div className="grid grid-cols-8 gap-2">
                   {specialChars.map((char: string, index: number) => (
                     <button 
-                      key={index} 
-                      onClick={() => handleSpecialCharSelect(char)} 
-                      className={`p-2 rounded text-sm flex items-center justify-center hover:bg-opacity-50 ${variant === 'light' 
-                        ? 'text-gray-700 hover:bg-gray-100' 
-                        : 'text-white hover:bg-slate-600'}`}
-                      title={`Insert ${char}`}
+                      key={index}
+                      onClick={() => handleSpecialCharSelect(char)}
+                      className={`p-1 text-sm rounded hover:bg-gray-100 ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}
+                      title={char}
                     >
                       {char}
                     </button>
                   ))}
                 </div>
               </div>
-            )}
-          </div>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
         </div>
 
         {/* Link */}
