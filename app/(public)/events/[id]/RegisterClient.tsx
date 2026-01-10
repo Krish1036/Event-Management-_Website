@@ -109,12 +109,33 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         order_id: data.order_id,
         name: 'University Events',
         description: 'Event registration',
-        handler: function () {
-          toast.success('Payment completed! Registration is being confirmed...');
-          // Registration will be created by webhook, redirect after delay
-          setTimeout(() => {
-            window.location.href = '/dashboard';
-          }, 3000);
+        handler: async function (response: any) {
+          toast.success('Payment completed! Confirming registration...');
+          try {
+            // Manually confirm registration since test mode doesn't trigger webhooks
+            const confirmRes = await fetch('/api/manual-confirm-payment', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                event_id: eventId,
+                payment_id: response.razorpay_payment_id,
+                order_id: response.razorpay_order_id,
+                amount: data.amount * 100
+              })
+            });
+            const confirmData = await confirmRes.json();
+            if (confirmData.success) {
+              toast.success('Registration confirmed! Redirecting to tickets...');
+              setTimeout(() => {
+                window.location.href = `/tickets/${confirmData.registration_id}`;
+              }, 2000);
+            } else {
+              toast.error('Payment successful but registration failed. Please contact support.');
+            }
+          } catch (error) {
+            console.error('Confirmation error:', error);
+            toast.error('Payment successful but confirmation failed. Please contact support.');
+          }
         },
         modal: {
           ondismiss: function () {

@@ -4,10 +4,20 @@ import crypto from 'crypto';
 
 export async function POST(request: NextRequest) {
   try {
+    console.log('🔔 Razorpay webhook called');
+    
     const body = await request.text();
     const signature = request.headers.get("x-razorpay-signature");
 
+    console.log('📥 Webhook details:', {
+      hasBody: !!body,
+      bodyLength: body.length,
+      hasSignature: !!signature,
+      signatureLength: signature?.length || 0
+    });
+
     if (!signature) {
+      console.error('❌ No signature in webhook');
       return NextResponse.json({ error: "No signature" }, { status: 400 });
     }
 
@@ -16,17 +26,39 @@ export async function POST(request: NextRequest) {
       .update(body)
       .digest("hex");
 
+    console.log('🔐 Signature verification:', {
+      expected: expected.substring(0, 20) + '...',
+      received: signature.substring(0, 20) + '...',
+      match: expected === signature
+    });
+
     if (expected !== signature) {
+      console.error('❌ Invalid signature');
       return NextResponse.json({ error: "Invalid signature" }, { status: 401 });
     }
 
     const payload = JSON.parse(body);
+    console.log('📦 Webhook payload:', {
+      type: payload.event,
+      hasPayment: !!payload.payload?.payment,
+      paymentId: payload.payload?.payment?.entity?.id
+    });
+
     const payment = payload.payload.payment.entity;
     
     // Get event and user info from Razorpay notes
     const event_id = payment.notes?.event_id;
     const user_id = payment.notes?.user_id;
     const event_title = payment.notes?.event_title;
+
+    console.log('👤 Payment details:', {
+      event_id,
+      user_id,
+      event_title,
+      payment_id: payment.id,
+      order_id: payment.order_id,
+      amount: payment.amount
+    });
 
     if (!event_id || !user_id) {
       return NextResponse.json({ error: "Missing event_id or user_id" }, { status: 400 });
