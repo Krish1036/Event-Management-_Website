@@ -11,6 +11,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script src="https://checkout.razorpay.com/v1/checkout.js" async />
+      </head>
       <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
         <SupabaseProvider>
           <div className="flex min-h-screen flex-col">

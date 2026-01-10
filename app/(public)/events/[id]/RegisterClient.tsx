@@ -110,7 +110,11 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         name: 'University Events',
         description: 'Event registration',
         handler: function () {
-          toast.success('Payment completed. Awaiting confirmation.');
+          toast.success('Payment completed! Registration is being confirmed...');
+          // Registration will be created by webhook, redirect after delay
+          setTimeout(() => {
+            window.location.href = '/dashboard';
+          }, 3000);
         },
         modal: {
           ondismiss: function () {
@@ -119,7 +123,7 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         }
       };
 
-      // @ts-expect-error Razorpay is loaded globally by checkout.js script
+      // Razorpay is loaded globally by checkout.js script
       const rzp = new window.Razorpay(options);
       rzp.open();
     } catch (err: any) {
