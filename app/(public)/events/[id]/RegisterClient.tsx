@@ -109,6 +109,30 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         order_id: data.order_id,
         name: 'University Events',
         description: 'Event registration',
+        image: 'https://bfspxxunptawbuivhvyq.supabase.co/storage/v1/object/public/icon/U.V.-Patel-College-of-Engineering.png',
+        theme: {
+          color: '#9333ea'
+        },
+        modal: {
+          ondismiss: function () {
+            toast('You can reopen your ticket later once payment is processed.');
+          },
+          escape: false,
+          handleback: false,
+          confirm: true,
+          persistent: true,
+          backdropclose: false,
+          animation: true
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: ''
+        },
+        notes: {
+          event_id: eventId,
+          event_title: 'Event Registration'
+        },
         handler: async function (response: any) {
           toast.success('Payment completed! Confirming registration...');
           try {
@@ -137,11 +161,6 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
             toast.error('Payment successful but confirmation failed. Please contact support.');
           }
         },
-        modal: {
-          ondismiss: function () {
-            toast('You can reopen your ticket later once payment is processed.');
-          }
-        }
       };
 
       // Razorpay is loaded globally by checkout.js script
