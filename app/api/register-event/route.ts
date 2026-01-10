@@ -80,27 +80,42 @@ export async function POST(request: NextRequest) {
     }
 
     // PAID EVENT - Create Razorpay order first, registration after payment
+    const orderPayload = {
+      amount: event.price * 100,
+      currency: "INR",
+      receipt: `order_${eventId}_${user.id}_${Date.now()}`,
+      notes: {
+        event_id: eventId,
+        user_id: user.id,
+        event_title: event.title
+      },
+    };
+
+    console.log('Creating Razorpay order:', {
+      url: "https://api.razorpay.com/v1/orders",
+      payload: orderPayload,
+      keyId: process.env.RAZORPAY_KEY_ID,
+      hasSecret: !!process.env.RAZORPAY_KEY_SECRET
+    });
+
     const res = await fetch("https://api.razorpay.com/v1/orders", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": "Basic " + Buffer.from(`${process.env.RAZORPAY_KEY_ID}:${process.env.RAZORPAY_KEY_SECRET}`).toString('base64'),
       },
-      body: JSON.stringify({
-        amount: event.price * 100,
-        currency: "INR",
-        receipt: `order_${eventId}_${user.id}_${Date.now()}`,
-        notes: {
-          event_id: eventId,
-          user_id: user.id,
-          event_title: event.title
-        },
-      }),
+      body: JSON.stringify(orderPayload),
     });
 
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error('Failed to create payment order');
+      const errorText = await res.text();
+      console.error('Razorpay API Error:', {
+        status: res.status,
+        statusText: res.statusText,
+        error: errorText,
+        headers: Object.fromEntries(res.headers.entries())
+      });
+      throw new Error(`Razorpay API Error: ${res.status} - ${errorText}`);
     }
 
     const order = await res.json();
