@@ -2,6 +2,7 @@
 // These alternatives to purple/pink work well with light backgrounds
 
 // 1. BLUE THEME (Professional & Corporate)
+/*
 .blue-theme {
   background: linear-gradient(to bottom right, #f0f9ff, #e0f2fe);
   border-color: #0ea5e9;
@@ -9,8 +10,10 @@
   hover-color: #0ea5e9;
   text-color: #334155;
 }
+*/
 
 // 2. GREEN THEME (Fresh & Natural)
+/*
 .green-theme {
   background: linear-gradient(to bottom right, #f0fdf4, #dcfce7);
   border-color: #22c55e;
@@ -18,8 +21,10 @@
   hover-color: #22c55e;
   text-color: #334155;
 }
+*/
 
 // 3. TEAL/TURQUOISE THEME (Modern & Clean)
+/*
 .teal-theme {
   background: linear-gradient(to bottom right, #f0fdfa, #ccfbf1);
   border-color: #14b8a6;
@@ -27,8 +32,10 @@
   hover-color: #14b8a6;
   text-color: #334155;
 }
+*/
 
 // 4. INDIGO THEME (Sophisticated & Deep)
+/*
 .indigo-theme {
   background: linear-gradient(to bottom right, #eef2ff, #e0e7ff);
   border-color: #6366f1;
@@ -36,8 +43,10 @@
   hover-color: #6366f1;
   text-color: #334155;
 }
+*/
 
 // 5. ORANGE/AMBER THEME (Warm & Energetic)
+/*
 .orange-theme {
   background: linear-gradient(to bottom right, #fffbeb, #fef3c7);
   border-color: #f59e0b;
@@ -45,8 +54,10 @@
   hover-color: #f59e0b;
   text-color: #334155;
 }
+*/
 
 // 6. ROSE/PINK THEME (Elegant & Soft - alternative to purple)
+/*
 .rose-theme {
   background: linear-gradient(to bottom right, #fff1f2, #ffe4e6);
   border-color: #f43f5e;
@@ -54,8 +65,10 @@
   hover-color: #f43f5e;
   text-color: #334155;
 }
+*/
 
 // 7. SLATE/GRAY THEME (Minimal & Neutral)
+/*
 .slate-theme {
   background: linear-gradient(to bottom right, #f8fafc, #f1f5f9);
   border-color: #64748b;
@@ -63,8 +76,10 @@
   hover-color: #64748b;
   text-color: #334155;
 }
+*/
 
 // 8. CYAN THEME (Bright & Fresh)
+/*
 .cyan-theme {
   background: linear-gradient(to bottom right, #ecfeff, #cffafe);
   border-color: #06b6d4;
@@ -72,6 +87,7 @@
   hover-color: #06b6d4;
   text-color: #334155;
 }
+*/
 
 // TAILWIND CLASS EQUIVALENTS
 const tailwindClasses = {
