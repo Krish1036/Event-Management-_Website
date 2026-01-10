@@ -2,6 +2,7 @@ import './globals.css';
 import type { Metadata } from 'next';
 import { ReactNode } from 'react';
 import { SupabaseProvider } from '@/lib/supabase-provider';
+import PublicFooter from '@/components/PublicFooter';
 
 export const metadata: Metadata = {
   title: 'University Event Management',
@@ -20,6 +21,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <main className="flex-1 bg-gradient-to-b from-slate-950 to-slate-900">
               {children}
             </main>
+            <PublicFooter />
           </div>
         </SupabaseProvider>
       </body>

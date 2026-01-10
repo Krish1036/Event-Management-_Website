@@ -129,10 +129,43 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error: any) {
-    console.error('register-event failed', error);
+    console.error('register-event failed', {
+      error: error.message,
+      stack: error.stack,
+      eventId,
+      userId: user.id,
+      timestamp: new Date().toISOString()
+    });
+    
+    // Return specific error messages for better user experience
+    let errorMessage = 'Registration failed';
+    let statusCode = 400;
+    
+    if (error.message.includes('Event not found')) {
+      errorMessage = 'This event is no longer available';
+      statusCode = 404;
+    } else if (error.message.includes('Already registered')) {
+      errorMessage = 'You are already registered for this event';
+      statusCode = 409;
+    } else if (error.message.includes('Razorpay API Error')) {
+      errorMessage = 'Payment service is temporarily unavailable. Please try again later';
+      statusCode = 503;
+    } else if (error.message.includes('Unable to register')) {
+      errorMessage = 'Registration is currently full or closed';
+      statusCode = 409;
+    } else if (error.message.includes('capacity')) {
+      errorMessage = 'This event has reached maximum capacity';
+      statusCode = 409;
+    }
+    
     return NextResponse.json(
-      { success: false, error: error.message || 'Registration failed' },
-      { status: 400 }
+      { 
+        success: false, 
+        error: errorMessage,
+        error_code: error.message.includes('Razorpay') ? 'PAYMENT_ERROR' : 'REGISTRATION_ERROR',
+        retry_after: statusCode === 503 ? 60 : undefined // Suggest retry after 60 seconds for service errors
+      },
+      { status: statusCode }
     );
   }
 }

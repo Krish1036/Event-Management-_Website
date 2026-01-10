@@ -7,7 +7,7 @@
 /* Header */
 .dashboard-header {
   border-bottom: 1px solid #e2e8f0;
-  background-color: #ffffff;
+  background: linear-gradient(to bottom right, #faf5ff, #f3e8ff);
 }
 
 .header-content {
@@ -66,7 +66,7 @@
 }
 
 .nav-link:hover {
-  color: #334155;
+  color: #a855f7;
 }
 
 .nav-link.active {

@@ -140,7 +140,7 @@ function EventCard({ event, onEdit }: EventCardProps) {
             </div>
             <div className="flex items-center text-sm text-gray-500">
               <Users className="w-4 h-4 mr-1" />
-              {event.capacity} participants • {event.price > 0 ? `$${event.price}` : 'Free'}
+              {event.capacity} participants • {event.price > 0 ? `₹${event.price}` : 'Free'}
             </div>
             <div className="flex items-center mt-2">
               <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${getStatusColor(event.status)}`}>

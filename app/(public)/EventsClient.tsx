@@ -274,7 +274,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                     <div className="progress-header">
                       <span className="progress-percentage">{progress}%</span>
                       <span className="event-price">
-                        {event.is_paid ? `$${event.price}` : 'Free'}
+                        {event.is_paid ? `₹${event.price}` : 'Free'}
                       </span>
                     </div>
                     <div className="progress-bar">

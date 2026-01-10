@@ -1,6 +1,6 @@
 "use client";
 
-import { RegisterClient } from './RegisterClient';
+import { RegisterClient } from './RegisterClientNew';
 
 interface RegistrationFormField {
   id: string;
