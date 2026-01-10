@@ -408,23 +408,16 @@ export function AdvancedRichTextEditor({
   if (!editor) return null;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-lg overflow-visible relative">
       {/* Toolbar */}
-      <div className={`border-b p-2 flex flex-wrap gap-1 ${variant === 'light' ? 'bg-gray-50 border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+      <div className={`border-b p-2 flex flex-wrap gap-1 relative z-10 ${variant === 'light' ? 'bg-gray-50 border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+        
         {/* Basic Formatting */}
         <div className="flex gap-1 border-r pr-2">
-          <button 
-            onClick={() => editor.chain().focus().toggleBold().run()} 
-            className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} 
-            title="Bold (Ctrl+B)"
-          >
+          <button onClick={() => editor.chain().focus().toggleBold().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bold') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Bold (Ctrl+B)">
             <BoldIcon size={16} />
           </button>
-          <button 
-            onClick={() => editor.chain().focus().toggleItalic().run()} 
-            className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} 
-            title="Italic (Ctrl+I)"
-          >
+          <button onClick={() => editor.chain().focus().toggleItalic().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('italic') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Italic (Ctrl+I)">
             <ItalicIcon size={16} />
           </button>
           <button onClick={() => editor.chain().focus().toggleUnderline().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('underline') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Underline (Ctrl+U)">
@@ -486,7 +479,7 @@ export function AdvancedRichTextEditor({
               <FontIcon size={16} />
             </button>
             {showFontDropdown && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-10 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 {fonts.map((font) => (
                   <button key={font.value} onClick={() => { editor.chain().focus().setFontFamily(font.value).run(); setShowFontDropdown(false); }} className={`w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`} style={{ fontFamily: font.value }}>
                     {font.name}
@@ -504,29 +497,35 @@ export function AdvancedRichTextEditor({
               <ColorIcon size={16} />
             </button>
             {showColorPicker && (
-              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-6 gap-2 mb-2">
+              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Text Color</h4>
+                <div className="grid grid-cols-6 gap-2 mb-3">
                   {colors.map((color) => (
                     <button
                       key={color}
                       onClick={() => {
-                        editor?.chain().focus().setColor(color).run();
+                        editor.chain().focus().setColor(color).run();
                         setShowColorPicker(false);
                       }}
-                      className={`w-8 h-8 rounded border-2 hover:scale-110 transition-transform ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                      className="w-6 h-6 rounded border border-gray-300 hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 transition-all"
                       style={{ backgroundColor: color }}
                       title={color}
                     />
                   ))}
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={editor?.getAttributes('textStyle').color || '#000000'}
-                    onChange={(e) => editor?.chain().focus().setColor(e.target.value).run()}
-                    className={`w-12 h-8 border rounded cursor-pointer ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
-                  />
-                  <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>Custom</span>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Custom:</span>
+                  <div className="flex items-center">
+                    <input
+                      type="color"
+                      onChange={(e) => {
+                        editor.chain().focus().setColor(e.target.value).run();
+                        setShowColorPicker(false);
+                      }}
+                      className="w-8 h-8 p-0 border-0 rounded cursor-pointer"
+                      title="Select custom color"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -595,7 +594,7 @@ export function AdvancedRichTextEditor({
               <ListIcon size={16} />
             </button>
             {showBulletListDropdown && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-2 gap-1">
                   {bulletListStyles.map((style) => (
                     <button
@@ -619,7 +618,7 @@ export function AdvancedRichTextEditor({
               <OrderedListIcon size={16} />
             </button>
             {showNumberedListDropdown && (
-              <div className={`absolute top-full left-0 mt-1 p-2 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-2 gap-1">
                   {numberedListStyles.map((style) => (
                     <button
@@ -660,11 +659,11 @@ export function AdvancedRichTextEditor({
               <TableIcon size={16} />
             </button>
             {showTableDialog && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-60">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
                 <div className={`rounded-lg p-4 w-80 ${variant === 'light' ? 'bg-white' : 'bg-slate-800'}`}>
                   <h3 className={`font-semibold mb-3 ${variant === 'light' ? 'text-gray-900' : 'text-white'}`}>Insert Table</h3>
-                  <div className="space-y-4">
-                    <div>
+                  <div className="flex gap-4 mb-3">
+                    <div className="flex-1">
                       <label className={`block text-sm font-medium mb-1 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Rows</label>
                       <input
                         type="number"
@@ -672,59 +671,76 @@ export function AdvancedRichTextEditor({
                         max="20"
                         value={tableRows}
                         onChange={(e) => setTableRows(parseInt(e.target.value) || 1)}
-                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300' : 'border-slate-600 bg-slate-700 text-white'}`}
+                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300 bg-white text-gray-900' : 'border-slate-600 bg-slate-700 text-white'}`}
                       />
                     </div>
-                    <div>
+                    <div className="flex-1">
                       <label className={`block text-sm font-medium mb-1 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Columns</label>
                       <input
                         type="number"
                         min="1"
-                        max="10"
+                        max="20"
                         value={tableCols}
                         onChange={(e) => setTableCols(parseInt(e.target.value) || 1)}
-                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300' : 'border-slate-600 bg-slate-700 text-white'}`}
+                        className={`w-full p-2 rounded border ${variant === 'light' ? 'border-gray-300 bg-white text-gray-900' : 'border-slate-600 bg-slate-700 text-white'}`}
                       />
                     </div>
-                    <div className="flex justify-end gap-2">
-                      <button
-                        onClick={() => setShowTableDialog(false)}
-                        className={`px-3 py-1 rounded ${variant === 'light' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-slate-600 text-white hover:bg-slate-500'}`}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={insertTable}
-                        className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700"
-                      >
-                        Insert
-                      </button>
-                    </div>
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <button onClick={() => setShowTableDialog(false)} className={`px-3 py-1 rounded ${variant === 'light' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' : 'bg-slate-600 text-white hover:bg-slate-500'}`}>Cancel</button>
+                    <button onClick={insertTable} className="px-3 py-1 rounded bg-purple-600 text-white hover:bg-purple-700">Insert Table</button>
                   </div>
                 </div>
               </div>
             )}
           </div>
+          <button onClick={() => editor.chain().focus().toggleBlockquote().run()} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('blockquote') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Block Quote">
+            <QuoteIcon size={16} />
+          </button>
+          <button onClick={() => editor.chain().focus().setHorizontalRule().run()} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Horizontal Rule">
+            <MinusIcon size={16} />
+          </button>
+        </div>
 
-          {/* Special Characters */}
+        {/* Special Characters */}
+        <div className="flex gap-1 border-r pr-2">
           <div className="relative">
-            <button 
-              onClick={() => setShowSpecialChars(!showSpecialChars)} 
-              className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} 
-              title="Special Characters"
-            >
+            <button onClick={() => setShowEmojiPicker(!showEmojiPicker)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Emoji Picker">
+              <SmileIcon size={16} />
+            </button>
+            {showEmojiPicker && (
+              <div className="fixed z-[9999] mt-1">
+                <div className="bg-white rounded-lg shadow-xl border border-gray-200 w-80">
+                  <EmojiPicker 
+                    onEmojiClick={handleEmojiSelect}
+                    width="100%"
+                    height={400}
+                    searchPlaceholder="Search emojis..."
+                    previewConfig={{
+                      showPreview: false
+                    }}
+                    skinTonesDisabled
+                  />
+                </div>
+              </div>
+            )}
+          </div>
+          <div className="relative">
+            <button onClick={() => setShowSpecialChars(!showSpecialChars)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Special Characters">
               <ZapIcon size={16} />
             </button>
             {showSpecialChars && (
-              <div className={`absolute bottom-full mb-1 right-0 p-3 rounded shadow-lg border z-60 w-64 max-h-64 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-3 rounded shadow-xl border w-72 max-h-64 overflow-y-auto ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Special Characters</h4>
                 <div className="grid grid-cols-8 gap-2">
                   {specialChars.map((char: string, index: number) => (
-                    <button
-                      key={index}
-                      onClick={() => handleSpecialCharSelect(char)}
-                      className={`w-8 h-8 flex items-center justify-center rounded text-sm hover:scale-110 transition-transform ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}
-                      title={`Character code: ${char.charCodeAt(0).toString(16)}`}
+                    <button 
+                      key={index} 
+                      onClick={() => handleSpecialCharSelect(char)} 
+                      className={`p-2 rounded text-sm flex items-center justify-center hover:bg-opacity-50 ${variant === 'light' 
+                        ? 'text-gray-700 hover:bg-gray-100' 
+                        : 'text-white hover:bg-slate-600'}`}
+                      title={`Insert ${char}`}
                     >
                       {char}
                     </button>
@@ -752,7 +768,7 @@ export function AdvancedRichTextEditor({
               <DownloadIcon size={16} />
             </button>
             {showExportOptions && (
-              <div className={`absolute bottom-full mb-1 right-0 p-2 rounded shadow-lg border z-[100] min-w-[180px] ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <button onClick={exportToPDF} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to PDF</button>
                 <button onClick={exportToWord} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to Word</button>
                 <button onClick={copyAsHTML} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Copy as HTML</button>
@@ -764,7 +780,7 @@ export function AdvancedRichTextEditor({
               <UploadIcon size={16} />
             </button>
             {showImportOptions && (
-              <div className={`absolute bottom-full mb-1 right-0 p-2 rounded shadow-lg border z-[100] min-w-[180px] ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <button onClick={pasteFromWord} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Paste from Word</button>
                 <button onClick={() => fileInputRef.current?.click()} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import HTML</button>
                 <button onClick={() => docxInputRef.current?.click()} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import DOCX</button>
@@ -792,13 +808,15 @@ export function AdvancedRichTextEditor({
       </div>
 
       {/* Editor Content */}
-      <div ref={editorRef} className={`p-4 relative z-10 ${variant === 'light' ? 'bg-white' : 'bg-slate-800'}`}>
-        <EditorContent editor={editor} className="min-h-[200px]" />
+      <div className="relative z-0">
+        <div ref={editorRef}>
+          <EditorContent editor={editor} />
+        </div>
       </div>
 
       {/* Find & Replace Dialog */}
       {showFindReplace && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-[9999]">
           <div className={`rounded-lg p-4 w-96 ${variant === 'light' ? 'bg-white' : 'bg-slate-800'}`}>
             <h3 className={`font-semibold mb-3 ${variant === 'light' ? 'text-gray-900' : 'text-white'}`}>Find & Replace</h3>
             <input type="text" value={findText} onChange={(e) => setFindText(e.target.value)} placeholder="Find text" className={`w-full p-2 rounded border mb-2 ${variant === 'light' ? 'border-gray-300 bg-white text-gray-900' : 'border-slate-600 bg-slate-700 text-white'}`} />
@@ -827,9 +845,7 @@ export function AdvancedRichTextEditor({
 
       {/* Error Message */}
       {error && (
-        <div className="p-2">
-          <p className="text-sm text-red-400">{error}</p>
-        </div>
+        <p className="mt-1 text-sm text-red-400">{error}</p>
       )}
     </div>
   );
