@@ -83,7 +83,7 @@ export async function POST(request: NextRequest) {
     const orderPayload = {
       amount: event.price * 100,
       currency: "INR",
-      receipt: `order_${eventId}_${user.id}_${Date.now()}`,
+      receipt: `ord_${Date.now().toString(36)}`,
       notes: {
         event_id: eventId,
         user_id: user.id,
