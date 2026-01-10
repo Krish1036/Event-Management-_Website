@@ -65,49 +65,19 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
   };
 
   return (
-    <header className="bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 shadow-sm px-8 py-8 rounded-lg">
+    <header className="bg-gradient-to-r from-purple-50 via-purple-100 to-purple-50 shadow-sm px-8 py-5 rounded-lg">
       <div className="flex items-center justify-between">
-        {/* Left side - Branding and Navigation */}
-        <div className="flex items-center gap-6 flex-1">
-          {/* Logo and University Name */}
-          <div className="flex items-center gap-4">
-            <img 
-              src="/icon/U.V.-Patel-College-of-Engineering.png" 
-              alt="Ganpat University Logo" 
-              className="h-12 w-auto object-contain"
-            />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-800">Ganpat University</h1>
-              <p className="text-base text-gray-600">Event Management System</p>
-            </div>
-          </div>
-          
-          {/* Navigation Links */}
-          <nav className="flex items-center gap-4 ml-6">
-            <Link 
-              href="/organizer-dashboard"
-              className="text-lg text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            >
-              Home
-            </Link>
-            <Link 
-              href="/organizer-dashboard/events"
-              className="text-lg text-gray-700 hover:text-gray-900 font-medium transition-colors"
-            >
-              Events
-            </Link>
-          </nav>
-        </div>
+        <div></div>
         <div className="flex items-center gap-6">
           {/* Date/Time */}
-          <span className="text-base text-gray-700 font-medium">{currentTime}</span>
+          <span className="text-sm text-gray-700 font-medium">{currentTime}</span>
           
           {/* Icons */}
           <button className="text-gray-700 hover:text-gray-900 transition-colors">
-            <Bell className="w-6 h-6" />
+            <Bell className="w-5 h-5" />
           </button>
           <button className="text-gray-700 hover:text-gray-900 transition-colors">
-            <Settings className="w-6 h-6" />
+            <Settings className="w-5 h-5" />
           </button>
           
           {/* User Profile Dropdown */}
@@ -116,11 +86,11 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
               onClick={() => setDropdownOpen(!dropdownOpen)}
               className="flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <span className="text-base font-medium text-gray-800">
+              <span className="text-sm font-medium text-gray-800">
                 Hi, {userName || 'Organizer'}
               </span>
               <span className="text-gray-500 hover:text-gray-700">
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </span>

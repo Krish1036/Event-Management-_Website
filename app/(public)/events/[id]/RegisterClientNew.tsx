@@ -196,6 +196,42 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
   if (!formFields || formFields.length === 0) {
     return (
       <div className="space-y-4">
+        {/* Mobile-only overflow control */}
+        <style jsx>{`
+          @media (max-width: 480px) {
+            div {
+              overflow-x: hidden;
+              max-width: 100vw;
+              width: 100%;
+            }
+            .space-y-4 > * {
+              max-width: 100%;
+              box-sizing: border-box;
+            }
+            .flex {
+              flex-wrap: wrap;
+            }
+            .w-full {
+              max-width: 100% !important;
+              width: 100% !important;
+              box-sizing: border-box;
+            }
+            .bg-blue-50 {
+              max-width: 100%;
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+            }
+            label {
+              word-wrap: break-word;
+              overflow-wrap: break-word;
+              hyphens: auto;
+            }
+            a {
+              word-break: break-all;
+              max-width: 100%;
+            }
+          }
+        `}</style>
         {/* Legal Agreements Section */}
         <div className="space-y-4 border-t pt-6">
           <h3 className="text-lg font-semibold text-gray-900">Legal Agreements</h3>
@@ -285,6 +321,51 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
 
   return (
     <form onSubmit={handleRegister} className="space-y-4">
+      {/* Mobile-only overflow control */}
+      <style jsx>{`
+        @media (max-width: 480px) {
+          form {
+            overflow-x: hidden;
+            max-width: 100vw;
+            width: 100%;
+          }
+          .space-y-4 > * {
+            max-width: 100%;
+            box-sizing: border-box;
+          }
+          .flex {
+            flex-wrap: wrap;
+          }
+          .w-full {
+            max-width: 100% !important;
+            width: 100% !important;
+            box-sizing: border-box;
+          }
+          input[type="file"],
+          input[type="text"],
+          input[type="email"],
+          input[type="tel"],
+          input[type="number"] {
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
+          }
+          .bg-blue-50 {
+            max-width: 100%;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+          }
+          label {
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+          }
+          a {
+            word-break: break-all;
+            max-width: 100%;
+          }
+        }
+      `}</style>
       {formFields.map((field) => {
         const isFile = field.field_type === 'file';
         const isSelect = field.field_type === 'select' && field.options && field.options.length > 0;

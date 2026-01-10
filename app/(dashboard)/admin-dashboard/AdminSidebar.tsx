@@ -46,7 +46,6 @@ export default function AdminSidebar() {
           alt="Ganpat University Logo" 
           className="h-12 w-auto object-contain"
         />
-        <span className="text-2xl font-bold text-gray-900">UnivEvents</span>
       </div>
 
       {/* Panel Title */}

@@ -154,7 +154,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
-            <button className="action-button primary">
+            <button className="action-button primary mobile-hidden">
               <Plus className="icon" />
             </button>
             <select 
@@ -188,13 +188,13 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
               <option value="December">December</option>
             </select>
             <button 
-              className={`action-button ${viewMode === 'grid' ? 'primary' : 'secondary'}`}
+              className={`action-button ${viewMode === 'grid' ? 'primary' : 'secondary'} mobile-hidden`}
               onClick={() => setViewMode('grid')}
             >
               <Grid className="icon" />
             </button>
             <button 
-              className={`action-button ${viewMode === 'list' ? 'primary' : 'secondary'}`}
+              className={`action-button ${viewMode === 'list' ? 'primary' : 'secondary'} mobile-hidden`}
               onClick={() => setViewMode('list')}
             >
               <List className="icon" />

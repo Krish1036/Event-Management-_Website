@@ -39,7 +39,8 @@ export default function PublicNavbar() {
     const handleClickOutside = (event: MouseEvent) => {
       if (showProfileDropdown) {
         const target = event.target as Element;
-        if (!target.closest('.relative')) {
+        const dropdownContainer = document.querySelector('.profile-dropdown-container');
+        if (dropdownContainer && !dropdownContainer.contains(target)) {
           setShowProfileDropdown(false);
         }
       }
@@ -53,6 +54,10 @@ export default function PublicNavbar() {
     const supabase = getSupabaseBrowserClient();
     await supabase.auth.signOut();
     window.location.href = '/login';
+  };
+
+  const toggleDropdown = () => {
+    setShowProfileDropdown(!showProfileDropdown);
   };
 
   return (
@@ -80,17 +85,35 @@ export default function PublicNavbar() {
           <button className="icon-button text-gray-700 hover:text-gray-900 p-3">
             <Settings className="icon w-6 h-6" />
           </button>
-          <div className="relative">
+          <div className="relative profile-dropdown-container">
             <button 
               className="admin-profile flex items-center gap-2 hover:opacity-80 transition-opacity"
-              onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+              onClick={(e) => {
+                e.stopPropagation();
+                toggleDropdown();
+              }}
             >
               <span className="admin-label text-gray-800 text-base">Hi, {userName}</span>
               <ChevronDown className="w-5 h-5 text-gray-600" />
             </button>
             
             {showProfileDropdown && (
-              <div className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+              <div 
+                  className="absolute right-0 top-full mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-[9999]"
+                  style={{
+                    position: 'absolute',
+                    right: '0',
+                    top: '100%',
+                    marginTop: '0.5rem',
+                    zIndex: 99999,
+                    backgroundColor: 'white',
+                    border: '1px solid rgb(229 231 235)',
+                    borderRadius: '0.5rem',
+                    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+                    minWidth: '12rem',
+                    padding: '0.5rem 0'
+                  }}
+                >
                 <Link 
                   href="/dashboard"
                   className="flex items-center gap-2 px-4 py-3 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors"
