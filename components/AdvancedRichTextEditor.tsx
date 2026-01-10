@@ -601,8 +601,9 @@ export const AdvancedRichTextEditor = ({
               </button>
             }
             content={
-              <div className={`p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-6 gap-2 mb-2">
+              <div className={`p-3 rounded shadow-lg border z-20 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Highlight Color</h4>
+                <div className="grid grid-cols-6 gap-2 mb-3">
                   {highlightColors.map((color) => (
                     <button
                       key={color}
@@ -610,20 +611,23 @@ export const AdvancedRichTextEditor = ({
                         editor?.chain().focus().toggleHighlight({ color }).run(); 
                         setShowHighlightPicker(false); 
                       }}
-                      className={`w-8 h-8 rounded border-2 hover:scale-110 transition-transform ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
+                      className="w-6 h-6 rounded border border-gray-300 hover:ring-2 hover:ring-offset-1 hover:ring-blue-500 transition-all"
                       style={{ backgroundColor: color }}
                       title={color}
                     />
                   ))}
                 </div>
-                <div className="flex items-center gap-2">
-                  <input
-                    type="color"
-                    value={editor?.getAttributes('highlight').color || '#ffff00'}
-                    onChange={(e) => editor?.chain().focus().toggleHighlight({ color: e.target.value }).run()}
-                    className={`w-12 h-8 border rounded cursor-pointer ${variant === 'light' ? 'border-gray-300' : 'border-slate-600'}`}
-                  />
-                  <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>Custom</span>
+                <div className="flex items-center justify-between">
+                  <span className={`text-xs ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Custom:</span>
+                  <div className="flex items-center">
+                    <input
+                      type="color"
+                      value={editor?.getAttributes('highlight').color || '#ffff00'}
+                      onChange={(e) => editor?.chain().focus().toggleHighlight({ color: e.target.value }).run()}
+                      className="w-8 h-8 p-0 border-0 rounded cursor-pointer"
+                      title="Select custom highlight color"
+                    />
+                  </div>
                 </div>
               </div>
             }
@@ -667,8 +671,9 @@ export const AdvancedRichTextEditor = ({
               </button>
             }
             content={
-              <div className={`p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-2 gap-1">
+              <div className={`p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Bullet List Style</h4>
+                <div className="space-y-1">
                   {bulletListStyles.map((style) => (
                     <button
                       key={style.value}
@@ -676,9 +681,9 @@ export const AdvancedRichTextEditor = ({
                         editor?.chain().focus().toggleBulletList().updateAttributes('bulletList', { type: style.value }).run();
                         setShowBulletListDropdown(false);
                       }}
-                      className={`px-3 py-2 text-left rounded text-sm hover:bg-gray-100 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
+                      className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
                     >
-                      <span className="mr-2">{style.icon}</span>
+                      <span className="text-lg">{style.icon}</span>
                       {style.name}
                     </button>
                   ))}
@@ -698,8 +703,9 @@ export const AdvancedRichTextEditor = ({
               </button>
             }
             content={
-              <div className={`p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <div className="grid grid-cols-2 gap-1">
+              <div className={`p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Numbered List Style</h4>
+                <div className="space-y-1">
                   {numberedListStyles.map((style) => (
                     <button
                       key={style.value}
@@ -707,9 +713,9 @@ export const AdvancedRichTextEditor = ({
                         editor?.chain().focus().toggleOrderedList().updateAttributes('orderedList', { type: style.value }).run();
                         setShowNumberedListDropdown(false);
                       }}
-                      className={`px-3 py-2 text-left rounded text-sm hover:bg-gray-100 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
+                      className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}
                     >
-                      <span className="mr-2">{style.icon}</span>
+                      <span className="text-lg">{style.icon}</span>
                       {style.name}
                     </button>
                   ))}
@@ -856,32 +862,70 @@ export const AdvancedRichTextEditor = ({
           <button onClick={() => setShowFindReplace(!showFindReplace)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Find & Replace (Ctrl+F)">
             <SearchIcon size={16} />
           </button>
-          <div className="relative">
-            <button onClick={() => setShowExportOptions(!showExportOptions)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Export">
-              <DownloadIcon size={16} />
-            </button>
-            {showExportOptions && (
-              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <button onClick={exportToPDF} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to PDF</button>
-                <button onClick={exportToWord} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Export to Word</button>
-                <button onClick={copyAsHTML} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Copy as HTML</button>
+          <CustomPopover
+            open={showExportOptions}
+            onOpenChange={setShowExportOptions}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Export">
+                <DownloadIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Export Options</h4>
+                <div className="space-y-1">
+                  <button onClick={exportToPDF} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <FileTextIcon size={16} />
+                    Export to PDF
+                  </button>
+                  <button onClick={exportToWord} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <FileTextIcon size={16} />
+                    Export to Word
+                  </button>
+                  <button onClick={copyAsHTML} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <CopyIcon size={16} />
+                    Copy as HTML
+                  </button>
+                </div>
               </div>
-            )}
-          </div>
-          <div className="relative">
-            <button onClick={() => setShowImportOptions(!showImportOptions)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Import">
-              <UploadIcon size={16} />
-            </button>
-            {showImportOptions && (
-              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                <button onClick={pasteFromWord} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Paste from Word</button>
-                <button onClick={() => fileInputRef.current?.click()} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import HTML</button>
-                <button onClick={() => docxInputRef.current?.click()} className={`block w-full text-left px-3 py-2 rounded text-sm whitespace-nowrap ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`}>Import DOCX</button>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
+          <CustomPopover
+            open={showImportOptions}
+            onOpenChange={setShowImportOptions}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Import">
+                <UploadIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Import Options</h4>
+                <div className="space-y-1">
+                  <button onClick={pasteFromWord} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <FileTextIcon size={16} />
+                    Paste from Word
+                  </button>
+                  <button onClick={() => fileInputRef.current?.click()} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <UploadIcon size={16} />
+                    Import HTML
+                  </button>
+                  <button onClick={() => docxInputRef.current?.click()} className={`w-full text-left px-3 py-2 rounded text-sm hover:bg-gray-100 flex items-center gap-2 ${variant === 'light' ? 'text-gray-700' : 'text-white hover:bg-slate-600'}`}>
+                    <UploadIcon size={16} />
+                    Import DOCX
+                  </button>
+                </div>
                 <input ref={fileInputRef} type="file" accept=".html,.htm" onChange={importHTML} className="hidden" />
                 <input ref={docxInputRef} type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={importDOCX} className="hidden" />
               </div>
-            )}
-          </div>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
         </div>
 
         {/* Undo/Redo */}
