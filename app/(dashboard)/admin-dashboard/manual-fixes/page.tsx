@@ -378,7 +378,14 @@ export default async function AdminManualFixesPage({
                         <div className="space-y-1 text-sm text-gray-500">
                           <div className="flex items-center gap-2">
                             <Calendar className="w-4 h-4" />
-                            Created: {new Date(payment.created_at).toLocaleString()}
+                            Created: {new Date(payment.created_at).toLocaleString('en-US', {
+                            year: 'numeric',
+                            month: 'short',
+                            day: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                          })}
                           </div>
                           <div className="flex items-center gap-2">
                             <AlertTriangle className="w-4 h-4" />

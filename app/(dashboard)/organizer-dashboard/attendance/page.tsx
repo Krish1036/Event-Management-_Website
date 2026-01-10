@@ -386,7 +386,14 @@ export default async function OrganizerAttendancePage({
                     <p className="text-xs text-gray-600">
                       {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
                     </p>
-                    <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString()}</p>
+                    <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}</p>
                   </div>
                 </div>
               ))}

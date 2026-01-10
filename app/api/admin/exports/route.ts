@@ -54,7 +54,14 @@ async function exportRegistrations(supabase: any) {
     'Event Price': reg.event?.price || 0,
     'Status': reg.status,
     'Entry Code': reg.entry_code,
-    'Created At': String(new Date(reg.created_at).toLocaleString())
+    'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -122,7 +129,14 @@ async function exportEventDetailed(supabase: any, eventId: string) {
       'Event Is Paid': reg.event?.is_paid ?? '',
       Status: reg.status,
       'Entry Code': reg.entry_code,
-      'Created At': String(new Date(reg.created_at).toLocaleString())
+      'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
     };
 
     // Initialise all custom field columns as empty strings
@@ -186,7 +200,14 @@ async function exportAttendance(supabase: any) {
     'Event Title': att.event?.title || '',
     'Event Date': att.event?.event_date ? String(new Date(att.event.event_date).toLocaleDateString()) : '',
     'Entry Code': att.registration?.entry_code || '',
-    'Checked In At': String(new Date(att.checked_in_at).toLocaleString())
+    'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -222,7 +243,14 @@ async function exportManualRegistrations(supabase: any) {
     'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
     'Status': reg.status,
     'Entry Code': reg.entry_code,
-    'Created At': String(new Date(reg.created_at).toLocaleString())
+    'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -261,7 +289,14 @@ async function exportPayments(supabase: any) {
     'Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
     'Razorpay Payment ID': payment.razorpay_payment_id || '',
-    'Created At': String(new Date(payment.created_at).toLocaleString())
+    'Created At': String(new Date(payment.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -286,7 +321,14 @@ async function exportUsers(supabase: any) {
     'Full Name': user.full_name || '',
     'Email': user.email,
     'Role': user.role,
-    'Created At': String(new Date(user.created_at).toLocaleString())
+    'Created At': String(new Date(user.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);

@@ -221,7 +221,14 @@ export default async function OrganizerRegistrationsPage({
                   {reg.user?.full_name ?? 'User'} · {reg.user?.email ?? 'No email'} · Entry code: {reg.entry_code ?? 'N/A'}
                 </p>
                 <p className="text-[11px] text-gray-600">
-                  Registered on {new Date(reg.created_at).toLocaleString()}
+                  Registered on {new Date(reg.created_at).toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    hour12: true
+                  })}
                   {reg.event?.price && reg.event.is_paid && ` · Price: ₹${reg.event.price}`}
                 </p>
               </div>

@@ -86,7 +86,14 @@ export default async function DashboardPage() {
                 {r.event?.is_paid ? `• Paid • ₹${r.event.price}` : '• Free'}
                 {!PAYMENTS_ENABLED && r.event?.is_paid && ' · payments disabled (test mode)'}
               </p>
-              <p className="mt-1 text-[11px] text-slate-400">Registered on {new Date(r.created_at).toLocaleString()}</p>
+              <p className="mt-1 text-[11px] text-slate-400">Registered on {new Date(r.created_at).toLocaleString('en-US', {
+                  year: 'numeric',
+                  month: 'short',
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit',
+                  hour12: true
+                })}</p>
             </div>
             <div className="flex flex-col items-start gap-2 md:items-end">
               <span

@@ -287,7 +287,14 @@ export default async function AdminPaymentsPage({
                           {payment.razorpay_payment_id && (
                             <p>Payment ID: {payment.razorpay_payment_id}</p>
                           )}
-                          <p>Created: {new Date(payment.created_at).toLocaleString()}</p>
+                          <p>Created: {new Date(payment.created_at).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}</p>
                         </div>
                       </div>
                     </div>

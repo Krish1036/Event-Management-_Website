@@ -75,7 +75,14 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
     'Payment Amount': reg.payment?.amount ?? '',
     'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
     'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
-    'Created At': String(new Date(reg.created_at).toLocaleString())
+    'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: true
+    }))
   }));
 
   return generateCSV(csvData, headers);
@@ -111,7 +118,14 @@ async function exportAttendance(admin: any, eventIds: string[]) {
     'Event Title': att.event?.title || '',
     'Event Date': att.event?.event_date ? String(new Date(att.event.event_date).toLocaleDateString()) : '',
     'Entry Code': att.registration?.entry_code || '',
-    'Checked In At': String(new Date(att.checked_in_at).toLocaleString())
+    'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -161,7 +175,14 @@ async function exportPayments(admin: any, eventIds: string[]) {
     'Razorpay Payment ID': payment.razorpay_payment_id || '',
     'Registration ID': payment.registration?.id || '',
     'Entry Code': payment.registration?.entry_code || '',
-    'Created At': String(new Date(payment.created_at).toLocaleString())
+    'Created At': String(new Date(payment.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  }))
   }));
 
   return generateCSV(csvData, headers);
@@ -244,7 +265,14 @@ async function exportEventDetailed(admin: any, organizerId: string, eventId: str
       'Payment Amount': reg.payment?.amount ?? '',
       'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
       'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
-      'Created At': String(new Date(reg.created_at).toLocaleString())
+      'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
+        year: 'numeric',
+        month: 'short',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true
+      }))
     };
 
     for (const label of fieldLabels) row[label] = '';

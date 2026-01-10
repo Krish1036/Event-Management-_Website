@@ -177,7 +177,14 @@ export default async function DashboardPage() {
                           </div>
                         </div>
                         <p className="text-sm text-gray-600">
-                          Registered on {new Date(r.created_at).toLocaleString()}
+                          Registered on {new Date(r.created_at).toLocaleString('en-US', {
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: true
+                        })}
                         </p>
                       </div>
                       

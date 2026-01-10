@@ -19,7 +19,7 @@ export default function AdminHeader({ userName }: { userName: string }) {
         day: 'numeric',
         hour: '2-digit',
         minute: '2-digit',
-        hour12: false,
+        hour12: true,
         timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
       };
       

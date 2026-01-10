@@ -17,7 +17,14 @@ export function ViewTicketButton({ registration }: ViewTicketButtonProps) {
     const entryCode = registration.entry_code ?? "N/A";
     const eventTitle = registration.event?.title ?? "Event";
     const status = registration.status ?? "UNKNOWN";
-    const createdAt = new Date(registration.created_at).toLocaleString();
+    const createdAt = new Date(registration.created_at).toLocaleString('en-US', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  });
     const pricePart = registration.event?.is_paid
       ? `Price: ₹${registration.event.price}`
       : "Free event";
