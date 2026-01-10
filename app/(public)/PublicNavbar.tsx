@@ -67,8 +67,7 @@ export default function PublicNavbar() {
                 className="h-full w-auto object-contain"
               />
             </div>
-            <span className="logo-text text-gray-800 text-xl">Ganpat University</span>
-          </div>
+                      </div>
           <nav className="main-nav">
             <Link href="/" className={`nav-link text-base ${pathname === '/' ? 'active' : ''}`}>Home</Link>
             <Link href="/events" className={`nav-link text-base ${pathname === '/events' ? 'active' : ''}`}>Events</Link>
