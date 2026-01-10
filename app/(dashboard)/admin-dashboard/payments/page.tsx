@@ -38,12 +38,24 @@ async function getPaymentsData(statusFilter: string | null, eventFilter: string 
 
   let query = supabase
     .from('payments')
-    .select(
-      `id,amount,status,razorpay_order_id,razorpay_payment_id,razorpay_signature,created_at,
-       registration:registrations(id,status,entry_code,event_id,user_id),
-       event:events(id,title,is_paid,price),
-       user:profiles(id,full_name)`
-    )
+    .select(`
+      id,
+      amount,
+      status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      razorpay_signature,
+      created_at,
+      registration:registrations(
+        id,
+        status,
+        entry_code,
+        event_id,
+        user_id,
+        event:events(id, title, is_paid, price),
+        user:profiles(id, full_name, email)
+      )
+    `)
     .order('created_at', { ascending: false });
 
   if (statusFilter && statusFilter !== 'all') {
@@ -51,7 +63,7 @@ async function getPaymentsData(statusFilter: string | null, eventFilter: string 
   }
 
   if (eventFilter && eventFilter !== 'all') {
-    query = query.eq('event_id', eventFilter);
+    query = query.eq('registration.event_id', eventFilter);
   }
 
   const { data } = await query;

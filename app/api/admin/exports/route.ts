@@ -260,9 +260,16 @@ async function exportPayments(supabase: any) {
   const { data } = await supabase
     .from('payments')
     .select(`
-      id,amount,status,razorpay_order_id,razorpay_payment_id,created_at,
-      user:profiles(id,full_name,email),
-      event:events(id,title,event_date)
+      id,
+      amount,
+      status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      created_at,
+      registration:registrations(
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date)
+      )
     `)
     .order('created_at', { ascending: false });
 
@@ -281,10 +288,10 @@ async function exportPayments(supabase: any) {
 
   const csvData = (data ?? []).map((payment: any) => ({
     'Payment ID': payment.id,
-    'User Name': payment.user?.full_name || '',
-    'User Email': payment.user?.email || '',
-    'Event Title': payment.event?.title || '',
-    'Event Date': payment.event?.event_date ? String(new Date(payment.event.event_date).toLocaleDateString()) : '',
+    'User Name': payment.registration?.user?.full_name || '',
+    'User Email': payment.registration?.user?.email || '',
+    'Event Title': payment.registration?.event?.title || '',
+    'Event Date': payment.registration?.event?.event_date ? String(new Date(payment.registration.event.event_date).toLocaleDateString()) : '',
     'Amount': payment.amount,
     'Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',

@@ -134,12 +134,21 @@ async function exportAttendance(admin: any, eventIds: string[]) {
 async function exportPayments(admin: any, eventIds: string[]) {
   const { data } = await admin
     .from('payments')
-    .select(
-      `id,amount,status,razorpay_order_id,razorpay_payment_id,created_at,
-       registration:registrations(id,event_id,entry_code),
-       user:profiles(id,full_name,email),
-       event:events(id,title,event_date,is_paid,price)`
-    )
+    .select(`
+      id,
+      amount,
+      status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      created_at,
+      registration:registrations(
+        id,
+        event_id,
+        entry_code,
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date,is_paid,price)
+      )
+    `)
     .order('created_at', { ascending: false });
 
   const filtered = (data ?? []).filter((p: any) => eventIds.includes(p.registration?.event_id));
@@ -163,12 +172,12 @@ async function exportPayments(admin: any, eventIds: string[]) {
 
   const csvData = filtered.map((payment: any) => ({
     'Payment ID': payment.id,
-    'User Name': payment.user?.full_name || '',
-    'User Email': payment.user?.email || '',
-    'Event Title': payment.event?.title || '',
-    'Event Date': payment.event?.event_date ? String(new Date(payment.event.event_date).toLocaleDateString()) : '',
-    'Free / Paid': payment.event?.is_paid ? 'Paid' : 'Free',
-    'Event Price': payment.event?.price ?? '',
+    'User Name': payment.registration?.user?.full_name || '',
+    'User Email': payment.registration?.user?.email || '',
+    'Event Title': payment.registration?.event?.title || '',
+    'Event Date': payment.registration?.event?.event_date ? String(new Date(payment.registration.event.event_date).toLocaleDateString()) : '',
+    'Free / Paid': payment.registration?.event?.is_paid ? 'Paid' : 'Free',
+    'Event Price': payment.registration?.event?.price ?? '',
     Amount: payment.amount,
     'Payment Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
