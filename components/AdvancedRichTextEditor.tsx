@@ -25,7 +25,8 @@ import TableHeader from '@tiptap/extension-table-header';
 import Blockquote from '@tiptap/extension-blockquote';
 import HorizontalRule from '@tiptap/extension-horizontal-rule';
 import CharacterCount from '@tiptap/extension-character-count';
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
+import * as Popover from '@radix-ui/react-popover';
 import EmojiPicker from 'emoji-picker-react';
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
@@ -72,14 +73,54 @@ interface AdvancedRichTextEditorProps {
   maxLength?: number;
 }
 
-export function AdvancedRichTextEditor({ 
-  value, 
-  onChange, 
-  variant = 'light', 
-  placeholder = 'Describe your event in detail', 
+export const AdvancedRichTextEditor = ({
+  value,
+  onChange,
+  variant = 'light',
+  placeholder = 'Describe your event in detail',
   error,
-  maxLength = 10000 
-}: AdvancedRichTextEditorProps) {
+  maxLength = 10000
+}: AdvancedRichTextEditorProps) => {
+  // Custom Popover component that handles viewport edge detection
+  const CustomPopover = ({
+    open, 
+    onOpenChange, 
+    trigger, 
+    content, 
+    align = 'center',
+    side = 'bottom',
+    sideOffset = 4,
+    className = ''
+  }: {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    trigger: React.ReactNode;
+    content: React.ReactNode;
+    align?: 'start' | 'center' | 'end';
+    side?: 'top' | 'right' | 'bottom' | 'left';
+    sideOffset?: number;
+    className?: string;
+  }) => {
+    return (
+      <Popover.Root open={open} onOpenChange={onOpenChange}>
+        <Popover.Trigger asChild>
+          {trigger}
+        </Popover.Trigger>
+        <Popover.Portal>
+          <Popover.Content 
+            className={`z-[9999] rounded-md border bg-white shadow-lg ${className}`}
+            sideOffset={sideOffset}
+            align={align}
+            side={side}
+            collisionPadding={8}
+          >
+            {content}
+          </Popover.Content>
+        </Popover.Portal>
+      </Popover.Root>
+    );
+  };
+
   const [showColorPicker, setShowColorPicker] = useState(false);
   const [showHighlightPicker, setShowHighlightPicker] = useState(false);
   const [showLinkDialog, setShowLinkDialog] = useState(false);
