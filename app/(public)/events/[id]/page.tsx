@@ -68,7 +68,10 @@ export default async function EventDetailPage({ params }: { params: { id: string
             <Card variant="light" className="shadow-sm">
               <CardHeader>
                 <CardTitle className="text-3xl font-bold text-gray-900 break-words">{event.title}</CardTitle>
-                <p className="text-gray-600 mt-3 leading-relaxed break-words">{event.description}</p>
+                <div 
+                  className="text-gray-600 mt-3 leading-relaxed break-words prose prose-sm max-w-none"
+                  dangerouslySetInnerHTML={{ __html: event.description || 'No description available' }}
+                />
               </CardHeader>
               <CardContent>
                 <div className="flex flex-wrap gap-3">

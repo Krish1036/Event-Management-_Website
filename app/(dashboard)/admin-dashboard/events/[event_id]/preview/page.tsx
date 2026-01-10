@@ -181,7 +181,10 @@ export default async function AdminEventPreviewPage({
 
           <div>
             <p className="text-slate-400 text-xs">Description</p>
-            <p className="text-slate-200 whitespace-pre-wrap">{event.description || 'No description'}</p>
+            <div 
+              className="text-slate-200 prose prose-sm max-w-none prose-invert"
+              dangerouslySetInnerHTML={{ __html: event.description || 'No description' }}
+            />
           </div>
         </CardContent>
       </Card>

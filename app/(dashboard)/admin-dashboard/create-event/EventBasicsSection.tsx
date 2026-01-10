@@ -2,6 +2,7 @@
 
 import { useCreateEvent } from './CreateEventProvider';
 import { ImageUpload } from '@/components/ui/ImageUpload';
+import { AdvancedRichTextEditor } from '@/components/AdvancedRichTextEditor';
 
 export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, updateField, setError, clearError } = useCreateEvent();
@@ -130,17 +131,13 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
           <label htmlFor="description" className={labelClass}>
             Event Description <span className="text-red-400">*</span>
           </label>
-          <textarea
-            id="description"
-            value={state.data.description}
-            onChange={(e) => handleInputChange('description', e.target.value)}
-            rows={4}
-            className={`${inputBase} resize-vertical ${state.errors.description ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
+          <AdvancedRichTextEditor
+            value={state.data.description || ''}
+            onChange={(value: string) => handleInputChange('description', value)}
+            variant={variant}
             placeholder="Describe your event in detail"
+            error={state.errors.description}
           />
-          {state.errors.description && (
-            <p className="mt-1 text-sm text-red-400">{state.errors.description}</p>
-          )}
         </div>
 
         {/* Location */}
