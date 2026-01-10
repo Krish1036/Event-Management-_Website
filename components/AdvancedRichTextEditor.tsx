@@ -108,11 +108,16 @@ export const AdvancedRichTextEditor = ({
         </Popover.Trigger>
         <Popover.Portal>
           <Popover.Content 
-            className={`z-[9999] rounded-md border bg-white shadow-lg ${className}`}
+            className={`fixed z-[9999] rounded-md border bg-white shadow-lg ${className}`}
             sideOffset={sideOffset}
             align={align}
             side={side}
             collisionPadding={8}
+            style={{
+              maxHeight: '400px',
+              overflowY: 'auto',
+              transform: side === 'top' ? 'translateY(-8px)' : 'translateY(8px)'
+            }}
           >
             {content}
           </Popover.Content>
