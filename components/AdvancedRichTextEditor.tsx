@@ -521,29 +521,42 @@ export const AdvancedRichTextEditor = ({
             )}
           </div>
           <div className="relative">
-            <button onClick={() => setShowFontDropdown(!showFontDropdown)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Font Family">
-              <FontIcon size={16} />
-            </button>
-            {showFontDropdown && (
-              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
-                {fonts.map((font) => (
-                  <button key={font.value} onClick={() => { editor.chain().focus().setFontFamily(font.value).run(); setShowFontDropdown(false); }} className={`w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`} style={{ fontFamily: font.value }}>
-                    {font.name}
-                  </button>
-                ))}
-              </div>
-            )}
+            <CustomPopover
+              open={showFontDropdown}
+              onOpenChange={setShowFontDropdown}
+              trigger={
+                <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Font Family">
+                  <FontIcon size={16} />
+                </button>
+              }
+              content={
+                <div className={`p-2 rounded shadow-xl border w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+                  {fonts.map((font) => (
+                    <button key={font.value} onClick={() => { editor.chain().focus().setFontFamily(font.value).run(); setShowFontDropdown(false); }} className={`w-full text-left px-2 py-1 rounded text-sm ${variant === 'light' ? 'text-gray-700 hover:bg-gray-100' : 'text-white hover:bg-slate-600'}`} style={{ fontFamily: font.value }}>
+                      {font.name}
+                    </button>
+                  ))}
+                </div>
+              }
+              align="start"
+              side="bottom"
+              sideOffset={4}
+            />
           </div>
         </div>
 
         {/* Text Colors */}
         <div className="flex gap-1 border-r pr-2">
-          <div className="relative">
-            <button onClick={() => setShowColorPicker(!showColorPicker)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Text Color">
-              <ColorIcon size={16} />
-            </button>
-            {showColorPicker && (
-              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+          <CustomPopover
+            open={showColorPicker}
+            onOpenChange={setShowColorPicker}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Text Color">
+                <ColorIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-3 rounded shadow-lg border z-50 w-48 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <h4 className={`text-sm font-medium mb-2 ${variant === 'light' ? 'text-gray-700' : 'text-gray-300'}`}>Text Color</h4>
                 <div className="grid grid-cols-6 gap-2 mb-3">
                   {colors.map((color) => (
@@ -574,14 +587,21 @@ export const AdvancedRichTextEditor = ({
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-          <div className="relative">
-            <button onClick={() => setShowHighlightPicker(!showHighlightPicker)} className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Highlight">
-              <HighlighterIcon size={16} />
-            </button>
-            {showHighlightPicker && (
-              <div className={`absolute top-full left-0 mt-1 p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
+          <CustomPopover
+            open={showHighlightPicker}
+            onOpenChange={setShowHighlightPicker}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Highlight">
+                <HighlighterIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-3 rounded shadow-lg border z-20 ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-6 gap-2 mb-2">
                   {highlightColors.map((color) => (
                     <button
@@ -606,8 +626,11 @@ export const AdvancedRichTextEditor = ({
                   <span className={`text-sm ${variant === 'light' ? 'text-gray-600' : 'text-gray-300'}`}>Custom</span>
                 </div>
               </div>
-            )}
-          </div>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
         </div>
 
         {/* Subscript/Superscript */}
@@ -635,12 +658,16 @@ export const AdvancedRichTextEditor = ({
 
         {/* Lists */}
         <div className="flex gap-1 border-r pr-2">
-          <div className="relative">
-            <button onClick={() => setShowBulletListDropdown(!showBulletListDropdown)} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Bullet List">
-              <ListIcon size={16} />
-            </button>
-            {showBulletListDropdown && (
-              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+          <CustomPopover
+            open={showBulletListDropdown}
+            onOpenChange={setShowBulletListDropdown}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('bulletList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Bullet List">
+                <ListIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-2 gap-1">
                   {bulletListStyles.map((style) => (
                     <button
@@ -657,14 +684,21 @@ export const AdvancedRichTextEditor = ({
                   ))}
                 </div>
               </div>
-            )}
-          </div>
-          <div className="relative">
-            <button onClick={() => setShowNumberedListDropdown(!showNumberedListDropdown)} className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Numbered List">
-              <OrderedListIcon size={16} />
-            </button>
-            {showNumberedListDropdown && (
-              <div className={`fixed z-[9999] mt-1 p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
+          <CustomPopover
+            open={showNumberedListDropdown}
+            onOpenChange={setShowNumberedListDropdown}
+            trigger={
+              <button className={`p-2 rounded hover:bg-gray-200 ${editor.isActive('orderedList') ? 'bg-gray-300' : ''} ${variant === 'dark' ? 'hover:bg-slate-600 text-white' : 'text-gray-700'}`} title="Numbered List">
+                <OrderedListIcon size={16} />
+              </button>
+            }
+            content={
+              <div className={`p-2 rounded shadow-xl border ${variant === 'light' ? 'bg-white border-gray-300' : 'bg-slate-700 border-slate-600'}`}>
                 <div className="grid grid-cols-2 gap-1">
                   {numberedListStyles.map((style) => (
                     <button
@@ -681,8 +715,11 @@ export const AdvancedRichTextEditor = ({
                   ))}
                 </div>
               </div>
-            )}
-          </div>
+            }
+            align="start"
+            side="bottom"
+            sideOffset={4}
+          />
         </div>
 
         {/* Headings */}
