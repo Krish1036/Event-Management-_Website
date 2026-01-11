@@ -4,6 +4,8 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import PublicNavbar from '../../(public)/PublicNavbar';
+import '../../(public)/EventsDashboard.css';
 
 export const revalidate = 0;
 
@@ -99,12 +101,15 @@ export default async function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F3F9F9] p-8">
-      <div className="mx-auto max-w-6xl">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">My Registrations</h1>
-          <p className="text-gray-600">View and access your event tickets and QR codes.</p>
+    <div className="dashboard-container">
+      <PublicNavbar />
+      
+      {/* Main Content */}
+      <div className="main-content">
+        {/* Page Header */}
+        <div className="page-header">
+          <div className="breadcrumb">Dashboard / My Registrations</div>
+          <h1 className="page-title">My Registrations</h1>
         </div>
 
         {/* Stats Cards */}
