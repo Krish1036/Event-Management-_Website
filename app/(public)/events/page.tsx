@@ -8,6 +8,18 @@ export const revalidate = 30;
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 
+// Basic HTML sanitization function to prevent XSS
+function sanitizeHTML(html: string): string {
+  if (typeof window === 'undefined') {
+    // Server-side: strip all HTML tags using regex
+    return html.replace(/<[^>]*>/g, '');
+  }
+  
+  // Client-side: use DOMParser to parse HTML and get text content
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+}
+
 async function getEvents(params: { paid?: 'free' | 'paid' }) {
   const supabase = getSupabaseServerClient();
 
@@ -87,7 +99,7 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
                 <EventImage 
                   src={event.image_url}
                   alt={event.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-fill group-hover:scale-105 transition-transform duration-300"
                 />
               </div>
               
@@ -103,7 +115,7 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
                   </span>
                 </div>
                 
-                <p className="mb-4 text-gray-600 line-clamp-2 flex-1">{event.description}</p>
+                <p className="mb-4 text-gray-600 line-clamp-2 flex-1">{sanitizeHTML(event.description || '')}</p>
                 
                 <div className="flex items-center justify-between text-sm text-gray-500 pt-4 border-t border-gray-100">
                   <div className="flex items-center gap-1">

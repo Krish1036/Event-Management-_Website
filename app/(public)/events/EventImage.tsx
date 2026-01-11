@@ -16,7 +16,7 @@ export default function EventImage({ src, alt, className }: EventImageProps) {
   }
 
   return (
-    <>
+    <div className="relative w-full h-full">
       <img 
         src={src} 
         alt={alt}
@@ -24,12 +24,18 @@ export default function EventImage({ src, alt, className }: EventImageProps) {
         onError={(e) => {
           const target = e.target as HTMLImageElement;
           target.style.display = 'none';
-          target.nextElementSibling?.classList.remove('hidden');
+          const parent = target.parentElement;
+          if (parent) {
+            const fallback = parent.querySelector('.fallback-placeholder');
+            if (fallback) {
+              fallback.classList.remove('hidden');
+            }
+          }
         }}
       />
-      <div className="w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden">
+      <div className="fallback-placeholder absolute inset-0 w-full h-full bg-gradient-to-br from-purple-100 to-purple-200 flex items-center justify-center hidden">
         <div className="text-purple-400 text-4xl">📅</div>
       </div>
-    </>
+    </div>
   );
 }

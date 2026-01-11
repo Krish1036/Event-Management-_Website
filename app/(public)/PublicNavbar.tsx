@@ -79,12 +79,6 @@ export default function PublicNavbar() {
           </nav>
         </div>
         <div className="header-right">
-          <button className="icon-button text-gray-700 hover:text-gray-900 p-3">
-            <Bell className="icon w-6 h-6" />
-          </button>
-          <button className="icon-button text-gray-700 hover:text-gray-900 p-3">
-            <Settings className="icon w-6 h-6" />
-          </button>
           <div className="relative profile-dropdown-container">
             <button 
               className="admin-profile flex items-center gap-2 hover:opacity-80 transition-opacity"
