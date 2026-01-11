@@ -1041,6 +1041,304 @@
 }
 
 /* ========================================
+   SURFACE DUO FIXES (540px to 720px)
+   ========================================
+   CRITICAL: These fixes apply ONLY to Surface Duo screens
+   to prevent content cut-off while preserving
+   mobile and desktop layouts exactly as they are.
+   ======================================== */
+
+@media (min-width: 540px) and (max-width: 720px) {
+  /* General fixes for Surface Duo - prevent horizontal scrolling */
+  .dashboard-container {
+    overflow-x: hidden !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+  }
+
+  body {
+    overflow-x: hidden !important;
+  }
+
+  /* Fix header layout to prevent logo and notification overlap */
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 0.5rem !important;
+    gap: 1rem;
+  }
+
+  .header-left {
+    margin-left: 0 !important;
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .logo-section {
+    flex-shrink: 0;
+    margin-right: 0.5rem;
+  }
+
+  .header-right {
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+  }
+
+  .icon-button {
+    padding: 0.5rem !important;
+    margin: 0;
+  }
+
+  /* Fix filter actions to align Category and All Time selectors */
+  .filter-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .search-box {
+    width: 100%;
+    margin-bottom: 0.5rem;
+  }
+
+  .action-button.secondary {
+    flex: 1;
+    min-width: 120px;
+    margin: 0;
+  }
+
+  /* Vertical Mode: Hide grid selector, fix logo */
+  @media (orientation: portrait) {
+    /* Hide grid/list selectors in vertical mode */
+    .mobile-hidden {
+      display: none !important;
+    }
+
+    .main-content {
+      padding: 1rem 0.5rem !important;
+    }
+
+    /* Stack filters vertically in portrait */
+    .filter-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .search-box {
+      margin-bottom: 0.75rem;
+    }
+
+    .action-button.secondary {
+      width: 100%;
+      margin-bottom: 0.5rem;
+    }
+  }
+
+  /* Horizontal Mode (Single Screen): Hide grid selector */
+  @media (orientation: landscape) and (max-width: 540px) {
+    /* Hide grid/list selectors for single screen landscape */
+    .mobile-hidden {
+      display: none !important;
+    }
+
+    .main-content {
+      padding: 1rem 0.5rem !important;
+    }
+
+    /* Horizontal layout for filters in single screen landscape */
+    .filter-actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .search-box {
+      width: auto;
+      flex: 1;
+      min-width: 150px;
+      margin-bottom: 0;
+    }
+
+    .action-button.secondary {
+      flex: none;
+      min-width: 100px;
+    }
+  }
+
+  /* Horizontal Mode (Double Screen): Keep grid selector, fix UI */
+  @media (orientation: landscape) and (min-width: 541px) {
+    /* Keep grid selectors visible for double screen landscape */
+    .mobile-hidden {
+      display: flex !important;
+    }
+
+    /* Fix UI for double screen landscape */
+    .header-content {
+      padding: 1.5rem 1rem !important;
+    }
+
+    .main-content {
+      padding: 2rem 1rem !important;
+    }
+
+    /* Horizontal layout for filters in double screen landscape */
+    .filter-actions {
+      flex-direction: row;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .search-box {
+      width: auto;
+      flex: 1;
+      min-width: 200px;
+      margin-bottom: 0;
+    }
+
+    .action-button.secondary {
+      flex: none;
+      min-width: 120px;
+      margin-bottom: 0;
+    }
+  }
+}
+
+/* ========================================
+   SURFACE PRO 7 FIXES (912px to 1368px)
+   ========================================
+   CRITICAL: These fixes apply ONLY to Surface Pro 7 screens
+   to prevent content cut-off while preserving
+   mobile and desktop layouts exactly as they are.
+   ======================================== */
+
+@media (min-width: 912px) and (max-width: 1368px) {
+  .header-content {
+    padding: 1.5rem 1rem 1.5rem 1rem !important;
+  }
+
+  .header-left {
+    margin-left: 0rem !important;
+  }
+
+  .main-content {
+    padding: 2rem 1rem !important;
+  }
+
+  .filter-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .action-button.secondary {
+    flex-grow: 1;
+  }
+}
+
+/* ========================================
+   IPAD PRO FIXES (1024px to 1366px)
+   ========================================
+   CRITICAL: These fixes apply ONLY to iPad Pro screens
+   to prevent content cut-off while preserving
+   mobile and desktop layouts exactly as they are.
+   ======================================== */
+
+@media (min-width: 1024px) and (max-width: 1366px) {
+  .header-content {
+    padding: 1.5rem 1rem 1.5rem 1rem !important;
+  }
+
+  .header-left {
+    margin-left: 0rem !important;
+  }
+
+  .main-content {
+    padding: 2rem 1rem !important;
+  }
+
+  .filter-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .action-button.secondary {
+    flex-grow: 1;
+  }
+}
+
+/* ========================================
+   IPAD AIR FIXES (768px to 1180px)
+   ========================================
+   CRITICAL: These fixes apply ONLY to iPad Air screens
+   to prevent content cut-off while preserving
+   mobile and desktop layouts exactly as they are.
+   ======================================== */
+
+@media (min-width: 768px) and (max-width: 1180px) {
+  .header-content {
+    padding: 1.5rem 1rem 1.5rem 1rem !important;
+  }
+
+  .header-left {
+    margin-left: 0rem !important;
+  }
+
+  .main-content {
+    padding: 2rem 1rem !important;
+  }
+
+  .filter-actions {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .action-button.secondary {
+    flex-grow: 1;
+  }
+}
+
+/* ========================================
+   TABLET LOGO FIX (768px to 1024px)
+   ========================================
+   CRITICAL: This fix applies ONLY to tablet screens
+   to prevent logo cut-off while preserving
+   mobile and desktop layouts exactly as they are.
+   ======================================== */
+
+@media (min-width: 768px) and (max-width: 1024px) {
+  .header-left {
+    margin-left: -2rem !important;
+  }
+  
+  .header-content {
+    padding-left: 2rem !important;
+  }
+}
+
+/* ========================================
    MOBILE LANDSCAPE FIXES (max-height: 500px) and (min-width: 600px)
    ========================================
    CRITICAL: These fixes apply ONLY to mobile landscape mode
