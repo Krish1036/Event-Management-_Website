@@ -31,13 +31,10 @@ async function getEventWithCapacity(id: string) {
   const activeFormFields = (formFields || []).filter((field: any) => !field.disabled);
   const serializedFormFields = JSON.parse(JSON.stringify(activeFormFields));
 
-  const { count } = await supabase
-    .from('registrations')
-    .select('id', { count: 'exact', head: true })
-    .eq('event_id', id)
-    .in('status', ['PENDING', 'CONFIRMED']);
+  const { data: registrationCount } = await supabase
+    .rpc('count_event_registrations', { event_uuid: id });
 
-  const used = count ?? 0;
+  const used = registrationCount ?? 0;
   const remaining = Math.max(0, (event.capacity as number) - used);
 
   return { event, remaining, used, registration_form_fields: serializedFormFields };
@@ -97,7 +94,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                 <CardTitle className="text-xl font-semibold text-gray-900">Event Registration</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {/* Capacity Section */}
+                {/* Capacity Section - Always visible */}
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-medium text-gray-700">Capacity</span>
@@ -108,7 +105,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-purple-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${(used / event.capacity) * 100}%` }}
+                      style={{ width: `${Math.min((used / event.capacity) * 100, 100)}%` }}
                     />
                   </div>
                   <p className="text-sm text-gray-600">
@@ -123,13 +120,15 @@ export default async function EventDetailPage({ params }: { params: { id: string
                   </div>
                 </div>
 
-                {/* Registration Form */}
-                <EventRegistrationSection 
-                  eventId={event.id as string} 
-                  registrationOpen={registrationOpen} 
-                  isLoggedIn={isLoggedIn}
-                  registrationFormFields={registration_form_fields}
-                />
+                {/* Registration Form - Only show if registration is open */}
+                {event.is_registration_open && (
+                  <EventRegistrationSection 
+                    eventId={event.id as string} 
+                    registrationOpen={registrationOpen} 
+                    isLoggedIn={isLoggedIn}
+                    registrationFormFields={registration_form_fields}
+                  />
+                )}
               </CardContent>
             </Card>
           </div>

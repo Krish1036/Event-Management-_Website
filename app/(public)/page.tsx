@@ -18,15 +18,12 @@ export default async function HomePage() {
   // Get registration counts for each event
   const eventsWithCounts = await Promise.all(
     (events || []).map(async (event) => {
-      const { count } = await supabase
-        .from('registrations')
-        .select('*', { count: 'exact', head: true })
-        .eq('event_id', event.id)
-        .in('status', ['PENDING', 'CONFIRMED']);
+      const { data: registrationCount } = await supabase
+        .rpc('count_event_registrations', { event_uuid: event.id });
       
       return {
         ...event,
-        registered_count: count || 0
+        registered_count: registrationCount || 0
       };
     })
   );
