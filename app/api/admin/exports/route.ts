@@ -29,7 +29,8 @@ async function exportRegistrations(supabase: any) {
     .select(`
       id,status,entry_code,created_at,
       user:profiles(id,full_name,email),
-      event:events(id,title,event_date,is_paid,price)
+      event:events(id,title,event_date,is_paid,price),
+      payment:payments(amount,status,razorpay_order_id,razorpay_payment_id)
     `)
     .order('created_at', { ascending: false });
 
@@ -39,9 +40,14 @@ async function exportRegistrations(supabase: any) {
     'User Email',
     'Event Title',
     'Event Date',
+    'Free / Paid',
     'Event Price',
     'Status',
     'Entry Code',
+    'Payment Status',
+    'Payment Amount',
+    'Razorpay Order ID',
+    'Razorpay Payment ID',
     'Created At'
   ];
 
@@ -51,9 +57,14 @@ async function exportRegistrations(supabase: any) {
     'User Email': reg.user?.email || '',
     'Event Title': reg.event?.title || '',
     'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
+    'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
     'Event Price': reg.event?.price || 0,
-    'Status': reg.status,
+    Status: reg.status,
     'Entry Code': reg.entry_code,
+    'Payment Status': reg.payment?.status ?? '',
+    'Payment Amount': reg.payment?.amount ?? '',
+    'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
+    'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
     'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
@@ -74,6 +85,7 @@ async function exportEventDetailed(supabase: any, eventId: string) {
       id,status,entry_code,created_at,event_id,
       user:profiles(id,full_name,email),
       event:events(id,title,event_date,is_paid,price),
+      payment:payments(amount,status,razorpay_order_id,razorpay_payment_id),
       responses:registration_responses(
         value,
         field:event_form_fields(label,field_type,required)
@@ -104,10 +116,14 @@ async function exportEventDetailed(supabase: any, eventId: string) {
     'Event ID',
     'Event Title',
     'Event Date',
+    'Free / Paid',
     'Event Price',
-    'Event Is Paid',
     'Status',
     'Entry Code',
+    'Payment Status',
+    'Payment Amount',
+    'Razorpay Order ID',
+    'Razorpay Payment ID',
     'Created At'
   ];
 
@@ -125,10 +141,14 @@ async function exportEventDetailed(supabase: any, eventId: string) {
       'Event Date': reg.event?.event_date
         ? String(new Date(reg.event.event_date).toLocaleDateString())
         : '',
+      'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
       'Event Price': reg.event?.price ?? '',
-      'Event Is Paid': reg.event?.is_paid ?? '',
       Status: reg.status,
       'Entry Code': reg.entry_code,
+      'Payment Status': reg.payment?.status ?? '',
+      'Payment Amount': reg.payment?.amount ?? '',
+      'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
+      'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
       'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
     year: 'numeric',
     month: 'short',
