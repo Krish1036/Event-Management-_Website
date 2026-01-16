@@ -52,6 +52,25 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Capacity must be greater than 0' }, { status: 400 });
     }
 
+    // Validate price for paid events
+    const eventType = eventInput.event_type === 'paid' ? 'paid' : 'free';
+    const price = Number(eventInput.price ?? 0);
+    if (eventType === 'paid') {
+      if (!Number.isFinite(price) || price <= 0) {
+        return NextResponse.json(
+          { success: false, error: 'Price must be greater than 0 for paid events' },
+          { status: 400 }
+        );
+      }
+      // Minimum price for paid events is ₹1
+      if (price < 1) {
+        return NextResponse.json(
+          { success: false, error: 'Minimum price for paid events is ₹1' },
+          { status: 400 }
+        );
+      }
+    }
+
     // Insert event
     const { data: event, error: eventError } = await supabase
       .from('events')

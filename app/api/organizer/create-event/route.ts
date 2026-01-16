@@ -68,6 +68,13 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
+      // Minimum price for paid events is ₹1
+      if (price < 1) {
+        return NextResponse.json(
+          { success: false, error: 'Minimum price for paid events is ₹1' },
+          { status: 400 }
+        );
+      }
     } else {
       price = 0;
     }
