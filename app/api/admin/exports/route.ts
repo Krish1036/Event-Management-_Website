@@ -339,10 +339,10 @@ async function exportAttendance(supabase: any) {
 
   const csvData = (data ?? []).map((att: any) => ({
     'Attendance ID': att.id,
-    'User Name': att.user?.full_name || '',
-    'User Email': att.user?.email || '',
-    'Event Title': att.event?.title || '',
-    'Event Date': att.event?.event_date ? String(new Date(att.event.event_date).toLocaleDateString()) : '',
+    'User Name': att.registration?.user?.full_name || '',
+    'User Email': att.registration?.user?.email || '',
+    'Event Title': att.registration?.event?.title || '',
+    'Event Date': att.registration?.event?.event_date ? String(new Date(att.registration.event.event_date).toLocaleDateString()) : '',
     'Entry Code': att.registration?.entry_code || '',
     'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
     year: 'numeric',
@@ -350,7 +350,8 @@ async function exportAttendance(supabase: any) {
     day: 'numeric',
     hour: '2-digit',
     minute: '2-digit',
-    hour12: true
+    hour12: true,
+    timeZone: 'Asia/Kolkata'
   }))
   }));
 
