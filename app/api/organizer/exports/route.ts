@@ -147,17 +147,26 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
 }
 
 async function exportAttendance(admin: any, eventIds: string[]) {
+  // Query attendance directly (like working payments export)
   const { data } = await admin
     .from('attendance')
-    .select(
-      `id,checked_in_at,
-       registration:registrations(id,entry_code,event_id),
-       user:profiles(id,full_name,email),
-       event:events(id,title,event_date)`
-    )
+    .select(`
+      id,
+      checked_in_at,
+      registration:registrations(
+        id,
+        entry_code,
+        event_id,
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date)
+      )
+    `)
     .order('checked_in_at', { ascending: false });
 
-  const filtered = (data ?? []).filter((row: any) => eventIds.includes(row.registration?.event_id));
+  // Filter for organizer's events only
+  const filtered = (data ?? []).filter((row: any) => 
+    eventIds.includes(row.registration?.event_id)
+  );
 
   const headers = [
     'Attendance ID',

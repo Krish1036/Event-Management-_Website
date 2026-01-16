@@ -311,13 +311,19 @@ async function exportEventDetailed(supabase: any, eventId: string) {
 }
 
 async function exportAttendance(supabase: any) {
+  // Query attendance directly (like working payments export)
   const { data } = await supabase
     .from('attendance')
     .select(`
-      id,checked_in_at,
-      registration:registrations(id,entry_code),
-      user:profiles(id,full_name,email),
-      event:events(id,title,event_date)
+      id,
+      checked_in_at,
+      registration:registrations(
+        id,
+        entry_code,
+        event_id,
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date)
+      )
     `)
     .order('checked_in_at', { ascending: false });
 
