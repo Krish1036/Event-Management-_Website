@@ -24,15 +24,71 @@ function generateCSV(data: any[], headers: string[]): string {
 }
 
 async function exportRegistrations(supabase: any) {
-  const { data } = await supabase
+  // Get all payments first (like the working exportPayments function)
+  const { data: payments } = await supabase
+    .from('payments')
+    .select(`
+      id,
+      amount,
+      status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      created_at,
+      registration:registrations(
+        id,
+        status,
+        entry_code,
+        created_at,
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date,is_paid,price)
+      )
+    `)
+    .order('created_at', { ascending: false });
+
+  // Get all registrations without payments (free events)
+  const { data: freeRegistrations } = await supabase
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,
       user:profiles(id,full_name,email),
-      event:events(id,title,event_date,is_paid,price),
-      payment:payments(amount,status,razorpay_order_id,razorpay_payment_id)
+      event:events(id,title,event_date,is_paid,price)
     `)
+    .is('event.is_paid', false)
     .order('created_at', { ascending: false });
+
+  // Combine paid and free registrations
+  const allRegistrations: any[] = [];
+  
+  // Add paid registrations from payments data
+  (payments ?? []).forEach((payment: any) => {
+    if (payment.registration) {
+      allRegistrations.push({
+        ...payment.registration,
+        payment: {
+          status: payment.status,
+          amount: payment.amount,
+          razorpay_order_id: payment.razorpay_order_id,
+          razorpay_payment_id: payment.razorpay_payment_id
+        }
+      });
+    }
+  });
+  
+  // Add free registrations
+  (freeRegistrations ?? []).forEach((reg: any) => {
+    allRegistrations.push({
+      ...reg,
+      payment: {
+        status: 'FREE',
+        amount: 0,
+        razorpay_order_id: '',
+        razorpay_payment_id: ''
+      }
+    });
+  });
+
+  // Sort by created_at
+  allRegistrations.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   const headers = [
     'Registration ID',
@@ -51,7 +107,7 @@ async function exportRegistrations(supabase: any) {
     'Created At'
   ];
 
-  const csvData = (data ?? []).map((reg: any) => ({
+  const csvData = allRegistrations.map((reg: any) => ({
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
@@ -79,22 +135,84 @@ async function exportRegistrations(supabase: any) {
 }
 
 async function exportEventDetailed(supabase: any, eventId: string) {
-  const { data } = await supabase
+  // Get all payments for this event (like the working exportPayments function)
+  const { data: payments } = await supabase
+    .from('payments')
+    .select(`
+      id,
+      amount,
+      status,
+      razorpay_order_id,
+      razorpay_payment_id,
+      created_at,
+      registration:registrations(
+        id,
+        status,
+        entry_code,
+        created_at,
+        event_id,
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date,is_paid,price),
+        responses:registration_responses(
+          value,
+          field:event_form_fields(label,field_type,required)
+        )
+      )
+    `)
+    .eq('registration.event_id', eventId)
+    .order('created_at', { ascending: false });
+
+  // Get all registrations without payments for this event (free events)
+  const { data: freeRegistrations } = await supabase
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,event_id,
       user:profiles(id,full_name,email),
       event:events(id,title,event_date,is_paid,price),
-      payment:payments(amount,status,razorpay_order_id,razorpay_payment_id),
       responses:registration_responses(
         value,
         field:event_form_fields(label,field_type,required)
       )
     `)
     .eq('event_id', eventId)
+    .is('event.is_paid', false)
     .order('created_at', { ascending: false });
 
-  const registrations = data ?? [];
+  // Combine paid and free registrations
+  const allRegistrations: any[] = [];
+  
+  // Add paid registrations from payments data
+  (payments ?? []).forEach((payment: any) => {
+    if (payment.registration) {
+      allRegistrations.push({
+        ...payment.registration,
+        payment: {
+          status: payment.status,
+          amount: payment.amount,
+          razorpay_order_id: payment.razorpay_order_id,
+          razorpay_payment_id: payment.razorpay_payment_id
+        }
+      });
+    }
+  });
+  
+  // Add free registrations
+  (freeRegistrations ?? []).forEach((reg: any) => {
+    allRegistrations.push({
+      ...reg,
+      payment: {
+        status: 'FREE',
+        amount: 0,
+        razorpay_order_id: '',
+        razorpay_payment_id: ''
+      }
+    });
+  });
+
+  // Sort by created_at
+  allRegistrations.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+
+  const registrations = allRegistrations;
 
   // Collect all distinct field labels for this event so we can make one column per field
   const fieldLabelSet = new Set<string>();
