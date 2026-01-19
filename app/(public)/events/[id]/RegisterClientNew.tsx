@@ -277,13 +277,6 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
               {event.pricing_dropdown_label || 'Select Pricing Option'} <span className="ml-1 text-red-500">*</span>
             </label>
             
-            {console.log('[DEBUG] Rendering pricing options dropdown:', {
-              hasPricingOptions: Array.isArray(pricingOptions) && pricingOptions.length > 0,
-              optionsCount: pricingOptions?.length || 0,
-              optionsSample: pricingOptions?.slice(0, 2) || 'none',
-              timestamp: new Date().toISOString()
-            })}
-            
             {Array.isArray(pricingOptions) && pricingOptions.length > 0 ? (
               <>
                 <Select 
