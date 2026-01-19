@@ -34,15 +34,40 @@ export async function POST(request: NextRequest) {
   try {
     const admin = getSupabaseAdminClient();
 
-    // Check if event exists and get price
+    // Check if event exists and get pricing info
     const { data: event, error: eventError } = await admin
       .from('events')
-      .select('price, title')
+      .select('price, title, pricing_type, pricing_dropdown_label')
       .eq('id', eventId)
       .single();
 
     if (eventError || !event) {
       throw new Error('Event not found');
+    }
+
+    // For custom pricing, validate selected pricing option
+    let selectedPricingOption = null;
+    let actualPrice = event.price;
+
+    if (event.pricing_type === 'custom') {
+      const selectedOptionId = body?.selected_pricing_option_id as string | undefined;
+      if (!selectedOptionId) {
+        throw new Error('Pricing option selection is required for custom pricing events');
+      }
+
+      const { data: pricingOption, error: pricingError } = await admin
+        .from('event_pricing_options')
+        .select('id, label, price')
+        .eq('id', selectedOptionId)
+        .eq('event_id', eventId)
+        .single();
+
+      if (pricingError || !pricingOption) {
+        throw new Error('Invalid pricing option selected');
+      }
+
+      selectedPricingOption = pricingOption;
+      actualPrice = pricingOption.price;
     }
 
     // Check if user is already registered
@@ -58,7 +83,7 @@ export async function POST(request: NextRequest) {
     }
 
     // FREE EVENT - Register immediately
-    if (event.price === 0) {
+    if (actualPrice === 0) {
       const { data: registrationId, error } = await admin.rpc('register_for_event', {
         p_event_id: eventId,
         p_user_id: user.id
@@ -81,13 +106,19 @@ export async function POST(request: NextRequest) {
 
     // PAID EVENT - Create Razorpay order first, registration after payment
     const orderPayload = {
-      amount: event.price * 100,
+      amount: actualPrice * 100,
       currency: "INR",
       receipt: `ord_${Date.now().toString(36)}`,
       notes: {
         event_id: eventId,
         user_id: user.id,
-        event_title: event.title
+        event_title: event.title,
+        pricing_type: event.pricing_type,
+        ...(event.pricing_type === 'custom' && {
+          pricing_option_id: selectedPricingOption?.id,
+          pricing_option_label: selectedPricingOption?.label,
+          pricing_option_price: selectedPricingOption?.price
+        })
       },
     };
 
@@ -124,8 +155,12 @@ export async function POST(request: NextRequest) {
       success: true,
       order_id: order.id,
       razorpay_key: process.env.RAZORPAY_KEY_ID,
-      amount: event.price,
-      event_title: event.title
+      amount: actualPrice,
+      event_title: event.title,
+      pricing_type: event.pricing_type,
+      ...(event.pricing_type === 'custom' && {
+        selected_pricing_option: selectedPricingOption
+      })
     });
 
   } catch (error: any) {

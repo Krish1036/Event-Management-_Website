@@ -43,10 +43,13 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
             capacity: state.data.total_capacity,
             is_registration_open: state.data.registration_status === 'open',
             price: state.data.event_type === 'paid' ? state.data.price : 0,
+            pricing_type: state.data.event_type,
+            pricing_dropdown_label: state.data.event_type === 'custom' ? state.data.pricing_dropdown_label : null,
             status: state.data.save_mode === 'publish' ? 'approved' : 'draft',
             visibility: state.data.visibility,
             assigned_organizer: state.data.assigned_organizer || null,
           },
+          pricing_options: state.data.event_type === 'custom' ? state.data.pricing_options : [],
           form_fields: state.data.form_fields,
         }),
       });

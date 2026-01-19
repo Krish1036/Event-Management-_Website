@@ -27,6 +27,7 @@ interface Event {
   location: string;
   price: number;
   is_paid: boolean;
+  pricing_type?: 'free' | 'paid' | 'custom' | string;
   capacity: number;
   registered_count?: number;
   image_url?: string | null;
@@ -46,6 +47,9 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(8);
+  const [customPricingPricesByEventId, setCustomPricingPricesByEventId] = useState<
+    Record<string, number[]>
+  >({});
 
   // Debug: Log events data to see what image URLs we have
   console.log(
@@ -61,6 +65,66 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   useEffect(() => {
     filterEvents();
   }, [events, searchTerm, activeFilter, categoryFilter, monthFilter]);
+
+  useEffect(() => {
+    const customEventIds = (events || [])
+      .filter((e) => e.pricing_type === 'custom')
+      .map((e) => e.id)
+      .filter(Boolean);
+
+    if (customEventIds.length === 0) {
+      setCustomPricingPricesByEventId({});
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      const supabase = getSupabaseBrowserClient();
+      const { data, error } = await supabase
+        .from('event_pricing_options')
+        .select('event_id, price')
+        .in('event_id', customEventIds)
+        .order('price', { ascending: true });
+
+      if (cancelled) return;
+      if (error) {
+        console.error('Failed to fetch custom pricing options for events list', error);
+        setCustomPricingPricesByEventId({});
+        return;
+      }
+
+      const grouped: Record<string, number[]> = {};
+      for (const row of data ?? []) {
+        const eventId = (row as any).event_id as string;
+        const price = Number((row as any).price);
+        if (!eventId || !Number.isFinite(price)) continue;
+        if (!grouped[eventId]) grouped[eventId] = [];
+        grouped[eventId].push(price);
+      }
+
+      setCustomPricingPricesByEventId(grouped);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [events]);
+
+  const formatEventPrice = (event: Event) => {
+    if (event.pricing_type === 'custom') {
+      const prices = customPricingPricesByEventId[event.id] ?? [];
+      if (prices.length === 0) return 'Custom';
+
+      const uniqueSorted = Array.from(new Set(prices)).sort((a, b) => a - b);
+      const min = uniqueSorted[0];
+      const max = uniqueSorted[uniqueSorted.length - 1];
+      if (min === max) return `₹${min}`;
+      return `₹${min}–₹${max}`;
+    }
+
+    return event.is_paid ? `₹${event.price}` : 'Free';
+  };
 
   const filterEvents = () => {
     let filtered = [...events];
@@ -321,7 +385,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                     <div className="progress-header">
                       <span className="progress-percentage">{progress}%</span>
                       <span className="event-price">
-                        {event.is_paid ? `₹${event.price}` : "Free"}
+                        {formatEventPrice(event)}
                       </span>
                     </div>
                     <div className="progress-bar">

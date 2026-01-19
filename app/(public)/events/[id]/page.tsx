@@ -1,4 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { RegisterClient } from './RegisterClient';
 import { EventRegistrationSection } from './EventRegistrationSection';
 import { redirect } from 'next/navigation';
@@ -14,7 +15,7 @@ async function getEventWithCapacity(id: string) {
 
   const { data: event } = await supabase
     .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,is_paid,price,status')
+    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,is_paid,price,status,pricing_type,pricing_dropdown_label')
     .eq('id', id)
     .single();
 
@@ -37,7 +38,80 @@ async function getEventWithCapacity(id: string) {
   const used = registrationCount ?? 0;
   const remaining = Math.max(0, (event.capacity as number) - used);
 
-  return { event, remaining, used, registration_form_fields: serializedFormFields };
+  // Fetch pricing options if this is a custom pricing event
+  type PricingOption = { id: string; label: string; price: number };
+  let pricingOptions: PricingOption[] = [];
+  console.log('[DEBUG] Checking pricing type:', { 
+    eventId: id, 
+    pricingType: event.pricing_type,
+    isCustomPricing: event.pricing_type === 'custom'
+  });
+
+  if (event.pricing_type === 'custom') {
+    try {
+      console.log('[DEBUG] Fetching pricing options for event:', id);
+      // Use admin client to bypass RLS for pricing options
+      const admin = getSupabaseAdminClient();
+      console.log('[DEBUG] Using admin client to fetch pricing options');
+      
+      const { data: options, error } = await admin
+        .from('event_pricing_options')
+        .select('id, label, price, event_id')
+        .eq('event_id', id)
+        .order('price', { ascending: true })
+        .order('label', { ascending: true });
+      
+      console.log('[DEBUG] Pricing options query result:', { 
+        optionsCount: options?.length || 0, 
+        error,
+        query: `SELECT id, label, price, event_id FROM event_pricing_options WHERE event_id = '${id}' ORDER BY price ASC, label ASC`
+      });
+      
+      if (error) {
+        console.error('[ERROR] Failed to fetch pricing options:', error);
+      }
+      
+      // Ensure we have a proper array of pricing options
+      if (options && Array.isArray(options)) {
+        console.log('[DEBUG] Processing pricing options:', options);
+        pricingOptions = (options as any[]).map((option: any): PricingOption => ({
+          id: option.id,
+          label: option.label || `Option ${option.id}`,
+          price: Number(option.price) || 0
+        }));
+      }
+      
+      // Debug logging
+      console.log('[DEBUG] Page.tsx - Pricing options summary:', {
+        eventId: id,
+        eventPricingType: event.pricing_type,
+        eventStatus: event.status,
+        fetchedOptionsCount: options?.length || 0,
+        processedOptionsCount: pricingOptions.length,
+        hasPricingOptions: pricingOptions.length > 0,
+        samplePricingOption: pricingOptions[0] || null,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error('[ERROR] Error in pricing options fetch:', {
+        error,
+        message: error instanceof Error ? error.message : 'Unknown error',
+        stack: error instanceof Error ? error.stack : undefined,
+        timestamp: new Date().toISOString()
+      });
+    }
+  }
+
+  // Ensure pricing_options is always an array
+  const pricing_options = Array.isArray(pricingOptions) ? pricingOptions : [];
+  
+  return { 
+    event, 
+    remaining, 
+    used, 
+    registration_form_fields: serializedFormFields, 
+    pricing_options 
+  };
 }
 
 export default async function EventDetailPage({ params }: { params: { id: string } }) {
@@ -46,7 +120,18 @@ export default async function EventDetailPage({ params }: { params: { id: string
     redirect('/events');
   }
 
-  const { event, remaining, used, registration_form_fields } = result as any;
+  const { event, remaining, used, registration_form_fields, pricing_options } = result as any;
+  
+  console.log('[DEBUG] Page component render:', {
+    eventId: params.id,
+    hasEvent: !!event,
+    eventPricingType: event?.pricing_type,
+    pricingOptionsCount: pricing_options?.length || 0,
+    pricingOptionsSample: pricing_options?.slice(0, 2) || 'none',
+    registrationOpen: event?.is_registration_open,
+    remainingCapacity: remaining,
+    timestamp: new Date().toISOString()
+  });
 
   const supabase = getSupabaseServerClient();
   const {
@@ -78,8 +163,19 @@ export default async function EventDetailPage({ params }: { params: { id: string
                   <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 hover:bg-blue-200">
                     📍 {event.location}
                   </div>
-                  <div className={event.is_paid ? "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 hover:bg-green-200" : "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 hover:bg-gray-200"}>
-                    {event.is_paid ? `💰 Paid • ₹${event.price}` : '🆓 Free event'}
+                  <div className={
+                    event.pricing_type === 'custom' 
+                      ? "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 hover:bg-purple-200"
+                      : event.is_paid 
+                        ? "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-green-100 text-green-800 hover:bg-green-200"
+                        : "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 hover:bg-gray-200"
+                  }>
+                    {event.pricing_type === 'custom' 
+                      ? '💰 Custom Pricing' 
+                      : event.is_paid 
+                        ? `💰 Paid • ₹${event.price}` 
+                        : '🆓 Free event'
+                    }
                     {!PAYMENTS_ENABLED && event.is_paid && ' · payments disabled (test mode)'}
                   </div>
                 </div>
@@ -127,6 +223,8 @@ export default async function EventDetailPage({ params }: { params: { id: string
                     registrationOpen={registrationOpen} 
                     isLoggedIn={isLoggedIn}
                     registrationFormFields={registration_form_fields}
+                    event={event}
+                    pricingOptions={pricing_options}
                   />
                 )}
               </CardContent>

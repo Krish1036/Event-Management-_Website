@@ -275,6 +275,7 @@ export const AdvancedRichTextEditor = ({
         placeholder: placeholder,
       },
     },
+    immediatelyRender: false,
   });
 
   const updateWordCount = useCallback((html: string) => {

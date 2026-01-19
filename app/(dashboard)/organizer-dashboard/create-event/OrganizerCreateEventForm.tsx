@@ -43,8 +43,11 @@ function OrganizerCreateEventFormContent() {
             is_registration_open: false,
             event_type: state.data.event_type,
             price: state.data.event_type === 'paid' ? state.data.price : 0,
+            pricing_type: state.data.event_type,
+            pricing_dropdown_label: state.data.event_type === 'custom' ? state.data.pricing_dropdown_label : null,
             save_mode: intent === 'submit' ? 'submit_for_approval' : 'draft'
           },
+          pricing_options: state.data.event_type === 'custom' ? state.data.pricing_options : [],
           form_fields: state.data.form_fields
         })
       });

@@ -35,6 +35,13 @@ interface Event {
   created_at: string;
   updated_at?: string;
   form_fields?: FormField[];
+  pricing_type?: 'free' | 'paid' | 'custom';
+  pricing_dropdown_label?: string | null;
+  pricing_options?: Array<{
+    id: string;
+    label: string;
+    price: number;
+  }>;
 }
 
 type Organizer = {
@@ -64,7 +71,7 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
     total_capacity: event.capacity,
     registration_status: event.is_registration_open ? 'open' : 'closed',
     auto_close_when_full: true, // Default
-    event_type: event.price > 0 ? 'paid' : 'free',
+    event_type: event.pricing_type || (event.price > 0 ? 'paid' : 'free'),
     price: event.price,
     currency: 'INR', // Default
     form_fields: event.form_fields || [],
@@ -72,6 +79,8 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
     save_mode: event.status === 'approved' ? 'publish' : 'draft',
     assigned_organizer: event.assigned_organizer,
     image_url: event.image_url || null,
+    pricing_dropdown_label: event.pricing_dropdown_label || undefined,
+    pricing_options: event.pricing_options || [],
   });
 
   const handleSubmit = async () => {
@@ -115,10 +124,13 @@ function EditEventFormContent({ initialData, organizers }: EditEventFormProps) {
           capacity: state.data.total_capacity,
           is_registration_open: state.data.registration_status === 'open',
           price: state.data.event_type === 'paid' ? state.data.price : 0,
+          pricing_type: state.data.event_type,
+          pricing_dropdown_label: state.data.event_type === 'custom' ? state.data.pricing_dropdown_label : null,
           status: state.data.save_mode === 'publish' ? 'approved' : 'draft',
           visibility: state.data.visibility,
           assigned_organizer: state.data.assigned_organizer || null,
         },
+        pricing_options: state.data.event_type === 'custom' ? state.data.pricing_options : [],
         form_fields: state.data.form_fields,
       });
 

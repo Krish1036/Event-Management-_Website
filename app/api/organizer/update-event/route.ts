@@ -44,6 +44,7 @@ export async function POST(request: NextRequest) {
     const eventId = body?.eventId as string | undefined;
     const eventInput = body?.event;
     const formFields = (body?.form_fields ?? []) as IncomingFormField[];
+    const pricingOptions = (body?.pricing_options ?? []) as any[];
     const intent = body?.intent as string | undefined;
 
     if (!eventId) {
@@ -59,7 +60,7 @@ export async function POST(request: NextRequest) {
     const { data: existingEvent, error: existingEventError } = await admin
       .from('events')
       .select(
-        'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,price,visibility,created_by,assigned_organizer'
+        'id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,price,visibility,created_by,assigned_organizer,pricing_type,pricing_dropdown_label'
       )
       .eq('id', eventId)
       .single();
@@ -136,6 +137,8 @@ export async function POST(request: NextRequest) {
       end_time: eventInput.end_time ?? existingEvent.end_time,
       capacity: incomingCapacity,
       price: incomingPrice,
+      pricing_type: eventInput.pricing_type ?? existingEvent.pricing_type,
+      pricing_dropdown_label: eventInput.pricing_dropdown_label ?? existingEvent.pricing_dropdown_label,
       visibility: eventInput.visibility ?? existingEvent.visibility ?? 'public'
     };
 
@@ -172,6 +175,8 @@ export async function POST(request: NextRequest) {
       updatedEventPayload.end_time = attempt.end_time;
       updatedEventPayload.capacity = attempt.capacity;
       updatedEventPayload.price = attempt.price;
+      updatedEventPayload.pricing_type = attempt.pricing_type;
+      updatedEventPayload.pricing_dropdown_label = attempt.pricing_dropdown_label;
       updatedEventPayload.visibility = attempt.visibility;
     }
 
@@ -279,6 +284,47 @@ export async function POST(request: NextRequest) {
 
     if (updateError || !updatedEvent) {
       return NextResponse.json({ success: false, error: 'Failed to update event' }, { status: 500 });
+    }
+
+    // Handle pricing options for custom pricing events (only if not approved)
+    if (!isApproved && attempt.pricing_type === 'custom') {
+      // Delete existing pricing options
+      const { error: deleteError } = await admin
+        .from('event_pricing_options')
+        .delete()
+        .eq('event_id', eventId);
+
+      if (deleteError) {
+        return NextResponse.json({ success: false, error: 'Failed to update pricing options' }, { status: 500 });
+      }
+
+      // Insert new pricing options if provided
+      if (pricingOptions && pricingOptions.length > 0) {
+        const pricingOptionsPayload = pricingOptions.map((option) => ({
+          event_id: eventId,
+          label: option.label.trim(),
+          price: Number(option.price)
+        }));
+
+        const { error: pricingOptionsError } = await admin
+          .from('event_pricing_options')
+          .insert(pricingOptionsPayload);
+
+        if (pricingOptionsError) {
+          return NextResponse.json({ success: false, error: 'Failed to create pricing options' }, { status: 500 });
+        }
+      }
+    } else if (!isApproved && attempt.pricing_type !== 'custom') {
+      // If not custom pricing, ensure no pricing options exist
+      const { error: cleanupError } = await admin
+        .from('event_pricing_options')
+        .delete()
+        .eq('event_id', eventId);
+
+      if (cleanupError) {
+        console.error('Failed to cleanup pricing options:', cleanupError);
+        // Don't fail the operation, just log the error
+      }
     }
 
     await admin.from('organizer_logs').insert({

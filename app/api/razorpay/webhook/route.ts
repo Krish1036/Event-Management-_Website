@@ -50,11 +50,19 @@ export async function POST(request: NextRequest) {
     const event_id = payment.notes?.event_id;
     const user_id = payment.notes?.user_id;
     const event_title = payment.notes?.event_title;
+    const pricing_type = payment.notes?.pricing_type;
+    const pricing_option_id = payment.notes?.pricing_option_id;
+    const pricing_option_label = payment.notes?.pricing_option_label;
+    const pricing_option_price = payment.notes?.pricing_option_price;
 
     console.log('👤 Payment details:', {
       event_id,
       user_id,
       event_title,
+      pricing_type,
+      pricing_option_id,
+      pricing_option_label,
+      pricing_option_price,
       payment_id: payment.id,
       order_id: payment.order_id,
       amount: payment.amount
@@ -87,6 +95,23 @@ export async function POST(request: NextRequest) {
     if (registrationError || !registrationId) {
       console.error('Failed to create registration after payment:', registrationError);
       return NextResponse.json({ error: "Failed to create registration" }, { status: 500 });
+    }
+
+    // Update registration with custom pricing info if applicable
+    if (pricing_type === 'custom' && pricing_option_id) {
+      const { error: updateError } = await admin
+        .from('registrations')
+        .update({
+          pricing_type: 'custom',
+          pricing_option_id: pricing_option_id,
+          paid_amount: payment.amount / 100
+        })
+        .eq('id', registrationId);
+
+      if (updateError) {
+        console.error('Failed to update registration with custom pricing info:', updateError);
+        // Don't fail the webhook, just log the error
+      }
     }
 
     // Record payment

@@ -30,6 +30,13 @@ interface Event {
   assigned_organizer: string | null;
   created_at: string;
   form_fields?: FormField[];
+  pricing_type?: 'free' | 'paid' | 'custom';
+  pricing_dropdown_label?: string | null;
+  pricing_options?: Array<{
+    id: string;
+    label: string;
+    price: number;
+  }>;
 }
 
 function mapInitialData(event: Event): Partial<EventData> {
@@ -43,13 +50,15 @@ function mapInitialData(event: Event): Partial<EventData> {
     total_capacity: event.capacity,
     registration_status: event.is_registration_open ? 'open' : 'closed',
     auto_close_when_full: true,
-    event_type: event.price > 0 ? 'paid' : 'free',
+    event_type: event.pricing_type || (event.price > 0 ? 'paid' : 'free'),
     price: event.price,
     currency: 'INR',
     form_fields: event.form_fields || [],
     visibility: (event.visibility ?? 'public') as any,
-    save_mode: 'draft',
+    save_mode: event.status === 'approved' ? 'publish' : 'draft',
     image_url: event.image_url || null,
+    pricing_dropdown_label: event.pricing_dropdown_label || undefined,
+    pricing_options: event.pricing_options || [],
   };
 }
 
@@ -111,8 +120,11 @@ function OrganizerEditEventFormContent({ initialData }: { initialData: Event }) 
             end_time: payload.end_time,
             capacity: payload.total_capacity,
             price: payload.event_type === 'paid' ? payload.price : 0,
+            pricing_type: payload.event_type,
+            pricing_dropdown_label: payload.event_type === 'custom' ? payload.pricing_dropdown_label : null,
             visibility: payload.visibility
           },
+          pricing_options: payload.event_type === 'custom' ? payload.pricing_options : [],
           form_fields: payload.form_fields
         })
       });

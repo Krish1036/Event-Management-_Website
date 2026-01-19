@@ -10,11 +10,26 @@ interface RegistrationFormField {
   options?: string[] | null;
 }
 
-export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn, registrationFormFields }: { 
+interface PricingOption {
+  id: string;
+  label: string;
+  price: number;
+}
+
+export function EventRegistrationSection({ 
+  eventId, 
+  registrationOpen, 
+  isLoggedIn, 
+  registrationFormFields, 
+  event, 
+  pricingOptions 
+}: { 
   eventId: string; 
   registrationOpen: boolean; 
   isLoggedIn: boolean;
   registrationFormFields?: RegistrationFormField[];
+  event?: any;
+  pricingOptions?: PricingOption[] | null;
 }) {
   if (!registrationOpen) return null;
   
@@ -28,5 +43,5 @@ export function EventRegistrationSection({ eventId, registrationOpen, isLoggedIn
     );
   }
   
-  return <RegisterClient eventId={eventId} formFields={registrationFormFields || []} />;
+  return <RegisterClient eventId={eventId} formFields={registrationFormFields || []} event={event} pricingOptions={pricingOptions} />;
 }

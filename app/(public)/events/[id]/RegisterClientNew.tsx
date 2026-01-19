@@ -19,9 +19,17 @@ interface RegistrationFormField {
   options?: string[] | null;
 }
 
+interface PricingOption {
+  id: string;
+  label: string;
+  price: number;
+}
+
 interface RegisterClientProps {
   eventId: string;
   formFields: RegistrationFormField[];
+  event?: any;
+  pricingOptions?: PricingOption[] | null;
 }
 
 interface AnswerPayload {
@@ -29,7 +37,7 @@ interface AnswerPayload {
   value: string;
 }
 
-export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
+export function RegisterClient({ eventId, formFields, event, pricingOptions }: RegisterClientProps) {
   const [loading, setLoading] = useState(false);
   const [textValues, setTextValues] = useState<Record<string, string>>({});
   const [fileValues, setFileValues] = useState<Record<string, File | null>>({});
@@ -37,6 +45,22 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
   const [privacyAccepted, setPrivacyAccepted] = useState(false);
   const [razorpayTermsAccepted, setRazorpayTermsAccepted] = useState(false);
   const [refundPolicyAccepted, setRefundPolicyAccepted] = useState(false);
+  const [selectedPricingOption, setSelectedPricingOption] = useState<string>('');
+  const [pricingError, setPricingError] = useState<string>('');
+
+  // Debug logging with more details
+  console.log('[DEBUG] RegisterClient - Initialization:', {
+    eventId,
+    eventPricingType: event?.pricing_type,
+    hasEvent: !!event,
+    hasPricingOptionsProp: !!pricingOptions,
+    pricingOptionsCount: pricingOptions?.length || 0,
+    pricingOptionsSample: pricingOptions?.slice(0, 2) || 'none',
+    isCustomPricing: event?.pricing_type === 'custom',
+    eventStatus: event?.status,
+    registrationOpen: event?.is_registration_open,
+    timestamp: new Date().toISOString()
+  });
 
   function handleTextChange(fieldId: string, value: string) {
     setTextValues((prev) => ({ ...prev, [fieldId]: value }));
@@ -44,6 +68,16 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
 
   function handleFileChange(fieldId: string, file: File | null) {
     setFileValues((prev) => ({ ...prev, [fieldId]: file }));
+  }
+
+  function handlePricingOptionChange(value: string) {
+    console.log('[DEBUG] Pricing option selected:', {
+      selectedValue: value,
+      optionDetails: pricingOptions?.find(opt => opt.id === value) || 'Not found',
+      timestamp: new Date().toISOString()
+    });
+    setSelectedPricingOption(value);
+    setPricingError(''); // Clear error when option is selected
   }
 
   async function uploadFile(fieldId: string, file: File): Promise<string> {
@@ -101,12 +135,52 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
         throw new Error('You must accept Refund Policy to continue');
       }
 
+      // Validate custom pricing selection
+      if (event?.pricing_type === 'custom') {
+        const hasPricingOptions = Array.isArray(pricingOptions) && pricingOptions.length > 0;
+        console.log('[DEBUG] Pricing validation - start:', { 
+          hasPricingOptions, 
+          pricingOptionsCount: pricingOptions?.length || 0,
+          selectedPricingOption,
+          pricingOptionsSample: pricingOptions?.slice(0, 2) || 'none',
+          timestamp: new Date().toISOString()
+        });
+        
+        if (!hasPricingOptions) {
+          console.error('[ERROR] No pricing options available for custom pricing event:', {
+            eventId: event?.id,
+            pricingType: event?.pricing_type,
+            pricingOptions,
+            timestamp: new Date().toISOString()
+          });
+          throw new Error('Pricing options are not configured for this event. Please contact the organizer.');
+        }
+        
+        if (!selectedPricingOption) {
+          console.log('[DEBUG] No pricing option selected, showing error');
+          setPricingError('Please select a pricing option to continue');
+          throw new Error('Please select a pricing option to continue');
+        }
+        
+        console.log('[DEBUG] Pricing validation - success:', {
+          selectedOption: pricingOptions.find(opt => opt.id === selectedPricingOption),
+          timestamp: new Date().toISOString()
+        });
+      }
+
       const answers = await buildAnswers();
+      const payload: any = { event_id: eventId, answers };
+      
+      // Include pricing option for custom pricing events
+      if (event?.pricing_type === 'custom' && selectedPricingOption) {
+        payload.selected_pricing_option_id = selectedPricingOption;
+      }
+
       const endpoint = PAYMENTS_ENABLED ? '/api/register-event' : '/api/register-event-test';
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event_id: eventId, answers })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       if (!res.ok || !data.success) {
@@ -196,6 +270,57 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
   if (!formFields || formFields.length === 0) {
     return (
       <div className="space-y-4">
+        {/* Custom Pricing Dropdown */}
+        {event?.pricing_type === 'custom' && (
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
+              {event.pricing_dropdown_label || 'Select Pricing Option'} <span className="ml-1 text-red-500">*</span>
+            </label>
+            
+            {console.log('[DEBUG] Rendering pricing options dropdown:', {
+              hasPricingOptions: Array.isArray(pricingOptions) && pricingOptions.length > 0,
+              optionsCount: pricingOptions?.length || 0,
+              optionsSample: pricingOptions?.slice(0, 2) || 'none',
+              timestamp: new Date().toISOString()
+            })}
+            
+            {Array.isArray(pricingOptions) && pricingOptions.length > 0 ? (
+              <>
+                <Select 
+                  value={selectedPricingOption} 
+                  onValueChange={handlePricingOptionChange}
+                  disabled={loading}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder={"Select an option"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {pricingOptions.map((option) => (
+                      <SelectItem 
+                        key={option.id} 
+                        value={option.id} 
+                        className="text-black hover:bg-purple-100"
+                      >
+                        {option.label} - ₹{option.price}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                
+                {pricingError && (
+                  <p className="mt-1 text-sm text-red-600">{pricingError}</p>
+                )}
+              </>
+            ) : (
+              <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                <p className="text-sm text-red-800">
+                  Pricing options are not configured for this event. Please contact the organizer.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Mobile-only overflow control */}
         <style jsx>{`
           @media (max-width: 480px) {
@@ -310,7 +435,14 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
 
         <Button 
           onClick={(e) => handleRegister(e as any)}
-          disabled={loading || !termsAccepted || !privacyAccepted || !razorpayTermsAccepted || !refundPolicyAccepted}
+          disabled={
+            loading || 
+            !termsAccepted || 
+            !privacyAccepted || 
+            !razorpayTermsAccepted || 
+            !refundPolicyAccepted ||
+            (event?.pricing_type === 'custom' && (!selectedPricingOption || !pricingOptions || pricingOptions.length === 0))
+          }
           className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {loading ? 'Processing…' : 'Register'}
@@ -366,6 +498,43 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
           }
         }
       `}</style>
+
+      {/* Custom Pricing Dropdown */}
+      {event?.pricing_type === 'custom' && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            {event.pricing_dropdown_label || 'Select Pricing Option'} <span className="ml-1 text-red-500">*</span>
+          </label>
+          
+          {Array.isArray(pricingOptions) && pricingOptions.length > 0 ? (
+            <>
+              <Select value={selectedPricingOption} onValueChange={handlePricingOptionChange}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select an option" />
+                </SelectTrigger>
+                <SelectContent>
+                  {pricingOptions.map((option) => (
+                    <SelectItem key={option.id} value={option.id} className="text-black hover:bg-purple-100">
+                      {option.label} - ₹{option.price}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {pricingError && (
+                <p className="text-sm text-red-600">{pricingError}</p>
+              )}
+            </>
+          ) : (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <p className="text-sm text-red-800">
+                Pricing options are not configured for this event. Please contact the organizer.
+              </p>
+            </div>
+          )}
+        </div>
+      )}
+
       {formFields.map((field) => {
         const isFile = field.field_type === 'file';
         const isSelect = field.field_type === 'select' && field.options && field.options.length > 0;
@@ -489,7 +658,14 @@ export function RegisterClient({ eventId, formFields }: RegisterClientProps) {
 
       <Button
         type="submit"
-        disabled={loading || !termsAccepted || !privacyAccepted || !razorpayTermsAccepted || !refundPolicyAccepted}
+        disabled={
+          loading || 
+          !termsAccepted || 
+          !privacyAccepted || 
+          !razorpayTermsAccepted || 
+          !refundPolicyAccepted ||
+          (event?.pricing_type === 'custom' && (!selectedPricingOption || !pricingOptions || pricingOptions.length === 0))
+        }
         className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
       >
         {loading ? 'Processing…' : 'Register'}

@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
 
     const eventInput = body?.event;
     const formFields = (body?.form_fields ?? []) as any[];
+    const pricingOptions = (body?.pricing_options ?? []) as any[];
 
     if (!eventInput) {
       return NextResponse.json({ success: false, error: 'Missing event payload' }, { status: 400 });
@@ -59,9 +60,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: 'Capacity must be greater than 0' }, { status: 400 });
     }
 
-    const eventType: 'free' | 'paid' = eventInput.event_type === 'paid' ? 'paid' : 'free';
+    // Validate pricing type and options
+    const pricingType = eventInput.pricing_type || (eventInput.price > 0 ? 'paid' : 'free');
     let price = Number(eventInput.price ?? 0);
-    if (eventType === 'paid') {
+
+    if (pricingType === 'paid') {
       if (!Number.isFinite(price) || price <= 0) {
         return NextResponse.json(
           { success: false, error: 'Price must be greater than 0 for paid events' },
@@ -77,6 +80,57 @@ export async function POST(request: NextRequest) {
       }
     } else {
       price = 0;
+    }
+
+    if (pricingType === 'custom') {
+      if (!eventInput.pricing_dropdown_label?.trim()) {
+        return NextResponse.json(
+          { success: false, error: 'Dropdown label is required for custom pricing events' },
+          { status: 400 }
+        );
+      }
+
+      if (!Array.isArray(pricingOptions) || pricingOptions.length === 0) {
+        return NextResponse.json(
+          { success: false, error: 'At least one pricing option is required for custom pricing events' },
+          { status: 400 }
+        );
+      }
+
+      // Validate each pricing option
+      for (const option of pricingOptions) {
+        if (!option.label?.trim()) {
+          return NextResponse.json(
+            { success: false, error: 'All pricing options must have a label' },
+            { status: 400 }
+          );
+        }
+
+        const optionPrice = Number(option.price);
+        if (!Number.isFinite(optionPrice) || optionPrice <= 0) {
+          return NextResponse.json(
+            { success: false, error: 'All pricing options must have a price greater than 0' },
+            { status: 400 }
+          );
+        }
+
+        if (optionPrice < 1) {
+          return NextResponse.json(
+            { success: false, error: 'Minimum price for pricing options is ₹1' },
+            { status: 400 }
+          );
+        }
+      }
+
+      // Check for duplicate option names
+      const labels = pricingOptions.map(opt => opt.label?.trim().toLowerCase()).filter(Boolean);
+      const uniqueLabels = new Set(labels);
+      if (labels.length !== uniqueLabels.size) {
+        return NextResponse.json(
+          { success: false, error: 'Duplicate pricing option names are not allowed' },
+          { status: 400 }
+        );
+      }
     }
 
     const saveMode = eventInput.save_mode === 'submit_for_approval' ? 'submit_for_approval' : 'draft';
@@ -95,6 +149,8 @@ export async function POST(request: NextRequest) {
         capacity,
         is_registration_open: false,
         price,
+        pricing_type: pricingType,
+        pricing_dropdown_label: pricingType === 'custom' ? eventInput.pricing_dropdown_label : null,
         status,
         created_by: user.id,
         assigned_organizer: user.id
@@ -105,6 +161,27 @@ export async function POST(request: NextRequest) {
     if (eventError || !event) {
       console.error('Failed to insert event', eventError);
       return NextResponse.json({ success: false, error: 'Failed to create event' }, { status: 500 });
+    }
+
+    // Insert pricing options for custom pricing events
+    if (pricingType === 'custom' && Array.isArray(pricingOptions) && pricingOptions.length > 0) {
+      const admin = getSupabaseAdminClient();
+      const pricingOptionsPayload = pricingOptions.map((option) => ({
+        event_id: event.id,
+        label: option.label.trim(),
+        price: Number(option.price)
+      }));
+
+      const { error: pricingOptionsError } = await admin
+        .from('event_pricing_options')
+        .insert(pricingOptionsPayload);
+
+      if (pricingOptionsError) {
+        console.error('Failed to insert pricing options', pricingOptionsError);
+        // Clean up the event since pricing options failed
+        await supabase.from('events').delete().eq('id', event.id);
+        return NextResponse.json({ success: false, error: 'Failed to create pricing options' }, { status: 500 });
+      }
     }
 
     if (Array.isArray(formFields) && formFields.length > 0) {
@@ -133,7 +210,15 @@ export async function POST(request: NextRequest) {
       action: saveMode === 'submit_for_approval' ? 'SUBMIT_FOR_APPROVAL' : 'CREATE_EVENT',
       details: {
         event_id: event.id,
-        status
+        status,
+        pricing_type: pricingType,
+        ...(pricingType === 'custom' && {
+          pricing_dropdown_label: eventInput.pricing_dropdown_label,
+          pricing_options_count: pricingOptions.length
+        }),
+        ...(pricingType === 'paid' && {
+          price: price
+        })
       }
     });
 

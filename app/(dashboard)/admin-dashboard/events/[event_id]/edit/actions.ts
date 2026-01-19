@@ -25,10 +25,17 @@ export async function updateEventAction(params: {
     capacity: number;
     is_registration_open: boolean;
     price: number;
+    pricing_type?: 'free' | 'paid' | 'custom';
+    pricing_dropdown_label?: string | null;
     status: 'approved' | 'draft' | 'cancelled';
     visibility: 'public' | 'hidden';
     assigned_organizer: string | null;
   };
+  pricing_options?: Array<{
+    id?: string;
+    label: string;
+    price: number;
+  }>;
   form_fields: IncomingFormField[];
 }) {
   const logPrefix = '[EDIT_EVENT:updateEventAction]';
@@ -273,6 +280,8 @@ export async function updateEventAction(params: {
       capacity: normalizedCapacity,
       is_registration_open: !!params.event.is_registration_open,
       price: Number(params.event.price ?? 0),
+      pricing_type: params.event.pricing_type,
+      pricing_dropdown_label: params.event.pricing_dropdown_label,
       status: params.event.status,
       assigned_organizer: params.event.assigned_organizer,
     })
@@ -288,6 +297,49 @@ export async function updateEventAction(params: {
   if (updateError || !updatedEvent) {
     console.log(logPrefix, 'exit:update_event_failed');
     return { success: false, error: 'Failed to update event' };
+  }
+
+  // Handle pricing options for custom pricing events
+  if (params.event.pricing_type === 'custom') {
+    // Delete existing pricing options
+    const { error: deleteError } = await admin
+      .from('event_pricing_options')
+      .delete()
+      .eq('event_id', params.eventId);
+
+    if (deleteError) {
+      console.log(logPrefix, 'exit:delete_pricing_options_failed', { error: deleteError.message });
+      return { success: false, error: 'Failed to update pricing options' };
+    }
+
+    // Insert new pricing options if provided
+    if (params.pricing_options && params.pricing_options.length > 0) {
+      const pricingOptionsPayload = params.pricing_options.map((option) => ({
+        event_id: params.eventId,
+        label: option.label.trim(),
+        price: Number(option.price)
+      }));
+
+      const { error: pricingOptionsError } = await admin
+        .from('event_pricing_options')
+        .insert(pricingOptionsPayload);
+
+      if (pricingOptionsError) {
+        console.log(logPrefix, 'exit:insert_pricing_options_failed', { error: pricingOptionsError.message });
+        return { success: false, error: 'Failed to create pricing options' };
+      }
+    }
+  } else {
+    // If not custom pricing, ensure no pricing options exist
+    const { error: cleanupError } = await admin
+      .from('event_pricing_options')
+      .delete()
+      .eq('event_id', params.eventId);
+
+    if (cleanupError) {
+      console.log(logPrefix, 'pricing_options.cleanup_failed', { error: cleanupError.message });
+      // Don't fail the operation, just log the error
+    }
   }
 
   const { error: logError } = await admin.from('admin_logs').insert({

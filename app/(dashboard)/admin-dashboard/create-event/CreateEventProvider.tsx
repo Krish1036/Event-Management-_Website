@@ -17,6 +17,12 @@ export interface FormField {
   original_required?: boolean;
 }
 
+export interface PricingOption {
+  id: string;
+  label: string;
+  price: number;
+}
+
 export interface EventData {
   // Section 1: Event Basics
   title: string;
@@ -33,9 +39,11 @@ export interface EventData {
   auto_close_when_full: boolean;
   
   // Section 3: Pricing & Payment
-  event_type: 'free' | 'paid';
+  event_type: 'free' | 'paid' | 'custom';
   price: number;
   currency: string;
+  pricing_dropdown_label?: string;
+  pricing_options: PricingOption[];
   
   // Section 4: Form Builder
   form_fields: FormField[];
@@ -82,6 +90,8 @@ const initialState: EventState = {
     event_type: 'free',
     price: 0,
     currency: 'INR',
+    pricing_dropdown_label: '',
+    pricing_options: [],
     form_fields: [],
     visibility: 'public',
     save_mode: 'publish',
@@ -308,6 +318,33 @@ export function CreateEventProvider({
     // Section 3: Pricing & Payment
     if (state.data.event_type === 'paid' && state.data.price <= 0) {
       errors.price = 'Price must be greater than 0 for paid events';
+    }
+    
+    if (state.data.event_type === 'custom') {
+      if (!state.data.pricing_dropdown_label?.trim()) {
+        errors.pricing_dropdown_label = 'Dropdown label is required for custom pricing';
+      }
+      
+      if (state.data.pricing_options.length === 0) {
+        errors.pricing_options = 'At least one pricing option is required';
+      } else {
+        // Validate each pricing option
+        state.data.pricing_options.forEach((option, index) => {
+          if (!option.label?.trim()) {
+            errors[`pricing_option_${index}_label`] = 'Option name is required';
+          }
+          if (option.price <= 0) {
+            errors[`pricing_option_${index}_price`] = 'Price must be greater than 0';
+          }
+        });
+        
+        // Check for duplicate option names
+        const labels = state.data.pricing_options.map(opt => opt.label?.trim().toLowerCase()).filter(Boolean);
+        const uniqueLabels = new Set(labels);
+        if (labels.length !== uniqueLabels.size) {
+          errors.pricing_options = 'Duplicate option names are not allowed';
+        }
+      }
     }
 
     // Set all errors

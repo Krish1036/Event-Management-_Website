@@ -26,11 +26,11 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
     }
   };
 
-  const handleEventTypeChange = (eventType: 'free' | 'paid') => {
+  const handleEventTypeChange = (eventType: 'free' | 'paid' | 'custom') => {
     updateField('event_type', eventType);
     
-    // Clear price error when switching to free
-    if (eventType === 'free') {
+    // Clear price error when switching to free or custom
+    if (eventType === 'free' || eventType === 'custom') {
       clearError('price');
     } else if (state.data.price <= 0) {
       setError('price', 'Price must be greater than 0 for paid events');
@@ -55,7 +55,7 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
           <label className={labelClass}>
             Event Type
           </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <button
               type="button"
               onClick={() => handleEventTypeChange('free')}
@@ -99,6 +99,28 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
                 <p className={`mt-1 text-sm ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Charge attendees to register</p>
               </div>
             </button>
+
+            <button
+              type="button"
+              onClick={() => handleEventTypeChange('custom')}
+              className={`rounded-lg p-4 border-2 transition-colors ${
+                state.data.event_type === 'custom'
+                  ? (isLight ? 'border-purple-500 bg-purple-50' : 'border-purple-500 bg-purple-500/10')
+                  : (isLight ? 'border-gray-200 hover:border-gray-300 bg-white' : 'border-slate-700 hover:border-slate-600 bg-slate-800/50')
+              }`}
+            >
+              <div className="text-left">
+                <div className="flex items-center justify-between">
+                  <span className={`font-medium ${isLight ? 'text-gray-900' : 'text-white'}`}>Custom Pricing</span>
+                  {state.data.event_type === 'custom' && (
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                      Selected
+                    </span>
+                  )}
+                </div>
+                <p className={`mt-1 text-sm ${isLight ? 'text-gray-600' : 'text-slate-400'}`}>Multiple pricing options</p>
+              </div>
+            </button>
           </div>
         </div>
 
@@ -137,7 +159,150 @@ export function PricingSection({ variant = 'dark' }: { variant?: 'dark' | 'light
           </div>
         )}
 
-        {/* Payment Methods */}
+        {/* Custom Pricing Configuration */}
+        {state.data.event_type === 'custom' && (
+          <div className="space-y-6 border-t pt-6">
+            <div>
+              <h3 className={`text-lg font-medium ${isLight ? 'text-gray-900' : 'text-white'} mb-4`}>
+                Custom Pricing Configuration
+              </h3>
+              
+              {/* Dropdown Label */}
+              <div className="mb-6">
+                <label htmlFor="pricing_dropdown_label" className={labelClass}>
+                  Dropdown Label <span className="text-red-400">*</span>
+                </label>
+                <input
+                  type="text"
+                  id="pricing_dropdown_label"
+                  value={state.data.pricing_dropdown_label || ''}
+                  onChange={(e) => updateField('pricing_dropdown_label', e.target.value)}
+                  className={`${inputBase} ${state.errors.pricing_dropdown_label ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
+                  placeholder="e.g., Select Category, Choose Ticket Type, Who are you?"
+                />
+                {state.errors.pricing_dropdown_label && (
+                  <p className="mt-1 text-sm text-red-400">{state.errors.pricing_dropdown_label}</p>
+                )}
+                <p className="mt-1 text-xs text-gray-500">
+                  This label will be shown to users when they register
+                </p>
+              </div>
+
+              {/* Pricing Options Builder */}
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <label className={labelClass}>
+                    Pricing Options <span className="text-red-400">*</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const newOption = {
+                        id: Date.now().toString(),
+                        label: '',
+                        price: 0
+                      };
+                      updateField('pricing_options', [...state.data.pricing_options, newOption]);
+                    }}
+                    className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-md ${
+                      isLight 
+                        ? 'bg-purple-600 text-white hover:bg-purple-700' 
+                        : 'bg-purple-600 text-white hover:bg-purple-700'
+                    }`}
+                  >
+                    + Add Option
+                  </button>
+                </div>
+
+                {state.errors.pricing_options && (
+                  <p className="mb-4 text-sm text-red-400">{state.errors.pricing_options}</p>
+                )}
+
+                <div className="space-y-3">
+                  {state.data.pricing_options.map((option, index) => (
+                    <div key={option.id} className={`flex items-center gap-3 p-3 rounded-lg border ${isLight ? 'border-gray-200 bg-gray-50' : 'border-slate-700 bg-slate-800/50'}`}>
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={option.label}
+                          onChange={(e) => {
+                            const updatedOptions = [...state.data.pricing_options];
+                            updatedOptions[index] = { ...option, label: e.target.value };
+                            updateField('pricing_options', updatedOptions);
+                          }}
+                          className={`block w-full rounded-md border py-2 px-3 text-sm ${
+                            isLight 
+                              ? 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-500' 
+                              : 'border-slate-600 bg-slate-700 text-white placeholder:text-slate-400'
+                          } ${state.errors[`pricing_option_${index}_label`] ? 'border-red-500' : ''}`}
+                          placeholder="Option name (e.g., Student, Teacher)"
+                        />
+                        {state.errors[`pricing_option_${index}_label`] && (
+                          <p className="mt-1 text-xs text-red-400">{state.errors[`pricing_option_${index}_label`]}</p>
+                        )}
+                      </div>
+                      
+                      <div className="w-32">
+                        <div className="relative">
+                          <div className="absolute inset-y-0 left-0 pl-2 flex items-center pointer-events-none">
+                            <span className={`text-sm ${isLight ? 'text-gray-500' : 'text-slate-400'}`}>₹</span>
+                          </div>
+                          <input
+                            type="number"
+                            value={option.price || ''}
+                            onChange={(e) => {
+                              const updatedOptions = [...state.data.pricing_options];
+                              updatedOptions[index] = { ...option, price: parseFloat(e.target.value) || 0 };
+                              updateField('pricing_options', updatedOptions);
+                            }}
+                            min="0"
+                            step="0.01"
+                            className={`block w-full pl-7 pr-2 py-2 text-sm rounded-md border ${
+                              isLight 
+                                ? 'border-gray-300 bg-white text-gray-900 placeholder:text-gray-500' 
+                                : 'border-slate-600 bg-slate-700 text-white placeholder:text-slate-400'
+                            } ${state.errors[`pricing_option_${index}_price`] ? 'border-red-500' : ''}`}
+                            placeholder="0.00"
+                          />
+                        </div>
+                        {state.errors[`pricing_option_${index}_price`] && (
+                          <p className="mt-1 text-xs text-red-400">{state.errors[`pricing_option_${index}_price`]}</p>
+                        )}
+                      </div>
+                      
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const updatedOptions = state.data.pricing_options.filter((_, i) => i !== index);
+                          updateField('pricing_options', updatedOptions);
+                        }}
+                        className={`p-2 text-sm rounded-md ${
+                          isLight 
+                            ? 'text-red-600 hover:text-red-800 hover:bg-red-50' 
+                            : 'text-red-400 hover:text-red-300 hover:bg-red-900/20'
+                        }`}
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  ))}
+                  
+                  {state.data.pricing_options.length === 0 && (
+                    <div className={`text-center py-8 rounded-lg border-2 border-dashed ${isLight ? 'border-gray-300 bg-gray-50' : 'border-slate-700 bg-slate-800/50'}`}>
+                      <p className={`text-sm ${isLight ? 'text-gray-500' : 'text-slate-400'}`}>
+                        No pricing options added yet. Click "Add Option" to get started.
+                      </p>
+                    </div>
+                  )}
+                </div>
+                
+                <p className="mt-2 text-xs text-gray-500">
+                  Minimum 1 option required. Each option must have a unique name and price greater than 0.
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
         <div className="pt-2">
           <label className={isLight ? 'block text-sm font-medium text-gray-700 mb-2' : 'block text-sm font-medium text-slate-300 mb-2'}>
             Payment Methods

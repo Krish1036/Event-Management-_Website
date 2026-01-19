@@ -10,7 +10,7 @@ export default async function HomePage() {
   
   const { data: events } = await supabase
     .from('events')
-    .select('id,title,description,event_date,start_time,end_time,location,price,is_paid,capacity,image_url')
+    .select('id,title,description,event_date,start_time,end_time,location,price,is_paid,pricing_type,capacity,image_url')
     .eq('status', 'approved')
     .order('event_date', { ascending: true })
     .limit(50); // Get more events for filtering

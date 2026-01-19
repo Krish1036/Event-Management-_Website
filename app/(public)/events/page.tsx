@@ -25,7 +25,7 @@ async function getEvents(params: { paid?: 'free' | 'paid' }) {
 
   let query = supabase
     .from('events')
-    .select('id,title,description,event_date,location,price,is_paid,capacity,is_registration_open,status,image_url')
+    .select('id,title,description,event_date,location,price,is_paid,pricing_type,capacity,is_registration_open,status,image_url')
     .gte('event_date', new Date().toISOString().slice(0, 10))
     .eq('status', 'approved')
     .order('event_date', { ascending: true });
@@ -38,12 +38,58 @@ async function getEvents(params: { paid?: 'free' | 'paid' }) {
 
   const { data: events } = await query;
 
-  return events ?? [];
+  const list = (events ?? []) as any[];
+  const customEventIds = list
+    .filter((e) => e.pricing_type === 'custom')
+    .map((e) => e.id)
+    .filter(Boolean);
+
+  let customPricingPricesByEventId: Record<string, number[]> = {};
+  if (customEventIds.length > 0) {
+    const { data: options, error } = await supabase
+      .from('event_pricing_options')
+      .select('event_id, price')
+      .in('event_id', customEventIds)
+      .order('price', { ascending: true });
+
+    if (!error) {
+      for (const row of options ?? []) {
+        const eventId = (row as any).event_id as string;
+        const price = Number((row as any).price);
+        if (!eventId || !Number.isFinite(price)) continue;
+        if (!customPricingPricesByEventId[eventId]) customPricingPricesByEventId[eventId] = [];
+        customPricingPricesByEventId[eventId].push(price);
+      }
+    }
+  }
+
+  return list.map((e) => ({
+    ...e,
+    custom_pricing_prices: customPricingPricesByEventId[e.id] ?? []
+  }));
 }
 
 export default async function EventsPage({ searchParams }: { searchParams: { paid?: string } }) {
   const filterPaid = searchParams.paid === 'free' || searchParams.paid === 'paid' ? (searchParams.paid as 'free' | 'paid') : undefined;
   const events = await getEvents({ paid: filterPaid });
+
+  const formatEventPrice = (event: any) => {
+    if (event.pricing_type === 'custom') {
+      const prices = Array.isArray(event.custom_pricing_prices) ? event.custom_pricing_prices : [];
+      if (prices.length === 0) return 'Custom';
+
+      const numericPrices = prices
+        .map((p: any) => Number(p))
+        .filter((p: any) => Number.isFinite(p)) as number[];
+      const uniqueSorted = Array.from(new Set<number>(numericPrices)).sort((a, b) => a - b);
+      const min = uniqueSorted[0];
+      const max = uniqueSorted[uniqueSorted.length - 1];
+      if (min === max) return `₹${min}`;
+      return `₹${min}–₹${max}`;
+    }
+
+    return event.is_paid ? `₹${event.price}` : 'Free';
+  };
 
   return (
     <div className="dashboard-container">
@@ -110,7 +156,7 @@ export default async function EventsPage({ searchParams }: { searchParams: { pai
                     {event.title}
                   </h2>
                   <span className="rounded-full bg-purple-100 px-3 py-1 text-sm font-medium text-purple-700">
-                    {event.is_paid ? `₹${event.price}` : 'Free'}
+                    {formatEventPrice(event)}
                     {!PAYMENTS_ENABLED && event.is_paid && ' · Test Mode'}
                   </span>
                 </div>
