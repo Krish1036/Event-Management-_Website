@@ -283,6 +283,7 @@ export async function updateEventAction(params: {
       pricing_type: params.event.pricing_type,
       pricing_dropdown_label: params.event.pricing_dropdown_label,
       status: params.event.status,
+      visibility: params.event.visibility,
       assigned_organizer: params.event.assigned_organizer,
     })
     .eq('id', params.eventId)

@@ -49,8 +49,8 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
         entry_code,
         created_at,
         event_id,
-        user:profiles(id,full_name,email),
-        event:events(id,title,event_date,is_paid,price)
+        user:profiles(id,full_name,email,phone_number,university),
+        event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
       )
     `)
     .in('registration.event_id', eventIds)
@@ -61,8 +61,8 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,event_id,
-      user:profiles(id,full_name,email),
-      event:events(id,title,event_date,is_paid,price)
+      user:profiles(id,full_name,email,phone_number,university),
+      event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
     `)
     .in('event_id', eventIds)
     .is('event.is_paid', false)
@@ -106,10 +106,16 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
     'Registration ID',
     'User Name',
     'User Email',
+    'User Phone',
+    'User University',
     'Event Title',
     'Event Date',
     'Free / Paid',
     'Event Price',
+    'Event Visibility',
+    'Event Pricing Type',
+    'Event Pricing Label',
+    'Assigned Organizer',
     'Status',
     'Entry Code',
     'Payment Status',
@@ -123,10 +129,16 @@ async function exportRegistrations(admin: any, eventIds: string[]) {
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
+    'User Phone': reg.user?.phone_number || '',
+    'User University': reg.user?.university || '',
     'Event Title': reg.event?.title || '',
     'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
     'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
     'Event Price': reg.event?.price ?? 0,
+    'Event Visibility': reg.event?.visibility || '',
+    'Event Pricing Type': reg.event?.pricing_type || '',
+    'Event Pricing Label': reg.event?.pricing_dropdown_label || '',
+    'Assigned Organizer': reg.event?.assigned_organizer || '',
     Status: reg.status,
     'Entry Code': reg.entry_code,
     'Payment Status': reg.payment?.status ?? '',
@@ -157,8 +169,8 @@ async function exportAttendance(admin: any, eventIds: string[]) {
         id,
         entry_code,
         event_id,
-        user:profiles(id,full_name,email),
-        event:events(id,title,event_date)
+        user:profiles(id,full_name,email,phone_number,university),
+        event:events(id,title,event_date,visibility,assigned_organizer)
       )
     `)
     .order('checked_in_at', { ascending: false });
@@ -172,8 +184,12 @@ async function exportAttendance(admin: any, eventIds: string[]) {
     'Attendance ID',
     'User Name',
     'User Email',
+    'User Phone',
+    'User University',
     'Event Title',
     'Event Date',
+    'Event Visibility',
+    'Assigned Organizer',
     'Entry Code',
     'Checked In At'
   ];
@@ -182,8 +198,12 @@ async function exportAttendance(admin: any, eventIds: string[]) {
     'Attendance ID': att.id,
     'User Name': att.registration?.user?.full_name || '',
     'User Email': att.registration?.user?.email || '',
+    'User Phone': att.registration?.user?.phone_number || '',
+    'User University': att.registration?.user?.university || '',
     'Event Title': att.registration?.event?.title || '',
     'Event Date': att.registration?.event?.event_date ? String(new Date(att.registration.event.event_date).toLocaleDateString()) : '',
+    'Event Visibility': att.registration?.event?.visibility || '',
+    'Assigned Organizer': att.registration?.event?.assigned_organizer || '',
     'Entry Code': att.registration?.entry_code || '',
     'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
     year: 'numeric',
@@ -213,8 +233,8 @@ async function exportPayments(admin: any, eventIds: string[]) {
         id,
         event_id,
         entry_code,
-        user:profiles(id,full_name,email),
-        event:events(id,title,event_date,is_paid,price)
+        user:profiles(id,full_name,email,phone_number,university),
+        event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
       )
     `)
     .order('created_at', { ascending: false });
@@ -225,10 +245,16 @@ async function exportPayments(admin: any, eventIds: string[]) {
     'Payment ID',
     'User Name',
     'User Email',
+    'User Phone',
+    'User University',
     'Event Title',
     'Event Date',
     'Free / Paid',
     'Event Price',
+    'Event Visibility',
+    'Event Pricing Type',
+    'Event Pricing Label',
+    'Assigned Organizer',
     'Amount',
     'Payment Status',
     'Razorpay Order ID',
@@ -242,10 +268,16 @@ async function exportPayments(admin: any, eventIds: string[]) {
     'Payment ID': payment.id,
     'User Name': payment.registration?.user?.full_name || '',
     'User Email': payment.registration?.user?.email || '',
+    'User Phone': payment.registration?.user?.phone_number || '',
+    'User University': payment.registration?.user?.university || '',
     'Event Title': payment.registration?.event?.title || '',
     'Event Date': payment.registration?.event?.event_date ? String(new Date(payment.registration.event.event_date).toLocaleDateString()) : '',
     'Free / Paid': payment.registration?.event?.is_paid ? 'Paid' : 'Free',
     'Event Price': payment.registration?.event?.price ?? '',
+    'Event Visibility': payment.registration?.event?.visibility || '',
+    'Event Pricing Type': payment.registration?.event?.pricing_type || '',
+    'Event Pricing Label': payment.registration?.event?.pricing_dropdown_label || '',
+    'Assigned Organizer': payment.registration?.event?.assigned_organizer || '',
     Amount: payment.amount,
     'Payment Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
@@ -293,8 +325,8 @@ async function exportEventDetailed(admin: any, organizerId: string, eventId: str
         entry_code,
         created_at,
         event_id,
-        user:profiles(id,full_name,email),
-        event:events(id,title,event_date,is_paid,price),
+        user:profiles(id,full_name,email,phone_number,university),
+        event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer),
         responses:registration_responses(
           value,
           field:event_form_fields(label,field_type,required)
@@ -309,8 +341,8 @@ async function exportEventDetailed(admin: any, organizerId: string, eventId: str
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,event_id,
-      user:profiles(id,full_name,email),
-      event:events(id,title,event_date,is_paid,price),
+      user:profiles(id,full_name,email,phone_number,university),
+      event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer),
       responses:registration_responses(
         value,
         field:event_form_fields(label,field_type,required)
@@ -370,11 +402,17 @@ async function exportEventDetailed(admin: any, organizerId: string, eventId: str
     'Registration ID',
     'User Name',
     'User Email',
+    'User Phone',
+    'User University',
     'Event ID',
     'Event Title',
     'Event Date',
     'Free / Paid',
     'Event Price',
+    'Event Visibility',
+    'Event Pricing Type',
+    'Event Pricing Label',
+    'Assigned Organizer',
     'Status',
     'Entry Code',
     'Payment Status',
@@ -393,11 +431,17 @@ async function exportEventDetailed(admin: any, organizerId: string, eventId: str
       'Registration ID': reg.id,
       'User Name': reg.user?.full_name || '',
       'User Email': reg.user?.email || '',
+      'User Phone': reg.user?.phone_number || '',
+      'User University': reg.user?.university || '',
       'Event ID': reg.event?.id || reg.event_id,
       'Event Title': reg.event?.title || '',
       'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
       'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
       'Event Price': reg.event?.price ?? '',
+      'Event Visibility': reg.event?.visibility || '',
+      'Event Pricing Type': reg.event?.pricing_type || '',
+      'Event Pricing Label': reg.event?.pricing_dropdown_label || '',
+      'Assigned Organizer': reg.event?.assigned_organizer || '',
       Status: reg.status,
       'Entry Code': reg.entry_code,
       'Payment Status': reg.payment?.status ?? '',

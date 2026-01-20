@@ -385,7 +385,7 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     total_capacity: initialData.capacity,
     registration_status: initialData.is_registration_open ? ('open' as const) : ('closed' as const),
     auto_close_when_full: true,
-    event_type: initialData.price > 0 ? 'paid' as const : 'free' as const,
+    event_type: (initialData.pricing_type || (initialData.price > 0 ? 'paid' : 'free')) as any,
     price: initialData.price,
     currency: 'INR',
     form_fields: initialData.form_fields || [],
@@ -393,6 +393,8 @@ export default function EditEventForm({ initialData, organizers }: EditEventForm
     save_mode: initialData.status === 'approved' ? 'publish' as const : 'draft' as const,
     assigned_organizer: initialData.assigned_organizer ?? null,
     image_url: initialData.image_url || null,
+    pricing_dropdown_label: initialData.pricing_dropdown_label || undefined,
+    pricing_options: initialData.pricing_options || [],
   };
 
   return (
