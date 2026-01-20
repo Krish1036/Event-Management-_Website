@@ -31,6 +31,7 @@ interface Event {
   capacity: number;
   registered_count?: number;
   image_url?: string | null;
+  is_registration_open?: boolean;
 }
 
 interface EventsClientProps {
@@ -41,7 +42,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   const [events, setEvents] = useState<Event[]>(initialEvents);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>(initialEvents);
   const [searchTerm, setSearchTerm] = useState("");
-  const [activeFilter, setActiveFilter] = useState("active");
+  const [activeFilter, setActiveFilter] = useState("upcoming");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [monthFilter, setMonthFilter] = useState("all");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -50,6 +51,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   const [customPricingPricesByEventId, setCustomPricingPricesByEventId] = useState<
     Record<string, number[]>
   >({});
+  const [userRole, setUserRole] = useState<string | null>(null);
 
   // Debug: Log events data to see what image URLs we have
   console.log(
@@ -65,6 +67,119 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   useEffect(() => {
     filterEvents();
   }, [events, searchTerm, activeFilter, categoryFilter, monthFilter]);
+
+  // Auto-close registration for past and today's events
+  useEffect(() => {
+    const autoCloseRegistrations = async () => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) return;
+
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const todayString = today.toISOString().split('T')[0];
+
+      console.log('[DEBUG] Auto-close registration check:', {
+        todayString,
+        today: today.toISOString(),
+        timestamp: new Date().toISOString()
+      });
+
+      // Get events that should have registration closed (past and today's events)
+      const { data: eventsToClose, error } = await supabase
+        .from('events')
+        .select('id, event_date, is_registration_open, title')
+        .eq('is_registration_open', true)
+        .lte('event_date', todayString); // events with date <= today
+
+      console.log('[DEBUG] Events that should be closed:', {
+        eventsToClose,
+        error,
+        count: eventsToClose?.length || 0
+      });
+
+      if (eventsToClose && eventsToClose.length > 0) {
+        const eventIds = eventsToClose.map(event => event.id);
+        
+        console.log('[DEBUG] Closing registration for events:', {
+          eventIds,
+          eventDetails: eventsToClose.map(e => ({ id: e.id, title: e.title, date: e.event_date }))
+        });
+        
+        // Close registrations for these events
+        const { error: updateError } = await supabase
+          .from('events')
+          .update({ is_registration_open: false })
+          .in('id', eventIds);
+
+        if (updateError) {
+          console.error('[ERROR] Failed to close registrations:', updateError);
+          return;
+        }
+
+        console.log('[DEBUG] Successfully closed registrations for events:', eventIds);
+
+        // Update local state
+        setEvents(prevEvents => 
+          prevEvents.map(event => 
+            eventIds.includes(event.id) 
+              ? { ...event, is_registration_open: false }
+              : event
+          )
+        );
+      }
+    };
+
+    autoCloseRegistrations();
+  }, []);
+
+  // Check user role for admin/organizer permissions
+  useEffect(() => {
+    const checkUserRole = async () => {
+      const supabase = getSupabaseBrowserClient();
+      if (!supabase) return;
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (profile) {
+        setUserRole(profile.role);
+      }
+    };
+
+    checkUserRole();
+  }, []);
+
+  // Toggle registration status for admins/organizers
+  const toggleRegistration = async (eventId: string, currentStatus: boolean) => {
+    if (!userRole || !['admin', 'organizer'].includes(userRole)) {
+      return;
+    }
+
+    const supabase = getSupabaseBrowserClient();
+    if (!supabase) return;
+
+    const newStatus = !currentStatus;
+    
+    await supabase
+      .from('events')
+      .update({ is_registration_open: newStatus })
+      .eq('id', eventId);
+
+    // Update local state
+    setEvents(prevEvents => 
+      prevEvents.map(event => 
+        event.id === eventId 
+          ? { ...event, is_registration_open: newStatus }
+          : event
+      )
+    );
+  };
 
   useEffect(() => {
     const customEventIds = (events || [])
@@ -140,11 +255,21 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
     }
 
     // Status filter
-    const now = new Date();
-    if (activeFilter === "active") {
-      filtered = filtered.filter((event) => new Date(event.event_date) >= now);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of day for accurate comparison
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    
+    if (activeFilter === "upcoming") {
+      filtered = filtered.filter((event) => new Date(event.event_date) >= tomorrow);
+    } else if (activeFilter === "today") {
+      filtered = filtered.filter((event) => {
+        const eventDate = new Date(event.event_date);
+        eventDate.setHours(0, 0, 0, 0);
+        return eventDate.getTime() === today.getTime();
+      });
     } else if (activeFilter === "past") {
-      filtered = filtered.filter((event) => new Date(event.event_date) < now);
+      filtered = filtered.filter((event) => new Date(event.event_date) < today);
     }
 
     // Month filter
@@ -184,6 +309,12 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
     return `${displayHour}:${minute.toString().padStart(2, "0")} ${ampm}`;
   };
 
+  const getEffectiveRegistrationOpen = (event: Event) => {
+    const todayString = new Date().toISOString().slice(0, 10);
+    const dateAllowsRegistration = typeof event.event_date === 'string' ? event.event_date > todayString : true;
+    return Boolean(event.is_registration_open) && dateAllowsRegistration;
+  };
+
   // Pagination
   const totalPages = Math.ceil(filteredEvents.length / pageSize);
   const startIndex = (currentPage - 1) * pageSize;
@@ -209,19 +340,19 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
           <div className="filter-tabs">
             <button
               className={`filter-tab ${
-                activeFilter === "active" ? "active" : ""
+                activeFilter === "upcoming" ? "active" : ""
               }`}
-              onClick={() => setActiveFilter("active")}
+              onClick={() => setActiveFilter("upcoming")}
             >
-              Active
+              Upcoming
             </button>
             <button
               className={`filter-tab ${
-                activeFilter === "draft" ? "active" : ""
+                activeFilter === "today" ? "active" : ""
               }`}
-              onClick={() => setActiveFilter("draft")}
+              onClick={() => setActiveFilter("today")}
             >
-              Draft
+              Today's Event
             </button>
             <button
               className={`filter-tab ${
@@ -303,6 +434,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
               event.registered_count,
               event.capacity
             );
+            const effectiveRegistrationOpen = getEffectiveRegistrationOpen(event);
 
             return (
               <Link
@@ -358,10 +490,6 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                       <ImageIcon className="placeholder-icon" />
                     </div>
                   )}
-                  <div className="active-badge">
-                    <span className="active-dot"></span>
-                    Active
-                  </div>
                 </div>
 
                 {/* Event Details */}
@@ -395,6 +523,29 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
                       ></div>
                     </div>
                   </div>
+
+                  {/* Registration Toggle for Admins/Organizers */}
+                  {userRole && ['admin', 'organizer'].includes(userRole) && (
+                    <div className="registration-control mt-3 pt-3 border-t border-gray-200">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">Registration Status</span>
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleRegistration(event.id, event.is_registration_open || false);
+                          }}
+                          className={`px-3 py-1 text-xs font-medium rounded-full transition-colors ${
+                            effectiveRegistrationOpen
+                              ? 'bg-green-100 text-green-700 hover:bg-green-200'
+                              : 'bg-red-100 text-red-700 hover:bg-red-200'
+                          }`}
+                        >
+                          {effectiveRegistrationOpen ? 'Open' : 'Closed'}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </Link>
             );

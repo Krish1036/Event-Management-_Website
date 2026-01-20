@@ -48,6 +48,11 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
   const [selectedPricingOption, setSelectedPricingOption] = useState<string>('');
   const [pricingError, setPricingError] = useState<string>('');
 
+  // Check if registration is open
+  const todayString = new Date().toISOString().slice(0, 10);
+  const dateAllowsRegistration = typeof event?.event_date === 'string' ? event.event_date > todayString : true;
+  const isRegistrationOpen = event?.is_registration_open === true && dateAllowsRegistration;
+
   // Debug logging with more details
   console.log('[DEBUG] RegisterClient - Initialization:', {
     eventId,
@@ -119,6 +124,13 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
 
   async function handleRegister(e: React.FormEvent) {
     e.preventDefault();
+    
+    // Check if registration is open
+    if (!isRegistrationOpen) {
+      toast.error('Registration is closed for this event');
+      return;
+    }
+    
     setLoading(true);
     try {
       // Validate legal checkboxes
@@ -265,6 +277,32 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
     } finally {
       setLoading(false);
     }
+  }
+
+  if (!isRegistrationOpen) {
+    return (
+      <div className="max-w-2xl mx-auto p-6">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-red-100 rounded-full mb-4">
+            <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.314 16.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-red-900 mb-2">Registration Closed</h2>
+          <p className="text-red-700 mb-4">
+            Registration for this event is now closed. This could be because:
+          </p>
+          <ul className="text-left text-red-700 space-y-1 mb-4">
+            <li>• The event has already passed</li>
+            <li>• The event is happening today</li>
+            <li>• The organizer has manually closed registration</li>
+          </ul>
+          <p className="text-red-600 text-sm">
+            If you believe this is an error, please contact the event organizer.
+          </p>
+        </div>
+      </div>
+    );
   }
 
   if (!formFields || formFields.length === 0) {

@@ -1,6 +1,5 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
-import { RegisterClient } from './RegisterClient';
 import { EventRegistrationSection } from './EventRegistrationSection';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -139,7 +138,9 @@ export default async function EventDetailPage({ params }: { params: { id: string
   } = await supabase.auth.getUser();
 
   const isLoggedIn = !!user;
-  const registrationOpen = event.is_registration_open && remaining > 0;
+  const todayString = new Date().toISOString().slice(0, 10);
+  const dateAllowsRegistration = typeof event.event_date === 'string' ? event.event_date > todayString : true;
+  const registrationOpen = event.is_registration_open && remaining > 0 && dateAllowsRegistration;
 
   return (
     <div className="min-h-screen bg-[#F3F9F9] p-8">
@@ -217,7 +218,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                 </div>
 
                 {/* Registration Form - Only show if registration is open */}
-                {event.is_registration_open && (
+                {registrationOpen && (
                   <EventRegistrationSection 
                     eventId={event.id as string} 
                     registrationOpen={registrationOpen} 

@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { Calendar, LayoutDashboard, PlusCircle, FileText, CheckCircle, Download } from 'lucide-react';
+import { Calendar, LayoutDashboard, PlusCircle, FileText, CheckCircle, Download, Mail } from 'lucide-react';
 import Link from 'next/link';
 
 const navigationItems = [
@@ -10,6 +10,7 @@ const navigationItems = [
   { href: '/organizer-dashboard/create-event', label: 'Create Event', icon: PlusCircle },
   { href: '/organizer-dashboard/registrations', label: 'Registrations', icon: FileText },
   { href: '/organizer-dashboard/attendance', label: 'Attendance', icon: CheckCircle },
+  { href: '/organizer-dashboard/emails', label: 'Event Emails', icon: Mail },
   { href: '/organizer-dashboard/exports', label: 'Exports', icon: Download },
 ];
 

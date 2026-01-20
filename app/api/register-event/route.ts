@@ -37,12 +37,23 @@ export async function POST(request: NextRequest) {
     // Check if event exists and get pricing info
     const { data: event, error: eventError } = await admin
       .from('events')
-      .select('price, title, pricing_type, pricing_dropdown_label')
+      .select('price, title, pricing_type, pricing_dropdown_label, event_date, is_registration_open, status')
       .eq('id', eventId)
       .single();
 
     if (eventError || !event) {
       throw new Error('Event not found');
+    }
+
+    const todayString = new Date().toISOString().slice(0, 10);
+    const dateAllowsRegistration = typeof (event as any).event_date === 'string' ? (event as any).event_date > todayString : true;
+
+    if ((event as any).status !== 'approved') {
+      throw new Error('Registration closed');
+    }
+
+    if (!(event as any).is_registration_open || !dateAllowsRegistration) {
+      throw new Error('Registration closed');
     }
 
     // For custom pricing, validate selected pricing option

@@ -59,6 +59,7 @@ export function RichTextEditor({ value, onChange, variant = 'light', placeholder
   ];
 
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit.configure({
         heading: {
