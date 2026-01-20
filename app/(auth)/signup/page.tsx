@@ -90,7 +90,6 @@ export default function SignupPage() {
   };
 
   const handleUniversityTypeChange = (type: string) => {
-    console.log('University type changed to:', type);
     setUniversityType(type);
     setGanpatInstitute('');
     setOtherUniversity('');
@@ -100,9 +99,7 @@ export default function SignupPage() {
   };
 
   const handleGanpatInstituteChange = (institute: string) => {
-    console.log('Ganpat institute changed to:', institute);
     const universityValue = `Ganpat University - ${institute}`;
-    console.log('Setting university to:', universityValue);
     setGanpatInstitute(institute);
     setUniversity(universityValue);
     // Clear related errors
@@ -110,7 +107,6 @@ export default function SignupPage() {
   };
 
   const handleOtherUniversityChange = (name: string) => {
-    console.log('Other university changed to:', name);
     setOtherUniversity(name);
     setUniversity(name);
     // Clear related errors
@@ -172,47 +168,13 @@ export default function SignupPage() {
         options: {
           data: {
             full_name: fullName,
+            phone_number: phoneNumber,
+            university: university,
           }
         }
       });
 
       if (signUpError) throw signUpError;
-
-      // If user creation successful, insert profile data
-      if (authData.user) {
-        // Debug logging
-        console.log('Inserting profile with data:', {
-          id: authData.user.id,
-          full_name: fullName,
-          phone_number: phoneNumber,
-          university: university,
-          role: 'student'
-        });
-
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .upsert({
-            id: authData.user.id,
-            full_name: fullName,
-            phone_number: phoneNumber,
-            university: university,
-            role: 'student'
-          });
-
-        if (profileError) {
-          console.error('Profile insertion error:', profileError);
-          console.error('Error details:', {
-            message: profileError.message,
-            details: profileError.details,
-            hint: profileError.hint,
-            code: profileError.code
-          });
-          // Don't throw error - user account created but profile failed
-          // User can still login and update profile later
-        } else {
-          console.log('Profile inserted successfully');
-        }
-      }
 
       if (authData.user && !authData.session) {
         // Email confirmation required
