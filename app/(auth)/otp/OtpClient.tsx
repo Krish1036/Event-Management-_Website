@@ -10,6 +10,8 @@ export default function OtpClient() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
+  const OTP_LENGTH = 8;
+
   const emailFromQuery = useMemo(() => searchParams.get('email') ?? '', [searchParams]);
 
   const [email, setEmail] = useState(emailFromQuery);
@@ -28,8 +30,8 @@ export default function OtpClient() {
       toast.error('Email is required');
       return;
     }
-    if (cleanedOtp.length !== 6) {
-      toast.error('Please enter a valid 6-digit OTP');
+    if (cleanedOtp.length !== OTP_LENGTH) {
+      toast.error(`Please enter a valid ${OTP_LENGTH}-digit OTP`);
       return;
     }
 
@@ -104,7 +106,7 @@ export default function OtpClient() {
             </svg>
           </div>
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Verify OTP</h1>
-          <p className="text-gray-600">Enter the 6-digit OTP sent to your email</p>
+          <p className="text-gray-600">Enter the {OTP_LENGTH}-digit OTP sent to your email</p>
         </div>
 
         <form onSubmit={handleVerify} className="space-y-6">
@@ -125,11 +127,11 @@ export default function OtpClient() {
             <input
               type="text"
               inputMode="numeric"
-              maxLength={6}
+              maxLength={OTP_LENGTH}
               value={otp}
               onChange={(e) => setOtp(e.target.value.replace(/\D/g, ''))}
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-400 tracking-widest text-center text-lg"
-              placeholder="------"
+              placeholder={"-".repeat(OTP_LENGTH)}
             />
           </div>
 
