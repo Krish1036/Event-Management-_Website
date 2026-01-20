@@ -130,7 +130,7 @@ function CreateEventFormContent({ organizers }: { organizers: any[] }) {
           <CardDescription className="text-gray-500">Control event visibility and publishing</CardDescription>
         </CardHeader>
         <CardContent>
-          <VisibilitySection />
+          <VisibilitySection variant="light" />
         </CardContent>
       </Card>
 

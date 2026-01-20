@@ -7,6 +7,28 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertTriangle, CheckCircle, Users, Calendar, DollarSign, Settings, Wrench, Plus } from 'lucide-react';
 
+const GANPAT_INSTITUTES = [
+  "U. V. Patel College of Engineering",
+  "Institute of Computer Technology",
+  "Institute of Technology",
+  "B. S. Patel Polytechnic",
+  "Institute of Pharmacy",
+  "Shree S. K. Patel College of Pharmaceutical Education & Research",
+  "V. M. Patel College of Management Studies",
+  "Acharya Motibhai Patel Institute of Computer Studies",
+  "Mehsana Urban Institute of Sciences (MUIS)",
+  "Department of Computer Science",
+  "Department of Social Work",
+  "Institute of Architecture",
+  "Institute of Design & Architecture",
+  "Kumud & Bhupesh Institute of Nursing",
+  "Institute of Physiotherapy",
+  "Kantaben Kashiram Institute of Agricultural Sciences & Research (KKIASR)",
+  "Centre for Applied Sciences & Technology",
+  "Japan–India Institute for Manufacturing (JIM)",
+  "Centre for Advanced Research Studies (CARS)"
+];
+
 export const revalidate = 0;
 
 async function requireAdmin() {
@@ -62,6 +84,10 @@ async function handleManualFix(formData: FormData) {
   const offlineEventId = formData.get('offlineEventId') as string | null;
   const offlineUserName = formData.get('offlineUserName') as string | null;
   const offlineUserEmail = formData.get('offlineUserEmail') as string | null;
+  const offlinePhoneNumber = formData.get('offlinePhoneNumber') as string | null;
+  const offlineUniversityType = formData.get('offlineUniversityType') as string | null;
+  const offlineGanpatInstitute = formData.get('offlineGanpatInstitute') as string | null;
+  const offlineOtherUniversity = formData.get('offlineOtherUniversity') as string | null;
 
   let redirectStatus: string | null = null;
 
@@ -186,7 +212,7 @@ async function handleManualFix(formData: FormData) {
         redirectStatus = 'manual_add_success';
       }
     }
-  } else if (action === 'add_offline_registration' && offlineEventId && offlineUserName && offlineUserEmail) {
+  } else if (action === 'add_offline_registration' && offlineEventId && offlineUserName && offlineUserEmail && offlinePhoneNumber && offlineUniversityType) {
     // Add offline registration
     // First create user profile if doesn't exist
     let userProfile = null;
@@ -196,6 +222,14 @@ async function handleManualFix(formData: FormData) {
       .eq('email', offlineUserEmail)
       .single();
 
+    // Determine university value
+    let universityValue = '';
+    if (offlineUniversityType === 'Ganpat University' && offlineGanpatInstitute) {
+      universityValue = `Ganpat University - ${offlineGanpatInstitute}`;
+    } else if (offlineUniversityType === 'Other' && offlineOtherUniversity) {
+      universityValue = offlineOtherUniversity;
+    }
+
     if (!existingUser) {
       // Create new user profile
       const { data: newUser } = await supabase
@@ -203,6 +237,8 @@ async function handleManualFix(formData: FormData) {
         .insert({
           email: offlineUserEmail,
           full_name: offlineUserName,
+          phone_number: offlinePhoneNumber,
+          university: universityValue,
           role: 'student'
         })
         .select('id,full_name')
@@ -243,6 +279,8 @@ async function handleManualFix(formData: FormData) {
           details: {
             user_email: offlineUserEmail,
             user_name: offlineUserName,
+            phone_number: offlinePhoneNumber,
+            university: universityValue,
             user_id: userProfile.id,
             event_id: offlineEventId,
             registration_id: newReg?.id,
@@ -512,7 +550,7 @@ export default async function AdminManualFixesPage({
         </CardHeader>
         <CardContent>
           <form action={handleManualFix} className="space-y-4">
-            <div className="grid gap-4 md:grid-cols-3">
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
                 <label htmlFor="offlineUserName" className="block text-sm font-medium text-gray-700 mb-2">
                   Full Name
@@ -539,25 +577,92 @@ export default async function AdminManualFixesPage({
                   className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
                 />
               </div>
+            </div>
+            
+            <div className="grid gap-4 md:grid-cols-2">
               <div>
-                <label htmlFor="offlineEventId" className="block text-sm font-medium text-gray-700 mb-2">
-                  Event
+                <label htmlFor="offlinePhoneNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                  Phone Number
                 </label>
-                <Select name="offlineEventId" required>
+                <Input
+                  type="tel"
+                  id="offlinePhoneNumber"
+                  name="offlinePhoneNumber"
+                  required
+                  placeholder="Enter phone number"
+                  className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
+              
+              <div>
+                <label htmlFor="offlineUniversityType" className="block text-sm font-medium text-gray-700 mb-2">
+                  University
+                </label>
+                <Select name="offlineUniversityType" required>
                   <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
-                    <SelectValue placeholder="Select event" className="text-black" />
+                    <SelectValue placeholder="Select University" className="text-black" />
                   </SelectTrigger>
                   <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
-                    <SelectItem value="all" className="text-black hover:bg-gray-100">All Events</SelectItem>
-                    {events.map((event: any) => (
-                      <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
-                        {event.title} ({new Date(event.event_date).toLocaleDateString()})
+                    <SelectItem value="Ganpat University" className="text-black hover:bg-gray-100">Ganpat University</SelectItem>
+                    <SelectItem value="Other" className="text-black hover:bg-gray-100">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <label htmlFor="offlineGanpatInstitute" className="block text-sm font-medium text-gray-700 mb-2">
+                  Ganpat Institute (if applicable)
+                </label>
+                <Select name="offlineGanpatInstitute">
+                  <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                    <SelectValue placeholder="Select Institute" className="text-black" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                    {GANPAT_INSTITUTES.map((institute) => (
+                      <SelectItem key={institute} value={institute} className="text-black hover:bg-gray-100">
+                        {institute}
                       </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
+              
+              <div>
+                <label htmlFor="offlineOtherUniversity" className="block text-sm font-medium text-gray-700 mb-2">
+                  Other University Name (if applicable)
+                </label>
+                <Input
+                  type="text"
+                  id="offlineOtherUniversity"
+                  name="offlineOtherUniversity"
+                  placeholder="Enter university name"
+                  minLength={3}
+                  className="border-gray-300 focus:ring-purple-500 focus:border-purple-500"
+                />
+              </div>
             </div>
+            
+            <div>
+              <label htmlFor="offlineEventId" className="block text-sm font-medium text-gray-700 mb-2">
+                Event
+              </label>
+              <Select name="offlineEventId" required>
+                <SelectTrigger className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white text-black">
+                  <SelectValue placeholder="Select event" className="text-black" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
+                  <SelectItem value="all" className="text-black hover:bg-gray-100">All Events</SelectItem>
+                  {events.map((event: any) => (
+                    <SelectItem key={event.id} value={event.id} className="text-black hover:bg-gray-100">
+                      {event.title} ({new Date(event.event_date).toLocaleDateString()})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            
             <Button
               type="submit"
               name="action"

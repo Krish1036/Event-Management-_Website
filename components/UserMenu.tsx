@@ -50,17 +50,17 @@ export function UserMenu() {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex h-8 w-8 items-center justify-center rounded-full border border-slate-700 bg-slate-900 text-xs font-medium text-slate-200 hover:border-slate-500"
+        className="flex h-8 w-8 items-center justify-center rounded-full border border-gray-300 bg-white text-xs font-medium text-gray-700 hover:border-gray-400"
       >
         {user?.email?.[0]?.toUpperCase() ?? "U"}
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-40 rounded-md border border-slate-800 bg-slate-900 py-1 text-xs shadow-lg">
+        <div className="absolute right-0 mt-2 w-40 rounded-md border border-gray-200 bg-white py-1 text-xs shadow-lg">
           {!user && (
             <Link
               href="/login"
-              className="block px-3 py-2 text-slate-200 hover:bg-slate-800"
+              className="block px-3 py-2 text-gray-700 hover:bg-gray-100"
               onClick={() => setOpen(false)}
             >
               Login
@@ -70,7 +70,7 @@ export function UserMenu() {
             <>
               <button
                 type="button"
-                className="flex w-full px-3 py-2 text-left text-slate-200 hover:bg-slate-800"
+                className="flex w-full px-3 py-2 text-left text-gray-700 hover:bg-gray-100"
                 onClick={() => {
                   router.push("/dashboard");
                   setOpen(false);
@@ -80,7 +80,7 @@ export function UserMenu() {
               </button>
               <button
                 type="button"
-                className="flex w-full px-3 py-2 text-left text-red-300 hover:bg-red-900/40"
+                className="flex w-full px-3 py-2 text-left text-red-600 hover:bg-red-50"
                 onClick={handleLogout}
               >
                 Logout

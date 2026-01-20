@@ -93,7 +93,7 @@ export default async function AdminEventPreviewPage({
           </Link>
           <div>
             <h1 className="text-3xl font-bold text-white">Preview Event</h1>
-            <p className="text-sm text-slate-400">Review full details before approving.</p>
+            <p className="text-sm text-gray-600">Review full details before approving.</p>
           </div>
         </div>
         <div className="flex items-center gap-2">
@@ -127,91 +127,91 @@ export default async function AdminEventPreviewPage({
 
       {!fetchError && event && (
         <>
-      <Card className="border-slate-800 bg-slate-900/60">
+      <Card className="border-gray-200 bg-white">
         <CardHeader>
-          <CardTitle className="text-white">Event Details</CardTitle>
+          <CardTitle className="text-gray-900">Event Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4 text-sm">
           <div className="flex flex-wrap gap-2 text-[11px]">
-            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 font-medium uppercase tracking-wide text-slate-200">
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-medium uppercase tracking-wide text-gray-700">
               {event.status}
             </span>
             <span
               className={`inline-flex items-center rounded-full px-2 py-0.5 font-medium uppercase tracking-wide ${
                 event.is_registration_open
-                  ? 'bg-emerald-800/50 text-emerald-200'
-                  : 'bg-red-800/40 text-red-200'
+                  ? 'bg-emerald-100 text-emerald-700'
+                  : 'bg-red-100 text-red-700'
               }`}
             >
               {event.is_registration_open ? 'Registrations Open' : 'Registrations Closed'}
             </span>
-            <span className="inline-flex items-center rounded-full bg-slate-800 px-2 py-0.5 font-medium uppercase tracking-wide text-slate-200">
+            <span className="inline-flex items-center rounded-full bg-gray-100 px-2 py-0.5 font-medium uppercase tracking-wide text-gray-700">
               {event.is_paid ? `Paid • ₹${event.price}` : 'Free'}
             </span>
           </div>
 
           <div className="grid gap-4 md:grid-cols-2">
             <div>
-              <p className="text-slate-400 text-xs">Title</p>
-              <p className="font-medium text-slate-100">{event.title}</p>
+              <p className="text-gray-600 text-xs">Title</p>
+              <p className="font-medium text-gray-900">{event.title}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs">Organizer</p>
-              <p className="font-medium text-slate-100">{(organizer as any)?.full_name ?? 'Unknown'}</p>
+              <p className="text-gray-600 text-xs">Organizer</p>
+              <p className="font-medium text-gray-900">{(organizer as any)?.full_name ?? 'Unknown'}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs">Date</p>
-              <p className="font-medium text-slate-100">{new Date(event.event_date as string).toLocaleDateString()}</p>
+              <p className="text-gray-600 text-xs">Date</p>
+              <p className="font-medium text-gray-900">{new Date(event.event_date as string).toLocaleDateString()}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs">Time</p>
-              <p className="font-medium text-slate-100">
+              <p className="text-gray-600 text-xs">Time</p>
+              <p className="font-medium text-gray-900">
                 {event.start_time} - {event.end_time}
               </p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs">Location</p>
-              <p className="font-medium text-slate-100">{event.location || 'No location'}</p>
+              <p className="text-gray-600 text-xs">Location</p>
+              <p className="font-medium text-gray-900">{event.location || 'No location'}</p>
             </div>
             <div>
-              <p className="text-slate-400 text-xs">Capacity</p>
-              <p className="font-medium text-slate-100">{event.capacity}</p>
+              <p className="text-gray-600 text-xs">Capacity</p>
+              <p className="font-medium text-gray-900">{event.capacity}</p>
             </div>
           </div>
 
           <div>
-            <p className="text-slate-400 text-xs">Description</p>
+            <p className="text-gray-600 text-xs">Description</p>
             <div 
-              className="text-slate-200 prose prose-sm max-w-none prose-invert"
+              className="text-gray-700 prose prose-sm max-w-none"
               dangerouslySetInnerHTML={{ __html: event.description || 'No description' }}
             />
           </div>
         </CardContent>
       </Card>
 
-      <Card className="border-slate-800 bg-slate-900/60">
+      <Card className="border-gray-200 bg-white">
         <CardHeader>
-          <CardTitle className="text-white">Registration Form Fields</CardTitle>
+          <CardTitle className="text-gray-900">Registration Form Fields</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           {activeFields.length === 0 && disabledFields.length === 0 ? (
-            <p className="text-sm text-slate-400">No form fields configured.</p>
+            <p className="text-sm text-gray-600">No form fields configured.</p>
           ) : (
             <div className="space-y-3">
               {activeFields.length > 0 && (
                 <div className="space-y-2">
                   {activeFields.map((field: any) => (
-                    <div key={field.id} className="rounded-lg border border-slate-800 bg-slate-950/40 p-3">
+                    <div key={field.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium text-slate-100">{field.label}</p>
-                        <span className="text-[11px] text-slate-400">
+                        <p className="font-medium text-gray-900">{field.label}</p>
+                        <span className="text-[11px] text-gray-500">
                           {field.field_type}
                           {' • '}
                           {field.required ? 'Required' : 'Optional'}
                         </span>
                       </div>
                       {Array.isArray(field.options) && field.options.length > 0 && (
-                        <p className="mt-1 text-xs text-slate-400">Options: {field.options.join(', ')}</p>
+                        <p className="mt-1 text-xs text-gray-500">Options: {field.options.join(', ')}</p>
                       )}
                     </div>
                   ))}
@@ -220,12 +220,12 @@ export default async function AdminEventPreviewPage({
 
               {disabledFields.length > 0 && (
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-slate-400">Disabled Fields</p>
+                  <p className="text-xs font-medium text-gray-600">Disabled Fields</p>
                   {disabledFields.map((field: any) => (
-                    <div key={field.id} className="rounded-lg border border-slate-800 bg-slate-950/20 p-3 opacity-70">
+                    <div key={field.id} className="rounded-lg border border-gray-200 bg-gray-50 p-3 opacity-70">
                       <div className="flex items-center justify-between gap-3">
-                        <p className="font-medium text-slate-100">{field.label}</p>
-                        <span className="text-[11px] text-slate-400">
+                        <p className="font-medium text-gray-900">{field.label}</p>
+                        <span className="text-[11px] text-gray-500">
                           {field.field_type}
                           {' • '}
                           {field.required ? 'Required' : 'Optional'}
@@ -240,9 +240,9 @@ export default async function AdminEventPreviewPage({
         </CardContent>
       </Card>
 
-      <Card className="border-slate-800 bg-slate-900/60">
+      <Card className="border-gray-200 bg-white">
         <CardHeader>
-          <CardTitle className="text-white">Admin Actions</CardTitle>
+          <CardTitle className="text-gray-900">Admin Actions</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap gap-2">
           <Link
@@ -253,7 +253,7 @@ export default async function AdminEventPreviewPage({
           </Link>
           <Link
             href="/admin-dashboard/events"
-            className="rounded-md bg-slate-700 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-600"
+            className="rounded-md bg-gray-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-700"
           >
             Back
           </Link>

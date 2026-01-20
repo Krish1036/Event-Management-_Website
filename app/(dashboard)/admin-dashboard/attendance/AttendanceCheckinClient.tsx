@@ -86,8 +86,8 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
   return (
     <>
       {/* Manual Check-in Methods */}
-      <div className="rounded-lg border border-slate-800 bg-slate-900/60 p-4">
-        <h2 className="text-lg font-medium text-white mb-4">Manual Check-in</h2>
+      <div className="rounded-lg border border-gray-200 bg-white p-4">
+        <h2 className="text-lg font-medium text-gray-900 mb-4">Manual Check-in</h2>
         {errorMessage && (
           <p className="mb-2 text-xs text-red-400">{errorMessage}</p>
         )}
@@ -99,36 +99,36 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
         <div className="grid gap-4 md:grid-cols-3">
           {/* QR Scanner / Entry Code combined */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">QR Code Scanner</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">QR Code Scanner</h3>
             <form onSubmit={handleCheckinByCode} className="space-y-2">
               <div>
                 <input
                   type="text"
                   name="entryCode"
                   placeholder="Scan QR code or enter entry code"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
-              <QRModalButton buttonLabel={loadingByCode ? 'Checking in…' : 'Check In (QR/Entry Code)'} className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed" />
+              <QRModalButton buttonLabel={loadingByCode ? 'Checking in…' : 'Check In (QR/Entry Code)'} className="w-full rounded-md bg-purple-600 px-3 py-2 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed" />
             </form>
           </div>
 
           {/* QR Code (text box) - replaces Registration ID and is placed before Entry Code */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">QR Code</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">QR Code</h3>
             <form onSubmit={handleCheckinByCode} className="space-y-2">
               <div>
                 <input
                   type="text"
                   name="entryCode"
                   placeholder="Scan or paste QR code"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loadingByCode}
-                className="w-full rounded-md bg-sky-700 px-3 py-2 text-xs font-medium text-white hover:bg-sky-600 disabled:opacity-60 disabled:cursor-not-allowed"
+                className="w-full rounded-md bg-purple-600 px-3 py-2 text-xs font-medium text-white hover:bg-purple-700 disabled:opacity-60 disabled:cursor-not-allowed"
               >
                 {loadingByCode ? 'Checking in…' : 'Check In (QR)'}
               </button>
@@ -137,14 +137,14 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
 
           {/* Entry Code only */}
           <div>
-            <h3 className="text-sm font-medium text-slate-300 mb-2">Entry Code</h3>
+            <h3 className="text-sm font-medium text-gray-700 mb-2">Entry Code</h3>
             <form onSubmit={handleCheckinByCode} className="space-y-2">
               <div>
                 <input
                   type="text"
                   name="entryCode"
                   placeholder="Enter entry code manually"
-                  className="w-full rounded-md border border-slate-700 bg-slate-800 px-3 py-2 text-xs text-slate-100 placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-xs text-gray-900 placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                 />
               </div>
               <button
@@ -161,23 +161,23 @@ export function AttendanceCheckinClient({ notCheckedIn }: Props) {
 
       {/* Not Checked In list with client-side check-in */}
       <div className="space-y-3">
-        <h2 className="text-lg font-medium text-white">Not Checked In</h2>
+        <h2 className="text-lg font-medium text-gray-900">Not Checked In</h2>
         {notCheckedInState.length === 0 ? (
-          <p className="text-sm text-slate-400">All confirmed registrations are checked in.</p>
+          <p className="text-sm text-gray-600">All confirmed registrations are checked in.</p>
         ) : (
           <div className="space-y-2 text-sm">
             {notCheckedInState.map((r) => (
               <div
                 key={r.registrationId}
-                className="rounded-xl border border-slate-800 bg-slate-900/60 p-3"
+                className="rounded-xl border border-gray-200 bg-white p-3"
               >
                 <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                   <div className="space-y-1">
-                    <p className="font-medium text-white">{r.event?.title ?? 'Event'}</p>
-                    <p className="text-xs text-slate-300">
+                    <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
+                    <p className="text-xs text-gray-600">
                       {r.user?.full_name ?? 'User'} · {r.entryCode ?? 'N/A'}
                     </p>
-                    <p className="text-[11px] text-slate-400">Confirmed registration</p>
+                    <p className="text-[11px] text-gray-500">Confirmed registration</p>
                   </div>
                   <button
                     type="button"

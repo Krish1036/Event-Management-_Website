@@ -1,324 +1,325 @@
-import { getSupabaseServerClient } from '@/lib/supabase-server';
-import { redirect } from 'next/navigation';
-import Link from 'next/link';
-import { Search, Filter, Grid3X3, Menu } from 'lucide-react';
+'use client';
+
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
+import { Search, Filter, Grid3X3, Menu, List } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminEventCard from './AdminEventCard';
 
-export const revalidate = 0;
+export default function AdminEventsPage() {
+  const [events, setEvents] = useState<any[]>([]);
+  const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list');
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-async function requireAdmin() {
-  const supabase = getSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/admin');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin') {
-    redirect('/');
-  }
-
-  return { user };
-}
-
-async function getEventsWithUsage() {
-  const supabase = getSupabaseServerClient();
-
-  const { data: events } = await supabase
-    .from('events')
-    .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,created_by,image_url')
-    .order('event_date', { ascending: true });
-
-  const { data: registrations } = await supabase
-    .from('registrations')
-    .select('event_id,status');
-
-  const usageMap = new Map<string, { pending: number; confirmed: number }>();
-  for (const r of registrations ?? []) {
-    const key = r.event_id as string;
-    const entry = usageMap.get(key) ?? { pending: 0, confirmed: 0 };
-    if (r.status === 'PENDING') entry.pending += 1;
-    if (r.status === 'CONFIRMED') entry.confirmed += 1;
-    usageMap.set(key, entry);
-  }
-
-  const { data: organizers } = await supabase
-    .from('profiles')
-    .select('id,full_name');
-
-  const orgMap = new Map<string, string>();
-  for (const o of organizers ?? []) {
-    orgMap.set(o.id as string, (o.full_name as string) ?? 'Organizer');
-  }
-
-  return (events ?? []).map((e) => {
-    const usage = usageMap.get(e.id as string) ?? { pending: 0, confirmed: 0 };
-    const total = usage.pending + usage.confirmed;
-    const capacity = e.capacity ?? 0;
-    const utilization = capacity > 0 ? Math.min(100, Math.round((total / capacity) * 100)) : 0;
-    const seatsLeft = Math.max(0, capacity - total);
-
-    return {
-      ...e,
-      organizerName: orgMap.get(e.created_by as string) ?? 'Unknown',
-      pendingCount: usage.pending,
-      confirmedCount: usage.confirmed,
-      utilization,
-      seatsLeft
-    };
-  });
-}
-
-async function handleEventAction(formData: FormData) {
-  'use server';
-
-  const action = formData.get('action') as string | null;
-  const eventId = formData.get('eventId') as string | null;
-
-  if (!action || !eventId) {
-    redirect('/admin-dashboard/events');
-  }
-
-  const supabase = getSupabaseServerClient();
-  const {
-    data: { user }
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    redirect('/admin');
-  }
-
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single();
-
-  if (!profile || profile.role !== 'admin') {
-    redirect('/');
-  }
-
-  const { data: event } = await supabase
-    .from('events')
-    .select('id,status,is_registration_open')
-    .eq('id', eventId)
-    .single();
-
-  if (!event) {
-    redirect('/admin-dashboard/events');
-  }
-
-  const updates: Record<string, any> = {};
-  let logAction = '';
-
-  if (action === 'approve') {
-    updates.status = 'approved';
-    logAction = 'EVENT_APPROVE';
-  } else if (action === 'cancel') {
-    updates.status = 'cancelled';
-    updates.is_registration_open = false;
-    logAction = 'EVENT_CANCEL';
-  } else if (action === 'open_reg') {
-    updates.is_registration_open = true;
-    logAction = 'EVENT_OPEN_REG';
-  } else if (action === 'close_reg') {
-    updates.is_registration_open = false;
-    logAction = 'EVENT_CLOSE_REG';
-  } else if (action === 'emergency_disable') {
-    updates.status = 'cancelled';
-    updates.is_registration_open = false;
-    logAction = 'EVENT_EMERGENCY_DISABLE';
-  } else if (action === 'edit_event') {
-    const title = formData.get('title') as string | null;
-    const event_date = formData.get('event_date') as string | null;
-    const start_time = formData.get('start_time') as string | null;
-    const end_time = formData.get('end_time') as string | null;
-    const location = formData.get('location') as string | null;
-    const capacity = formData.get('capacity') as string | null;
-
-    if (title) updates.title = title;
-    if (event_date) updates.event_date = event_date;
-    if (start_time) updates.start_time = start_time;
-    if (end_time) updates.end_time = end_time;
-    if (location) updates.location = location;
-    if (capacity) updates.capacity = parseInt(capacity, 10);
-    
-    logAction = 'EVENT_EDIT';
-  } else if (action === 'manual_override') {
-    const userEmail = formData.get('userEmail') as string | null;
-    
-    if (!userEmail) {
-      redirect('/admin-dashboard/events');
+  // Load view mode preference from localStorage
+  useEffect(() => {
+    const savedViewMode = localStorage.getItem('admin_events_view_mode');
+    if (savedViewMode === 'grid' || savedViewMode === 'list') {
+      setViewMode(savedViewMode);
     }
+  }, []);
 
-    // Find user by email
-    const { data: user } = await supabase
-      .from('profiles')
-      .select('id,full_name')
-      .eq('email', userEmail)
-      .single();
+  // Save view mode preference to localStorage
+  useEffect(() => {
+    localStorage.setItem('admin_events_view_mode', viewMode);
+  }, [viewMode]);
 
-    if (!user) {
-      redirect('/admin-dashboard/events');
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  useEffect(() => {
+    // Filter events based on search term
+    if (searchTerm.trim() === '') {
+      setFilteredEvents(events);
+    } else {
+      const filtered = events.filter(event => 
+        event.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.organizerName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        event.id?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        new Date(event.event_date).getFullYear().toString().includes(searchTerm.toLowerCase())
+      );
+      setFilteredEvents(filtered);
     }
+  }, [searchTerm, events]);
 
-    // Generate manual entry code
-    const entryCode = `MANUAL-${Date.now()}-${Math.random().toString(36).substr(2, 9).toUpperCase()}`;
-
-    // Create manual registration
-    await supabase.from('registrations').insert({
-      event_id: eventId,
-      user_id: user.id,
-      status: 'CONFIRMED',
-      entry_code: entryCode
-    });
-
-    // Log manual override immediately
-    await supabase.from('admin_logs').insert({
-      admin_id: user.id,
-      action: 'REG_MANUAL_OVERRIDE',
-      details: {
-        event_id: eventId,
-        user_email: userEmail,
-        entry_code: entryCode
+  async function fetchEvents() {
+    try {
+      const supabase = getSupabaseBrowserClient();
+      
+      // Check if user is logged in
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push('/admin');
+        return;
       }
-    });
 
-    logAction = 'REG_MANUAL_OVERRIDE';
-  } else if (action === 'force_close_capacity') {
-    updates.is_registration_open = false;
-    logAction = 'EVENT_FORCE_CLOSE_CAPACITY';
-  } else if (action === 'clone_event') {
-    // Get the full event data including form fields
-    const { data: fullEvent } = await supabase
-      .from('events')
-      .select('*')
-      .eq('id', eventId)
-      .single();
-
-    if (!fullEvent) {
-      redirect('/admin-dashboard/events');
-    }
-
-    // Get form fields for the event
-    const { data: formFields } = await supabase
-      .from('event_form_fields')
-      .select('*')
-      .eq('event_id', eventId);
-
-    // Create cloned event
-    const clonedEventData = {
-      title: `${fullEvent.title} (Copy)`,
-      description: fullEvent.description,
-      location: fullEvent.location,
-      event_date: new Date().toISOString().split('T')[0], // Set to today
-      start_time: fullEvent.start_time,
-      end_time: fullEvent.end_time,
-      capacity: fullEvent.capacity,
-      is_registration_open: false, // Start with registration closed
-      status: 'draft',
-      price: fullEvent.price,
-      created_by: user.id,
-      created_at: new Date().toISOString()
-    };
-
-    const { data: clonedEvent, error: cloneError } = await supabase
-      .from('events')
-      .insert(clonedEventData)
-      .select()
-      .single();
-
-    if (cloneError || !clonedEvent) {
-      redirect('/admin-dashboard/events');
-    }
-
-    // Clone form fields if they exist
-    if (formFields && formFields.length > 0) {
-      const clonedFormFields = formFields.map(field => ({
-        event_id: clonedEvent.id,
-        label: field.label,
-        field_type: field.field_type,
-        required: field.required,
-        options: field.options,
-        disabled: false,
-        original_required: field.original_required,
-        created_at: new Date().toISOString()
-      }));
-
-      await supabase
-        .from('event_form_fields')
-        .insert(clonedFormFields);
-    }
-
-    // Log clone action
-    await supabase.from('admin_logs').insert({
-      admin_id: user.id,
-      action: 'EVENT_CLONE',
-      details: {
-        original_event_id: eventId,
-        cloned_event_id: clonedEvent.id,
-        original_title: fullEvent.title,
-        cloned_title: clonedEventData.title
+      // Get user email to check if admin
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData?.user?.email;
+      
+      // Email check first: If the user's email is in the hardcoded list, they're admin
+      const adminEmails = ['krshthakore@gmail.com', 'admin@university.edu']; // Update with your admin emails
+      let isAdmin = false;
+      
+      if (userEmail && adminEmails.includes(userEmail)) {
+        isAdmin = true;
+      } else {
+        // Role check second: If not in email list, checks if they have admin role in profiles
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        isAdmin = profile?.role === 'admin';
       }
-    });
-
-    logAction = 'EVENT_CLONE';
-  } else if (action === 'delete') {
-    await supabase
-      .from('events')
-      .delete()
-      .eq('id', eventId);
-
-    await supabase.from('admin_logs').insert({
-      admin_id: user.id,
-      action: 'EVENT_DELETE',
-      details: {
-        event_id: eventId
+      
+      if (!isAdmin) {
+        router.push('/');
+        return;
       }
-    });
 
-    logAction = 'EVENT_DELETE';
+      // Fetch events with usage data
+      const { data: eventsData } = await supabase
+        .from('events')
+        .select('id,title,description,location,event_date,start_time,end_time,capacity,is_registration_open,status,created_by,image_url')
+        .order('event_date', { ascending: true });
+
+      const { data: registrations } = await supabase
+        .from('registrations')
+        .select('event_id,status');
+
+      const { data: organizers } = await supabase
+        .from('profiles')
+        .select('id,full_name');
+
+      const usageMap = new Map<string, { pending: number; confirmed: number }>();
+      for (const r of registrations ?? []) {
+        const key = r.event_id as string;
+        const entry = usageMap.get(key) ?? { pending: 0, confirmed: 0 };
+        if (r.status === 'PENDING') entry.pending += 1;
+        if (r.status === 'CONFIRMED') entry.confirmed += 1;
+        usageMap.set(key, entry);
+      }
+
+      const orgMap = new Map<string, string>();
+      for (const o of organizers ?? []) {
+        orgMap.set(o.id as string, (o.full_name as string) ?? 'Organizer');
+      }
+
+      const eventsWithUsage = (eventsData ?? []).map((e) => {
+        const usage = usageMap.get(e.id as string) ?? { pending: 0, confirmed: 0 };
+        const total = usage.pending + usage.confirmed;
+        const capacity = e.capacity ?? 0;
+        const utilization = capacity > 0 ? Math.min(100, Math.round((total / capacity) * 100)) : 0;
+        const seatsLeft = Math.max(0, capacity - total);
+
+        return {
+          ...e,
+          organizerName: orgMap.get(e.created_by as string) ?? 'Unknown',
+          pendingCount: usage.pending,
+          confirmedCount: usage.confirmed,
+          utilization,
+          seatsLeft
+        };
+      });
+
+      setEvents(eventsWithUsage);
+      setFilteredEvents(eventsWithUsage);
+    } catch (error) {
+      console.error('Error fetching events:', error);
+    } finally {
+      setLoading(false);
+    }
   }
 
-  if (Object.keys(updates).length > 0) {
-    await supabase
-      .from('events')
-      .update(updates)
-      .eq('id', eventId);
+  async function handleEventAction(formData: FormData) {
+    const action = formData.get('action') as string | null;
+    const eventId = formData.get('eventId') as string | null;
 
-    await supabase.from('admin_logs').insert({
-      admin_id: user.id,
-      action: logAction,
-      details: {
-        event_id: event.id,
-        previous_status: event.status,
-        previous_is_registration_open: event.is_registration_open,
-        updates
+    if (!action || !eventId) {
+      return;
+    }
+
+    try {
+      const supabase = getSupabaseBrowserClient();
+      
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
+      // Get user email to check if admin
+      const { data: userData } = await supabase.auth.getUser();
+      const userEmail = userData?.user?.email;
+      
+      // Email check first: If the user's email is in the hardcoded list, they're admin
+      const adminEmails = ['krshthakore@gmail.com', 'admin@university.edu'];
+      let isAdmin = false;
+      
+      if (userEmail && adminEmails.includes(userEmail)) {
+        isAdmin = true;
+      } else {
+        // Role check second
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        isAdmin = profile?.role === 'admin';
       }
-    });
+      
+      if (!isAdmin) return;
+
+      const { data: event } = await supabase
+        .from('events')
+        .select('id,status,is_registration_open')
+        .eq('id', eventId)
+        .single();
+
+      if (!event) return;
+
+      const updates: Record<string, any> = {};
+      let logAction = '';
+
+      if (action === 'approve') {
+        updates.status = 'approved';
+        logAction = 'EVENT_APPROVE';
+      } else if (action === 'cancel') {
+        updates.status = 'cancelled';
+        updates.is_registration_open = false;
+        logAction = 'EVENT_CANCEL';
+      } else if (action === 'open_reg') {
+        updates.is_registration_open = true;
+        logAction = 'EVENT_OPEN_REG';
+      } else if (action === 'close_reg') {
+        updates.is_registration_open = false;
+        logAction = 'EVENT_CLOSE_REG';
+      } else if (action === 'clone_event') {
+        // Get the full event data including form fields
+        const { data: fullEvent } = await supabase
+          .from('events')
+          .select('*')
+          .eq('id', eventId)
+          .single();
+
+        if (!fullEvent) return;
+
+        // Get form fields for the event
+        const { data: formFields } = await supabase
+          .from('event_form_fields')
+          .select('*')
+          .eq('id', eventId);
+
+        // Create cloned event
+        const clonedEventData = {
+          title: `${fullEvent.title} (Copy)`,
+          description: fullEvent.description,
+          location: fullEvent.location,
+          event_date: new Date().toISOString().split('T')[0],
+          start_time: fullEvent.start_time,
+          end_time: fullEvent.end_time,
+          capacity: fullEvent.capacity,
+          is_registration_open: false,
+          status: 'draft',
+          price: fullEvent.price,
+          created_by: user.id,
+          created_at: new Date().toISOString()
+        };
+
+        const { data: clonedEvent, error: cloneError } = await supabase
+          .from('events')
+          .insert(clonedEventData)
+          .select()
+          .single();
+
+        if (cloneError || !clonedEvent) return;
+
+        // Clone form fields if they exist
+        if (formFields && formFields.length > 0) {
+          const clonedFormFields = formFields.map(field => ({
+            event_id: clonedEvent.id,
+            label: field.label,
+            field_type: field.field_type,
+            required: field.required,
+            options: field.options,
+            disabled: false,
+            original_required: field.original_required,
+            created_at: new Date().toISOString()
+          }));
+
+          await supabase
+            .from('event_form_fields')
+            .insert(clonedFormFields);
+        }
+
+        // Log clone action
+        await supabase.from('admin_logs').insert({
+          admin_id: user.id,
+          action: 'EVENT_CLONE',
+          details: {
+            original_event_id: eventId,
+            cloned_event_id: clonedEvent.id,
+            original_title: fullEvent.title,
+            cloned_title: clonedEventData.title
+          }
+        });
+
+        logAction = 'EVENT_CLONE';
+      } else if (action === 'delete') {
+        await supabase
+          .from('events')
+          .delete()
+          .eq('id', eventId);
+
+        await supabase.from('admin_logs').insert({
+          admin_id: user.id,
+          action: 'EVENT_DELETE',
+          details: {
+            event_id: eventId
+          }
+        });
+
+        logAction = 'EVENT_DELETE';
+      }
+
+      if (Object.keys(updates).length > 0) {
+        await supabase
+          .from('events')
+          .update(updates)
+          .eq('id', eventId);
+
+        await supabase.from('admin_logs').insert({
+          admin_id: user.id,
+          action: logAction,
+          details: {
+            event_id: event.id,
+            previous_status: event.status,
+            previous_is_registration_open: event.is_registration_open,
+            updates
+          }
+        });
+      }
+
+      // Refresh events
+      await fetchEvents();
+    } catch (error) {
+      console.error('Error handling event action:', error);
+    }
   }
 
-  redirect('/admin-dashboard/events');
-}
-
-export default async function AdminEventsPage({
-  searchParams
-}: {
-  searchParams?: { [key: string]: string | string[] | undefined };
-}) {
-  await requireAdmin();
-  const events = await getEventsWithUsage();
-  const highlightEventId = typeof searchParams?.new_event === 'string' ? searchParams?.new_event : 
-                          typeof searchParams?.updated_event === 'string' ? searchParams?.updated_event : undefined;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[400px]">
+        <div className="text-gray-500">Loading events...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -329,16 +330,6 @@ export default async function AdminEventsPage({
           <p className="text-gray-600 mt-1">Manage events, approvals, registrations, and capacity.</p>
         </div>
         <div className="flex items-center gap-4">
-          {/* Search bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <input
-              type="text"
-              placeholder="Search event, location, etc"
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm w-64"
-            />
-          </div>
-
           {/* Filter button */}
           <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
             <Filter className="w-4 h-4 text-white" />
@@ -371,99 +362,67 @@ export default async function AdminEventsPage({
             </SelectContent>
           </Select>
 
-          {/* Grid view button */}
-          <button className="w-10 h-10 bg-purple-600 rounded-full flex items-center justify-center hover:bg-purple-700 transition-colors">
-            <Grid3X3 className="w-4 h-4 text-white" />
-          </button>
-
-          {/* Menu button */}
-          <button className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center hover:bg-gray-200 transition-colors">
-            <Menu className="w-4 h-4 text-gray-600" />
-          </button>
+          {/* View mode buttons */}
+          <div className="filter-actions">
+            <button
+              className={`action-button ${
+                viewMode === 'list' ? 'primary' : 'secondary'
+              } mobile-hidden`}
+              onClick={() => setViewMode('list')}
+            >
+              <List className="icon" />
+            </button>
+            <button
+              className={`action-button ${
+                viewMode === 'grid' ? 'primary' : 'secondary'
+              } mobile-hidden`}
+              onClick={() => setViewMode('grid')}
+            >
+              <Grid3X3 className="icon" />
+            </button>
+          </div>
         </div>
       </div>
-      {events.length === 0 ? (
-        <p className="text-sm text-gray-500">No events found.</p>
-      ) : (
-        <div className="space-y-4">
-          {events.map((event: any) => (
-            <div key={event.id}>
-              <AdminEventCard event={event} />
-              {/* Action Buttons */}
-              <div className="px-6 pb-6 -mt-4">
-                <form action={handleEventAction} className="flex flex-wrap gap-3">
-                  <input type="hidden" name="eventId" value={event.id} />
-                  
-                  {/* Preview Button */}
-                  <Link
-                    href={`/admin-dashboard/events/${event.id}/preview`}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    Preview
-                  </Link>
-                  
-                  {/* Edit Event Button */}
-                  <Link
-                    href={`/admin-dashboard/events/${event.id}/edit`}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    Edit Event
-                  </Link>
-                  
-                  {/* Clone Event Button */}
-                  <button
-                    type="submit"
-                    name="action"
-                    value="clone_event"
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    Clone Event
-                  </button>
-                  
-                  {/* Close/Open Registrations Button */}
-                  <button
-                    type="submit"
-                    name="action"
-                    value={event.is_registration_open ? 'close_reg' : 'open_reg'}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors text-sm font-medium"
-                  >
-                    {event.is_registration_open ? 'Close Registrations' : 'Open Registrations'}
-                  </button>
-                  
-                  {/* Cancel Event Button */}
-                  <button
-                    type="submit"
-                    name="action"
-                    value="cancel"
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                  >
-                    Cancel Event
-                  </button>
-                  
-                  {/* Delete Event Button */}
-                  <button
-                    type="submit"
-                    name="action"
-                    value="delete"
-                    className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-                  >
-                    Delete Event
-                  </button>
-                  
-                  {/* Approve Button (if pending) */}
-                  {event.status === 'pending_approval' && (
-                    <button
-                      type="submit"
-                      name="action"
-                      value="approve"
-                      className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm font-medium"
-                    >
-                      Approve Event
-                    </button>
-                  )}
-                </form>
-              </div>
+
+      {/* Search Bar */}
+      <div className="bg-white rounded-xl shadow-sm p-4 border border-gray-100">
+        <div className="relative">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+          <input
+            type="text"
+            placeholder="Search events, location, organizer, or ID..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm"
+          />
+        </div>
+      </div>
+
+      {/* Results count */}
+      <div className="text-sm text-gray-600">
+        {filteredEvents.length} {filteredEvents.length === 1 ? 'event' : 'events'} found
+        {searchTerm && ` (searching for "${searchTerm}")`}
+      </div>
+
+      {/* Events List */}
+      {filteredEvents.length === 0 ? (
+        <div className="bg-white rounded-xl shadow-sm p-12 border border-gray-100">
+          <div className="text-center">
+            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Filter className="w-8 h-8 text-gray-400" />
             </div>
+            <h3 className="text-lg font-medium text-gray-900 mb-2">
+              {searchTerm ? 'No events found' : 'No events available'}
+            </h3>
+            <p className="text-gray-500">
+              {searchTerm ? 'No events match your search criteria.' : 'There are no events in the system yet.'}
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6' : 'space-y-4'}>
+          {filteredEvents.map((event: any) => (
+            <AdminEventCard key={event.id} event={event} onAction={handleEventAction} viewMode={viewMode} />
           ))}
         </div>
       )}

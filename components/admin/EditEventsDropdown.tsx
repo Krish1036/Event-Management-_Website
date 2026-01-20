@@ -56,7 +56,7 @@ export default function EditEventsDropdown() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-slate-400">
+      <div className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-gray-500">
         <span>Loading events...</span>
       </div>
     );
@@ -72,7 +72,7 @@ export default function EditEventsDropdown() {
 
   if (events.length === 0) {
     return (
-      <div className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-slate-400">
+      <div className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-gray-500">
         <span>No events found</span>
       </div>
     );
@@ -80,28 +80,28 @@ export default function EditEventsDropdown() {
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-slate-200 hover:bg-slate-800 hover:text-white w-full">
+      <DropdownMenuTrigger className="flex items-center justify-between rounded-md px-3 py-2 text-xs text-gray-700 hover:bg-purple-100 hover:text-gray-900 w-full">
         <span>Edit Events</span>
         <ChevronDown className="h-3 w-3" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 bg-slate-900 border-slate-700">
-        <DropdownMenuLabel className="text-slate-200 text-xs font-semibold">
+      <DropdownMenuContent className="w-56 bg-white border-gray-200">
+        <DropdownMenuLabel className="text-gray-700 text-xs font-semibold">
           Select Event to Edit
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="bg-slate-700" />
+        <DropdownMenuSeparator className="bg-gray-200" />
         
         {events.map((event) => (
-          <DropdownMenuItem key={event.id} className="text-slate-200 hover:bg-slate-800 p-0">
+          <DropdownMenuItem key={event.id} className="text-gray-700 hover:bg-purple-50 p-0">
             <Link
               href={`/admin-dashboard/events/${event.id}/edit`}
               className="flex items-start space-x-2 w-full p-2"
             >
-              <Edit className="h-3 w-3 mt-0.5 text-slate-400 flex-shrink-0" />
+              <Edit className="h-3 w-3 mt-0.5 text-gray-400 flex-shrink-0" />
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-medium text-slate-100 truncate">
+                <div className="text-xs font-medium text-gray-900 truncate">
                   {event.title}
                 </div>
-                <div className="flex items-center space-x-2 mt-1 text-[10px] text-slate-400">
+                <div className="flex items-center space-x-2 mt-1 text-[10px] text-gray-500">
                   <div className="flex items-center space-x-1">
                     <Calendar className="h-2.5 w-2.5" />
                     <span>{new Date(event.event_date).toLocaleDateString()}</span>
@@ -113,14 +113,14 @@ export default function EditEventsDropdown() {
                 </div>
                 <div className="flex items-center space-x-2 mt-0.5">
                   <span className={`inline-flex items-center rounded-full px-1.5 py-0.5 text-[9px] font-medium ${
-                    event.status === 'approved' ? 'bg-green-800/50 text-green-200' :
-                    event.status === 'draft' ? 'bg-yellow-800/50 text-yellow-200' :
-                    event.status === 'cancelled' ? 'bg-red-800/50 text-red-200' :
-                    'bg-slate-800/50 text-slate-200'
+                    event.status === 'approved' ? 'bg-green-100 text-green-700' :
+                    event.status === 'draft' ? 'bg-yellow-100 text-yellow-700' :
+                    event.status === 'cancelled' ? 'bg-red-100 text-red-700' :
+                    'bg-gray-100 text-gray-700'
                   }`}>
                     {event.status}
                   </span>
-                  <span className="text-[9px] text-slate-500">
+                  <span className="text-[9px] text-gray-400">
                     {event.start_time} - {event.end_time}
                   </span>
                 </div>
@@ -129,8 +129,8 @@ export default function EditEventsDropdown() {
           </DropdownMenuItem>
         ))}
         
-        <DropdownMenuSeparator className="bg-slate-700" />
-        <DropdownMenuItem className="text-slate-400 hover:bg-slate-800">
+        <DropdownMenuSeparator className="bg-gray-200" />
+        <DropdownMenuItem className="text-gray-500 hover:bg-purple-50">
           <Link
             href="/admin-dashboard/events"
             className="flex items-center space-x-2 w-full p-2"

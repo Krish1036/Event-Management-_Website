@@ -176,7 +176,7 @@ export default function OrganizerEmailCenterClient({
       </div>
 
       {/* Event Selector */}
-      <Card>
+      <Card variant="light">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="w-5 h-5" />
@@ -218,7 +218,7 @@ export default function OrganizerEmailCenterClient({
       {selectedEvent && registrations && (
         <>
           {/* Recipient Summary */}
-          <Card>
+          <Card variant="light">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Users className="w-5 h-5" />
@@ -262,7 +262,7 @@ export default function OrganizerEmailCenterClient({
           </Card>
 
           {/* Email Composer */}
-          <Card>
+          <Card variant="light">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Mail className="w-5 h-5" />
@@ -314,7 +314,7 @@ export default function OrganizerEmailCenterClient({
               </div>
 
               {showPreview && (
-                <Card>
+                <Card variant="light">
                   <CardHeader>
                     <CardTitle className="text-lg">Email Preview</CardTitle>
                   </CardHeader>
@@ -387,38 +387,38 @@ export default function OrganizerEmailCenterClient({
 
       {/* Email History */}
       {emailHistory.length > 0 && (
-        <Card>
+        <Card variant="light">
           <CardHeader>
             <CardTitle>Email History</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-2">Subject</th>
-                    <th className="text-left p-2">Event</th>
-                    <th className="text-left p-2">Sent by</th>
-                    <th className="text-left p-2">Role</th>
-                    <th className="text-left p-2">Recipients</th>
-                    <th className="text-left p-2">Sent Time</th>
+              <table className="w-full text-sm bg-white border border-gray-200 rounded-lg overflow-hidden">
+                <thead className="bg-gray-50 border-b border-gray-200">
+                  <tr className="border-b border-gray-200">
+                    <th className="text-left p-3 font-medium text-gray-700 border-r border-gray-200">Subject</th>
+                    <th className="text-left p-3 font-medium text-gray-700 border-r border-gray-200">Event</th>
+                    <th className="text-left p-3 font-medium text-gray-700 border-r border-gray-200">Sent by</th>
+                    <th className="text-left p-3 font-medium text-gray-700 border-r border-gray-200">Role</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Recipients</th>
+                    <th className="text-left p-3 font-medium text-gray-700">Sent Time</th>
                   </tr>
                 </thead>
                 <tbody>
                   {emailHistory.map((email) => (
-                    <tr key={email.id} className="border-b">
-                      <td className="p-2 font-medium">{email.subject}</td>
-                      <td className="p-2">
+                    <tr key={email.id} className="border-b border-gray-200 hover:bg-gray-50">
+                      <td className="p-3 font-medium">{email.subject}</td>
+                      <td className="p-3">
                         {Array.isArray(email.events)
                           ? email.events[0]?.title
                           : email.events?.title}
                       </td>
-                      <td className="p-2">{email.sent_by}</td>
-                      <td className="p-2">
+                      <td className="p-3">{email.sent_by}</td>
+                      <td className="p-3">
                         <Badge variant="outline">{email.sender_role}</Badge>
                       </td>
-                      <td className="p-2">{email.recipient_count}</td>
-                      <td className="p-2">{formatDate(email.sent_at)}</td>
+                      <td className="p-3">{email.recipient_count}</td>
+                      <td className="p-3">{formatDate(email.sent_at)}</td>
                     </tr>
                   ))}
                 </tbody>

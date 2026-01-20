@@ -15,10 +15,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script src="https://checkout.razorpay.com/v1/checkout.js" async />
       </head>
-      <body className="min-h-screen bg-slate-950 text-slate-50 antialiased">
+      <body className="min-h-screen bg-white text-gray-900 antialiased">
         <SupabaseProvider>
           <div className="flex min-h-screen flex-col">
-            <main className="flex-1 bg-gradient-to-b from-slate-950 to-slate-900">
+            <main className="flex-1">
               {children}
             </main>
             <PublicFooter />

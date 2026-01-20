@@ -33,7 +33,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   const { user, profile } = await requireAdmin();
 
   return (
-    <div className="min-h-screen bg-[#F3F9F9] flex text-gray-900">
+    <div className="min-h-screen bg-gradient-to-br from-pink-50 via-rose-50 to-yellow-50 flex text-gray-900">
       {/* Sidebar */}
       <div className="w-64 bg-gradient-to-b from-indigo-50 via-violet-50 to-orange-50 shadow-md relative min-h-screen overflow-y-auto">
         <AdminSidebar />
