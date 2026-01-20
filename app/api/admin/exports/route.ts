@@ -39,8 +39,8 @@ async function exportRegistrations(supabase: any) {
         status,
         entry_code,
         created_at,
-        user:profiles(id,full_name,email,phone_number,university),
-        event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date,is_paid,price)
       )
     `)
     .order('created_at', { ascending: false });
@@ -50,8 +50,8 @@ async function exportRegistrations(supabase: any) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,
-      user:profiles(id,full_name,email,phone_number,university),
-      event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
+      user:profiles(id,full_name,email),
+      event:events(id,title,event_date,is_paid,price)
     `)
     .is('event.is_paid', false)
     .order('created_at', { ascending: false });
@@ -94,16 +94,10 @@ async function exportRegistrations(supabase: any) {
     'Registration ID',
     'User Name',
     'User Email',
-    'User Phone',
-    'User University',
     'Event Title',
     'Event Date',
     'Free / Paid',
     'Event Price',
-    'Event Visibility',
-    'Event Pricing Type',
-    'Event Pricing Label',
-    'Assigned Organizer',
     'Status',
     'Entry Code',
     'Payment Status',
@@ -117,16 +111,10 @@ async function exportRegistrations(supabase: any) {
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
-    'User Phone': reg.user?.phone_number || '',
-    'User University': reg.user?.university || '',
     'Event Title': reg.event?.title || '',
     'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
     'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
     'Event Price': reg.event?.price || 0,
-    'Event Visibility': reg.event?.visibility || '',
-    'Event Pricing Type': reg.event?.pricing_type || '',
-    'Event Pricing Label': reg.event?.pricing_dropdown_label || '',
-    'Assigned Organizer': reg.event?.assigned_organizer || '',
     Status: reg.status,
     'Entry Code': reg.entry_code,
     'Payment Status': reg.payment?.status ?? '',
@@ -163,8 +151,8 @@ async function exportEventDetailed(supabase: any, eventId: string) {
         entry_code,
         created_at,
         event_id,
-        user:profiles(id,full_name,email,phone_number,university),
-        event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer),
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date,is_paid,price),
         responses:registration_responses(
           value,
           field:event_form_fields(label,field_type,required)
@@ -179,8 +167,8 @@ async function exportEventDetailed(supabase: any, eventId: string) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,event_id,
-      user:profiles(id,full_name,email,phone_number,university),
-      event:events(id,title,event_date,is_paid,price,visibility,pricing_type,pricing_dropdown_label,assigned_organizer),
+      user:profiles(id,full_name,email),
+      event:events(id,title,event_date,is_paid,price),
       responses:registration_responses(
         value,
         field:event_form_fields(label,field_type,required)
@@ -243,17 +231,11 @@ async function exportEventDetailed(supabase: any, eventId: string) {
     'Registration ID',
     'User Name',
     'User Email',
-    'User Phone',
-    'User University',
     'Event ID',
     'Event Title',
     'Event Date',
     'Free / Paid',
     'Event Price',
-    'Event Visibility',
-    'Event Pricing Type',
-    'Event Pricing Label',
-    'Assigned Organizer',
     'Status',
     'Entry Code',
     'Payment Status',
@@ -272,8 +254,6 @@ async function exportEventDetailed(supabase: any, eventId: string) {
       'Registration ID': reg.id,
       'User Name': reg.user?.full_name || '',
       'User Email': reg.user?.email || '',
-      'User Phone': reg.user?.phone_number || '',
-      'User University': reg.user?.university || '',
       'Event ID': reg.event?.id || reg.event_id,
       'Event Title': reg.event?.title || '',
       'Event Date': reg.event?.event_date
@@ -281,10 +261,6 @@ async function exportEventDetailed(supabase: any, eventId: string) {
         : '',
       'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
       'Event Price': reg.event?.price ?? '',
-      'Event Visibility': reg.event?.visibility || '',
-      'Event Pricing Type': reg.event?.pricing_type || '',
-      'Event Pricing Label': reg.event?.pricing_dropdown_label || '',
-      'Assigned Organizer': reg.event?.assigned_organizer || '',
       Status: reg.status,
       'Entry Code': reg.entry_code,
       'Payment Status': reg.payment?.status ?? '',
@@ -345,8 +321,8 @@ async function exportAttendance(supabase: any) {
         id,
         entry_code,
         event_id,
-        user:profiles(id,full_name,email,phone_number,university),
-        event:events(id,title,event_date,visibility,assigned_organizer)
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date)
       )
     `)
     .order('checked_in_at', { ascending: false });
@@ -355,12 +331,8 @@ async function exportAttendance(supabase: any) {
     'Attendance ID',
     'User Name',
     'User Email',
-    'User Phone',
-    'User University',
     'Event Title',
     'Event Date',
-    'Event Visibility',
-    'Assigned Organizer',
     'Entry Code',
     'Checked In At'
   ];
@@ -369,12 +341,8 @@ async function exportAttendance(supabase: any) {
     'Attendance ID': att.id,
     'User Name': att.registration?.user?.full_name || '',
     'User Email': att.registration?.user?.email || '',
-    'User Phone': att.registration?.user?.phone_number || '',
-    'User University': att.registration?.user?.university || '',
     'Event Title': att.registration?.event?.title || '',
     'Event Date': att.registration?.event?.event_date ? String(new Date(att.registration.event.event_date).toLocaleDateString()) : '',
-    'Event Visibility': att.registration?.event?.visibility || '',
-    'Assigned Organizer': att.registration?.event?.assigned_organizer || '',
     'Entry Code': att.registration?.entry_code || '',
     'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
     year: 'numeric',
@@ -395,8 +363,8 @@ async function exportManualRegistrations(supabase: any) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,
-      user:profiles(id,full_name,email,phone_number,university),
-      event:events(id,title,event_date,visibility,assigned_organizer)
+      user:profiles(id,full_name,email),
+      event:events(id,title,event_date)
     `)
     .like('entry_code', 'MANUAL-%')
     .order('created_at', { ascending: false });
@@ -405,12 +373,8 @@ async function exportManualRegistrations(supabase: any) {
     'Registration ID',
     'User Name',
     'User Email',
-    'User Phone',
-    'User University',
     'Event Title',
     'Event Date',
-    'Event Visibility',
-    'Assigned Organizer',
     'Status',
     'Entry Code',
     'Created At'
@@ -420,12 +384,8 @@ async function exportManualRegistrations(supabase: any) {
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
-    'User Phone': reg.user?.phone_number || '',
-    'User University': reg.user?.university || '',
     'Event Title': reg.event?.title || '',
     'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
-    'Event Visibility': reg.event?.visibility || '',
-    'Assigned Organizer': reg.event?.assigned_organizer || '',
     'Status': reg.status,
     'Entry Code': reg.entry_code,
     'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
@@ -452,8 +412,8 @@ async function exportPayments(supabase: any) {
       razorpay_payment_id,
       created_at,
       registration:registrations(
-        user:profiles(id,full_name,email,phone_number,university),
-        event:events(id,title,event_date,visibility,pricing_type,pricing_dropdown_label,assigned_organizer)
+        user:profiles(id,full_name,email),
+        event:events(id,title,event_date)
       )
     `)
     .order('created_at', { ascending: false });
@@ -462,14 +422,8 @@ async function exportPayments(supabase: any) {
     'Payment ID',
     'User Name',
     'User Email',
-    'User Phone',
-    'User University',
     'Event Title',
     'Event Date',
-    'Event Visibility',
-    'Event Pricing Type',
-    'Event Pricing Label',
-    'Assigned Organizer',
     'Amount',
     'Status',
     'Razorpay Order ID',
@@ -481,14 +435,8 @@ async function exportPayments(supabase: any) {
     'Payment ID': payment.id,
     'User Name': payment.registration?.user?.full_name || '',
     'User Email': payment.registration?.user?.email || '',
-    'User Phone': payment.registration?.user?.phone_number || '',
-    'User University': payment.registration?.user?.university || '',
     'Event Title': payment.registration?.event?.title || '',
     'Event Date': payment.registration?.event?.event_date ? String(new Date(payment.registration.event.event_date).toLocaleDateString()) : '',
-    'Event Visibility': payment.registration?.event?.visibility || '',
-    'Event Pricing Type': payment.registration?.event?.pricing_type || '',
-    'Event Pricing Label': payment.registration?.event?.pricing_dropdown_label || '',
-    'Assigned Organizer': payment.registration?.event?.assigned_organizer || '',
     'Amount': payment.amount,
     'Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
@@ -509,15 +457,13 @@ async function exportPayments(supabase: any) {
 async function exportUsers(supabase: any) {
   const { data } = await supabase
     .from('profiles')
-    .select('id,full_name,email,phone_number,university,role,created_at')
+    .select('id,full_name,email,role,created_at')
     .order('created_at', { ascending: false });
 
   const headers = [
     'User ID',
     'Full Name',
     'Email',
-    'Phone Number',
-    'University',
     'Role',
     'Created At'
   ];
@@ -526,8 +472,6 @@ async function exportUsers(supabase: any) {
     'User ID': user.id,
     'Full Name': user.full_name || '',
     'Email': user.email,
-    'Phone Number': user.phone_number || '',
-    'University': user.university || '',
     'Role': user.role,
     'Created At': String(new Date(user.created_at).toLocaleString('en-US', {
     year: 'numeric',

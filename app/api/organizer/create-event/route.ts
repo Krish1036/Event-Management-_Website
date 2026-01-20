@@ -152,7 +152,6 @@ export async function POST(request: NextRequest) {
         pricing_type: pricingType,
         pricing_dropdown_label: pricingType === 'custom' ? eventInput.pricing_dropdown_label : null,
         status,
-        visibility: eventInput.visibility ?? 'public',
         created_by: user.id,
         assigned_organizer: user.id
       })
