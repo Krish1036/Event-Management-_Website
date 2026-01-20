@@ -161,31 +161,27 @@ export default function SignupPage() {
         throw new Error('Unable to initialize authentication client');
       }
 
-      // Create user account
-      const { data: authData, error: signUpError } = await supabase.auth.signUp({
+      const { error: otpError } = await supabase.auth.signInWithOtp({
         email,
-        password,
         options: {
+          shouldCreateUser: true,
           data: {
             full_name: fullName,
             phone_number: phoneNumber,
             university: university,
-          }
-        }
+          },
+        },
       });
 
-      if (signUpError) throw signUpError;
+      if (otpError) throw otpError;
 
-      if (authData.user && !authData.session) {
-        // Email confirmation required
-        toast.success('Account created! Please check your email to confirm your account.');
-      } else if (authData.session) {
-        // Auto sign-in (email confirmations disabled in Supabase)
-        toast.success('Account created successfully!');
-        router.push('/events');
-      } else {
-        throw new Error('Unable to create account');
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('pending_signup_email', email);
+        sessionStorage.setItem('pending_signup_password', password);
       }
+
+      toast.success('OTP sent! Please check your email.');
+      router.push(`/otp?email=${encodeURIComponent(email)}`);
     } catch (err: any) {
       toast.error(err.message ?? 'Unable to create account');
     } finally {
