@@ -3,7 +3,7 @@ import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Download, Users, Calendar, DollarSign, FileText, Settings, Database } from 'lucide-react';
+import { Download, Users, Calendar, IndianRupee, FileText, Settings, Database } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -146,7 +146,7 @@ export default async function AdminExportsPage() {
               <input type="hidden" name="exportType" value="payments" />
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                  <DollarSign className="w-5 h-5 text-purple-600" />
+                  <IndianRupee className="w-5 h-5 text-purple-600" />
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">Payments</h3>

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { DollarSign, Calendar, Users, Filter, Search, Info, AlertTriangle } from 'lucide-react';
+import { IndianRupee, Calendar, Users, Filter, Search, Info, AlertTriangle } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -236,7 +236,7 @@ export default async function AdminPaymentsPage({
           <CardContent className="p-12">
             <div className="text-center">
               <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <DollarSign className="w-8 h-8 text-gray-400" />
+                <IndianRupee className="w-8 h-8 text-gray-400" />
               </div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">No payments found</h3>
               <p className="text-gray-500">
@@ -262,7 +262,7 @@ export default async function AdminPaymentsPage({
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="flex items-center gap-2">
-                          <DollarSign className="w-5 h-5 text-green-600" />
+                          <IndianRupee className="w-5 h-5 text-green-600" />
                           <h3 className="text-lg font-semibold text-gray-900">
                             ₹{payment.amount}
                           </h3>

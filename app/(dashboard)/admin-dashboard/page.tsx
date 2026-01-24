@@ -1,6 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
-import { Users, Calendar, CheckCircle, DollarSign, UserCheck, TrendingUp } from 'lucide-react';
+import { Users, Calendar, CheckCircle, IndianRupee, UserCheck, TrendingUp } from 'lucide-react';
 
 export const revalidate = 0;
 
@@ -175,7 +175,7 @@ export default async function AdminDashboardPage() {
               <p className="mt-1 text-sm text-gray-500">{metrics.paidEvents} paid - {metrics.freeEvents} free</p>
             </div>
             <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
-              <DollarSign className="w-6 h-6 text-purple-600" />
+              <IndianRupee className="w-6 h-6 text-purple-600" />
             </div>
           </div>
         </div>
