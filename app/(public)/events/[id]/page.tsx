@@ -4,6 +4,8 @@ import { EventRegistrationSection } from './EventRegistrationSection';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { formatToIST, formatDateIST } from '@/lib/date';
+import { formatINR } from '@/lib/currency';
 
 export const revalidate = 0;
 
@@ -159,7 +161,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
               <CardContent>
                 <div className="flex flex-wrap gap-3">
                   <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-purple-100 text-purple-800 hover:bg-purple-200">
-                    📅 {new Date(event.event_date as string).toLocaleDateString()} {event.start_time}–{event.end_time}
+                    📅 {formatDateIST(event.event_date as string)} {event.start_time}–{event.end_time}
                   </div>
                   <div className="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 hover:bg-blue-200">
                     📍 {event.location}
@@ -174,7 +176,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
                     {event.pricing_type === 'custom' 
                       ? '💰 Custom Pricing' 
                       : event.is_paid 
-                        ? `💰 Paid • ₹${event.price}` 
+                        ? `💰 Paid • ${formatINR(event.price)}` 
                         : '🆓 Free event'
                     }
                     {!PAYMENTS_ENABLED && event.is_paid && ' · payments disabled (test mode)'}

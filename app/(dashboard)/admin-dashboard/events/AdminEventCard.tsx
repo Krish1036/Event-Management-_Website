@@ -3,6 +3,7 @@
 import { Calendar } from 'lucide-react';
 import Link from 'next/link';
 import './AdminEvents.css';
+import { formatDateIST } from '@/lib/date';
 
 interface AdminEventCardProps {
   event: any;
@@ -98,11 +99,7 @@ export default function AdminEventCard({ event, onAction, viewMode = 'list' }: A
           {/* Event Details */}
           <div className="space-y-1 text-xs text-gray-600">
             <p>{event.location || 'No location'}</p>
-            <p>{new Date(event.event_date).toLocaleDateString('en-US', { 
-              month: 'short', 
-              day: 'numeric', 
-              year: 'numeric' 
-            })} - {event.start_time}</p>
+            <p>{formatDateIST(event.event_date)} - {event.start_time}</p>
             <p>Organizer: {event.organizerName}</p>
             <p>Capacity: {event.capacity ?? 0} | Seats: {event.seatsLeft}</p>
           </div>
@@ -224,11 +221,7 @@ export default function AdminEventCard({ event, onAction, viewMode = 'list' }: A
             <div className="flex-1">
               <h2 className="text-xl font-bold text-gray-900 mb-2">{event.title}</h2>
               <p className="text-gray-600 text-sm">
-                {event.location || 'No location'} - {new Date(event.event_date).toLocaleDateString('en-US', { 
-                  month: 'numeric', 
-                  day: 'numeric', 
-                  year: 'numeric' 
-                })} - {event.start_time} - {event.end_time}
+                {event.location || 'No location'} - {formatDateIST(event.event_date)} - {event.start_time} - {event.end_time}
               </p>
               <div className="mt-2">
                 <span className="text-sm text-gray-600">Organizer: </span>

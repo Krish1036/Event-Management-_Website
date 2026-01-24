@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
+import { formatINR } from '@/lib/currency';
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 const FILES_BUCKET = 'registration-files';
@@ -332,7 +333,7 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
                         value={option.id} 
                         className="text-black hover:bg-purple-100"
                       >
-                        {option.label} - ₹{option.price}
+                        {option.label} - {formatINR(option.price)}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -546,7 +547,7 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
                 <SelectContent>
                   {pricingOptions.map((option) => (
                     <SelectItem key={option.id} value={option.id} className="text-black hover:bg-purple-100">
-                      {option.label} - ₹{option.price}
+                      {option.label} - {formatINR(option.price)}
                     </SelectItem>
                   ))}
                 </SelectContent>

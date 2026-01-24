@@ -1,5 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { NextRequest } from 'next/server';
+import { formatToIST, formatDateIST } from '@/lib/date';
+import { formatINR } from '@/lib/currency';
 
 function escapeCSVField(field: any): string {
   if (field === null || field === undefined) return '';
@@ -39,7 +41,7 @@ async function exportRegistrations(supabase: any) {
         status,
         entry_code,
         created_at,
-        user:profiles(id,full_name,email),
+        user:profiles(id,full_name,email,phone_number,university),
         event:events(id,title,event_date,is_paid,price)
       )
     `)
@@ -50,7 +52,7 @@ async function exportRegistrations(supabase: any) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,
-      user:profiles(id,full_name,email),
+      user:profiles(id,full_name,email,phone_number,university),
       event:events(id,title,event_date,is_paid,price)
     `)
     .is('event.is_paid', false)
@@ -94,6 +96,8 @@ async function exportRegistrations(supabase: any) {
     'Registration ID',
     'User Name',
     'User Email',
+    'User Phone Number',
+    'User University',
     'Event Title',
     'Event Date',
     'Free / Paid',
@@ -111,10 +115,12 @@ async function exportRegistrations(supabase: any) {
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
+    'User Phone Number': reg.user?.phone_number || '—',
+    'User University': reg.user?.university || '—',
     'Event Title': reg.event?.title || '',
-    'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
+    'Event Date': reg.event?.event_date ? formatDateIST(reg.event.event_date) : '',
     'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
-    'Event Price': reg.event?.price || 0,
+    'Event Price': reg.event?.price ? formatINR(reg.event.price) : '₹0',
     Status: reg.status,
     'Entry Code': reg.entry_code,
     'Payment Status': reg.payment?.status ?? '',
@@ -151,7 +157,7 @@ async function exportEventDetailed(supabase: any, eventId: string) {
         entry_code,
         created_at,
         event_id,
-        user:profiles(id,full_name,email),
+        user:profiles(id,full_name,email,phone_number,university),
         event:events(id,title,event_date,is_paid,price),
         responses:registration_responses(
           value,
@@ -167,7 +173,7 @@ async function exportEventDetailed(supabase: any, eventId: string) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,event_id,
-      user:profiles(id,full_name,email),
+      user:profiles(id,full_name,email,phone_number,university),
       event:events(id,title,event_date,is_paid,price),
       responses:registration_responses(
         value,
@@ -231,6 +237,8 @@ async function exportEventDetailed(supabase: any, eventId: string) {
     'Registration ID',
     'User Name',
     'User Email',
+    'User Phone Number',
+    'User University',
     'Event ID',
     'Event Title',
     'Event Date',
@@ -254,27 +262,22 @@ async function exportEventDetailed(supabase: any, eventId: string) {
       'Registration ID': reg.id,
       'User Name': reg.user?.full_name || '',
       'User Email': reg.user?.email || '',
+      'User Phone Number': reg.user?.phone_number || '—',
+      'User University': reg.user?.university || '—',
       'Event ID': reg.event?.id || reg.event_id,
       'Event Title': reg.event?.title || '',
       'Event Date': reg.event?.event_date
-        ? String(new Date(reg.event.event_date).toLocaleDateString())
+        ? formatDateIST(reg.event.event_date)
         : '',
       'Free / Paid': reg.event?.is_paid ? 'Paid' : 'Free',
-      'Event Price': reg.event?.price ?? '',
+      'Event Price': reg.event?.price ? formatINR(reg.event.price) : '₹0',
       Status: reg.status,
       'Entry Code': reg.entry_code,
       'Payment Status': reg.payment?.status ?? '',
-      'Payment Amount': reg.payment?.amount ?? '',
+      'Payment Amount': reg.payment?.amount ? formatINR(reg.payment.amount) : '',
       'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
       'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
-      'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }))
+      'Created At': formatToIST(reg.created_at),
     };
 
     // Initialise all custom field columns as empty strings
@@ -321,7 +324,7 @@ async function exportAttendance(supabase: any) {
         id,
         entry_code,
         event_id,
-        user:profiles(id,full_name,email),
+        user:profiles(id,full_name,email,phone_number,university),
         event:events(id,title,event_date)
       )
     `)
@@ -331,6 +334,8 @@ async function exportAttendance(supabase: any) {
     'Attendance ID',
     'User Name',
     'User Email',
+    'User Phone Number',
+    'User University',
     'Event Title',
     'Event Date',
     'Entry Code',
@@ -341,18 +346,12 @@ async function exportAttendance(supabase: any) {
     'Attendance ID': att.id,
     'User Name': att.registration?.user?.full_name || '',
     'User Email': att.registration?.user?.email || '',
+    'User Phone Number': att.registration?.user?.phone_number || '—',
+    'User University': att.registration?.user?.university || '—',
     'Event Title': att.registration?.event?.title || '',
-    'Event Date': att.registration?.event?.event_date ? String(new Date(att.registration.event.event_date).toLocaleDateString()) : '',
+    'Event Date': att.registration?.event?.event_date ? formatDateIST(att.registration.event.event_date) : '',
     'Entry Code': att.registration?.entry_code || '',
-    'Checked In At': String(new Date(att.checked_in_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-    timeZone: 'Asia/Kolkata'
-  }))
+    'Checked In At': formatToIST(att.checked_in_at)
   }));
 
   return generateCSV(csvData, headers);
@@ -363,7 +362,7 @@ async function exportManualRegistrations(supabase: any) {
     .from('registrations')
     .select(`
       id,status,entry_code,created_at,
-      user:profiles(id,full_name,email),
+      user:profiles(id,full_name,email,phone_number,university),
       event:events(id,title,event_date)
     `)
     .like('entry_code', 'MANUAL-%')
@@ -373,6 +372,8 @@ async function exportManualRegistrations(supabase: any) {
     'Registration ID',
     'User Name',
     'User Email',
+    'User Phone Number',
+    'User University',
     'Event Title',
     'Event Date',
     'Status',
@@ -384,18 +385,13 @@ async function exportManualRegistrations(supabase: any) {
     'Registration ID': reg.id,
     'User Name': reg.user?.full_name || '',
     'User Email': reg.user?.email || '',
+    'User Phone Number': reg.user?.phone_number || '—',
+    'User University': reg.user?.university || '—',
     'Event Title': reg.event?.title || '',
-    'Event Date': reg.event?.event_date ? String(new Date(reg.event.event_date).toLocaleDateString()) : '',
+    'Event Date': reg.event?.event_date ? formatDateIST(reg.event.event_date) : '',
     'Status': reg.status,
     'Entry Code': reg.entry_code,
-    'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }))
+    'Created At': formatToIST(reg.created_at)
   }));
 
   return generateCSV(csvData, headers);
@@ -412,7 +408,7 @@ async function exportPayments(supabase: any) {
       razorpay_payment_id,
       created_at,
       registration:registrations(
-        user:profiles(id,full_name,email),
+        user:profiles(id,full_name,email,phone_number,university),
         event:events(id,title,event_date)
       )
     `)
@@ -422,6 +418,8 @@ async function exportPayments(supabase: any) {
     'Payment ID',
     'User Name',
     'User Email',
+    'User Phone Number',
+    'User University',
     'Event Title',
     'Event Date',
     'Amount',
@@ -435,20 +433,15 @@ async function exportPayments(supabase: any) {
     'Payment ID': payment.id,
     'User Name': payment.registration?.user?.full_name || '',
     'User Email': payment.registration?.user?.email || '',
+    'User Phone Number': payment.registration?.user?.phone_number || '—',
+    'User University': payment.registration?.user?.university || '—',
     'Event Title': payment.registration?.event?.title || '',
-    'Event Date': payment.registration?.event?.event_date ? String(new Date(payment.registration.event.event_date).toLocaleDateString()) : '',
-    'Amount': payment.amount,
+    'Event Date': payment.registration?.event?.event_date ? formatDateIST(payment.registration.event.event_date) : '',
+    'Amount': payment.amount ? formatINR(payment.amount) : '₹0',
     'Status': payment.status,
     'Razorpay Order ID': payment.razorpay_order_id || '',
     'Razorpay Payment ID': payment.razorpay_payment_id || '',
-    'Created At': String(new Date(payment.created_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }))
+    'Created At': formatToIST(payment.created_at)
   }));
 
   return generateCSV(csvData, headers);
@@ -473,14 +466,7 @@ async function exportUsers(supabase: any) {
     'Full Name': user.full_name || '',
     'Email': user.email,
     'Role': user.role,
-    'Created At': String(new Date(user.created_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }))
+    'Created At': formatToIST(user.created_at)
   }));
 
   return generateCSV(csvData, headers);

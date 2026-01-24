@@ -16,6 +16,8 @@ import {
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import PublicNavbar from "./PublicNavbar";
+import { formatToIST, formatDateIST } from "@/lib/date";
+import { formatINR } from "@/lib/currency";
 
 interface Event {
   id: string;
@@ -234,11 +236,11 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
       const uniqueSorted = Array.from(new Set(prices)).sort((a, b) => a - b);
       const min = uniqueSorted[0];
       const max = uniqueSorted[uniqueSorted.length - 1];
-      if (min === max) return `₹${min}`;
-      return `₹${min}–₹${max}`;
+      if (min === max) return formatINR(min);
+      return `${formatINR(min)}–${formatINR(max)}`;
     }
 
-    return event.is_paid ? `₹${event.price}` : 'Free';
+    return event.is_paid ? formatINR(event.price) : 'Free';
   };
 
   const filterEvents = () => {
@@ -292,12 +294,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   };
 
   const formatEventDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
-      month: "short",
-      day: "numeric",
-      year: "numeric",
-    });
+    return formatDateIST(dateString);
   };
 
   const formatEventTime = (timeString: string) => {

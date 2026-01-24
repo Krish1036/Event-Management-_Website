@@ -102,7 +102,7 @@ export async function POST(req: Request) {
     }
 
     // fetch user profile
-    const { data: userProfile } = await admin.from('profiles').select('id,full_name,email').eq('id', registration.user_id).single();
+    const { data: userProfile } = await admin.from('profiles').select('id,full_name,email,phone_number,university').eq('id', registration.user_id).single();
 
     // best-effort: if profile missing email, try fetching from auth.users
     if (!userProfile?.email) {
@@ -165,7 +165,7 @@ export async function POST(req: Request) {
     }
 
     // return confirmation with user/profile
-    const { data: userProfile } = await admin.from('profiles').select('id,full_name,email').eq('id', registration.user_id).single();
+    const { data: userProfile } = await admin.from('profiles').select('id,full_name,email,phone_number,university').eq('id', registration.user_id).single();
 
     return NextResponse.json({ success: true, registrationId: registration.id, user: userProfile ?? null });
   }

@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Bell, Settings } from "lucide-react";
+import { formatToIST } from "@/lib/date";
 
 export default function OrganizerHeader({ userName }: { userName: string }) {
   const [currentTime, setCurrentTime] = useState("");
@@ -13,20 +14,7 @@ export default function OrganizerHeader({ userName }: { userName: string }) {
   useEffect(() => {
     // Update time immediately and then every minute
     const updateTime = () => {
-      const now = new Date();
-      const options: Intl.DateTimeFormatOptions = {
-        year: 'numeric',
-        month: 'short',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: true,
-        timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone
-      };
-      
-      setCurrentTime(
-        now.toLocaleString('en-US', options)
-      );
+      setCurrentTime(formatToIST(new Date()));
     };
 
     updateTime();

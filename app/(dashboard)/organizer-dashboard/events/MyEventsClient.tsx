@@ -17,6 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { formatDateIST } from '@/lib/date';
 
 interface Event {
   id: string;
@@ -39,12 +40,7 @@ interface EventCardProps {
 
 function EventCard({ event, onDelete }: EventCardProps) {
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
-    });
+    return formatDateIST(dateString);
   };
 
   const getStatusColor = (status: string) => {

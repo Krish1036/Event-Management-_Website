@@ -1,5 +1,7 @@
 "use client";
 
+import { formatINR } from '@/lib/currency';
+
 interface ViewTicketButtonProps {
   registration: {
     user?: { full_name?: string | null; email?: string | null } | null;
@@ -26,7 +28,7 @@ export function ViewTicketButton({ registration }: ViewTicketButtonProps) {
     hour12: true
   });
     const pricePart = registration.event?.is_paid
-      ? `Price: ₹${registration.event.price}`
+      ? `Price: ${formatINR(registration.event.price || 0)}`
       : "Free event";
 
     // Simple alert view, same content as before

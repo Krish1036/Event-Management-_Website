@@ -1,6 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { redirect } from 'next/navigation';
+import { formatINR } from '@/lib/currency';
 
 export const revalidate = 0;
 
@@ -51,7 +52,7 @@ async function getOrganizerRegistrations(params: {
     .select(
       `id,status,entry_code,created_at,event_id,user_id,
        event:events(id,title,is_paid,price),
-       user:profiles(id,full_name,email)`
+       user:profiles(id,full_name,email,phone_number,university)`
     )
     .in('event_id', eventIds)
     .order('created_at', { ascending: false });
@@ -218,7 +219,7 @@ export default async function OrganizerRegistrationsPage({
                   )}
                 </div>
                 <p className="text-xs text-gray-600">
-                  {reg.user?.full_name ?? 'User'} · {reg.user?.email ?? 'No email'} · Entry code: {reg.entry_code ?? 'N/A'}
+                  {reg.user?.full_name ?? 'User'} · {reg.user?.email ?? 'No email'} · {reg.user?.phone_number ?? '—'} · {reg.user?.university ?? '—'} · Entry code: {reg.entry_code ?? 'N/A'}
                 </p>
                 <p className="text-[11px] text-gray-600">
                   Registered on {new Date(reg.created_at).toLocaleString('en-US', {
@@ -229,7 +230,7 @@ export default async function OrganizerRegistrationsPage({
                     minute: '2-digit',
                     hour12: true
                   })}
-                  {reg.event?.price && reg.event.is_paid && ` · Price: ₹${reg.event.price}`}
+                  {reg.event?.price && reg.event.is_paid && ` · Price: ${formatINR(reg.event.price)}`}
                 </p>
               </div>
             </div>

@@ -64,7 +64,7 @@ async function getAttendanceData(organizerId: string, eventFilter: string | null
     .select(
       `id,status,entry_code,event_id,user_id,
        event:events(id,title,event_date),
-       user:profiles(id,full_name,email)`
+       user:profiles(id,full_name,email,phone_number,university)`
     )
     .eq('status', 'CONFIRMED')
     .in('event_id', filteredEventIds)
@@ -384,7 +384,7 @@ export default async function OrganizerAttendancePage({
                   <div className="space-y-1">
                     <p className="font-medium text-gray-900">{a.event?.title ?? 'Event'}</p>
                     <p className="text-xs text-gray-600">
-                      {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.entryCode ?? 'N/A'}
+                      {a.user?.full_name ?? 'User'} · {a.user?.email ?? 'No email'} · {a.user?.phone_number ?? '—'} · {a.user?.university ?? '—'} · {a.entryCode ?? 'N/A'}
                     </p>
                     <p className="text-[11px] text-gray-600">Checked in at {new Date(a.checkedInAt).toLocaleString('en-US', {
                     year: 'numeric',
@@ -413,7 +413,7 @@ export default async function OrganizerAttendancePage({
                     <div className="space-y-1">
                       <p className="font-medium text-gray-900">{r.event?.title ?? 'Event'}</p>
                       <p className="text-xs text-gray-600">
-                        {r.user?.full_name ?? 'User'} · {r.user?.email ?? 'No email'} · {r.entryCode ?? 'N/A'}
+                        {r.user?.full_name ?? 'User'} · {r.user?.email ?? 'No email'} · {r.user?.phone_number ?? '—'} · {r.user?.university ?? '—'} · {r.entryCode ?? 'N/A'}
                       </p>
                       <p className="text-[11px] text-gray-600">Confirmed registration</p>
                     </div>

@@ -37,7 +37,7 @@ async function getRegistrations(search: string | null, eventId: string | null, s
     .select(
       `id,status,entry_code,created_at,event_id,user_id,
        event:events(id,title,is_paid,price),
-       user:profiles(id,full_name,email)`
+       user:profiles(id,full_name,email,phone_number,university)`
     )
     .order('created_at', { ascending: false });
 
@@ -370,6 +370,10 @@ export default async function AdminRegistrationsPage({
                     <span className="font-medium">{reg.user?.full_name ?? 'User'}</span>
                     {' - '}
                     <span>{reg.user?.email ?? 'No email'}</span>
+                    {' - '}
+                    <span>{reg.user?.phone_number ?? '—'}</span>
+                    {' - '}
+                    <span>{reg.user?.university ?? '—'}</span>
                     {' - '}
                     <span>Entry code: {reg.entry_code ?? 'N/A'}</span>
                   </div>

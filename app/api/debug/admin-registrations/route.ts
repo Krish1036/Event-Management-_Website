@@ -23,7 +23,7 @@ export async function GET(req: Request) {
       .select(
         `id,status,entry_code,created_at,event_id,user_id,
          event:events(id,title,is_paid,price),
-         user:profiles(id,full_name,email)`
+         user:profiles(id,full_name,email,phone_number,university)`
       )
       .order('created_at', { ascending: false });
 

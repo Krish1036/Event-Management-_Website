@@ -290,6 +290,22 @@ export function FormBuilderSection({ variant = 'dark' }: { variant?: 'dark' | 'l
       disabled: true,
       disabled_by: 'system',
     },
+    {
+      id: 'phone_number',
+      label: 'Phone Number',
+      field_type: 'text' as const,
+      required: true,
+      disabled: true,
+      disabled_by: 'system',
+    },
+    {
+      id: 'university',
+      label: 'University',
+      field_type: 'text' as const,
+      required: true,
+      disabled: true,
+      disabled_by: 'system',
+    },
   ];
 
   const handleAddField = () => {
