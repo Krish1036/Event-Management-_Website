@@ -123,3 +123,25 @@ export function formatTimeForInput(dateString: string | Date): string {
   
   return istDate.toTimeString().slice(0, 5);
 }
+
+export function getISTDateYYYYMMDD(date: Date = new Date()): string {
+  const parts = new Intl.DateTimeFormat('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit'
+  }).formatToParts(date);
+
+  const year = parts.find((p) => p.type === 'year')?.value;
+  const month = parts.find((p) => p.type === 'month')?.value;
+  const day = parts.find((p) => p.type === 'day')?.value;
+
+  if (!year || !month || !day) return '';
+  return `${year}-${month}-${day}`;
+}
+
+export function getISTStartOfDayUTCISOString(date: Date = new Date()): string {
+  const ymd = getISTDateYYYYMMDD(date);
+  if (!ymd) return '';
+  return new Date(`${ymd}T00:00:00+05:30`).toISOString();
+}

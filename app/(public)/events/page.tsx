@@ -3,6 +3,7 @@ import Link from 'next/link';
 import EventImage from './EventImage';
 import PublicNavbar from '../PublicNavbar';
 import '../EventsDashboard.css';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export const revalidate = 30;
 
@@ -26,7 +27,7 @@ async function getEvents(params: { paid?: 'free' | 'paid' }) {
   let query = supabase
     .from('events')
     .select('id,title,description,event_date,location,price,is_paid,pricing_type,capacity,is_registration_open,status,image_url')
-    .gte('event_date', new Date().toISOString().slice(0, 10))
+    .gte('event_date', getISTDateYYYYMMDD())
     .eq('status', 'approved')
     .order('event_date', { ascending: true });
 

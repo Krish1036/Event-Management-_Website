@@ -1,6 +1,6 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { NextRequest } from 'next/server';
-import { formatToIST, formatDateIST } from '@/lib/date';
+import { formatToIST, formatDateIST, getISTDateYYYYMMDD } from '@/lib/date';
 import { formatINR } from '@/lib/currency';
 
 function escapeCSVField(field: any): string {
@@ -127,14 +127,7 @@ async function exportRegistrations(supabase: any) {
     'Payment Amount': reg.payment?.amount ?? '',
     'Razorpay Order ID': reg.payment?.razorpay_order_id ?? '',
     'Razorpay Payment ID': reg.payment?.razorpay_payment_id ?? '',
-    'Created At': String(new Date(reg.created_at).toLocaleString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true
-  }))
+    'Created At': formatToIST(reg.created_at)
   }));
 
   return generateCSV(csvData, headers);
@@ -506,30 +499,30 @@ export async function POST(req: NextRequest) {
   switch (exportType) {
     case 'registrations':
       csvData = await exportRegistrations(supabase);
-      filename = `registrations-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `registrations-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'attendance':
       csvData = await exportAttendance(supabase);
-      filename = `attendance-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `attendance-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'manual_registrations':
       csvData = await exportManualRegistrations(supabase);
-      filename = `manual-registrations-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `manual-registrations-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'payments':
       csvData = await exportPayments(supabase);
-      filename = `payments-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `payments-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'users':
       csvData = await exportUsers(supabase);
-      filename = `users-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `users-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'event_detailed':
       if (!eventId) {
         return new Response('Missing eventId', { status: 400 });
       }
       csvData = await exportEventDetailed(supabase, eventId);
-      filename = `event-${eventId}-detailed-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `event-${eventId}-detailed-${getISTDateYYYYMMDD()}.csv`;
       break;
   }
 

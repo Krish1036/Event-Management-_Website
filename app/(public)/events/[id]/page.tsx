@@ -4,7 +4,7 @@ import { EventRegistrationSection } from './EventRegistrationSection';
 import { redirect } from 'next/navigation';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatToIST, formatDateIST } from '@/lib/date';
+import { formatToIST, formatDateIST, getISTDateYYYYMMDD } from '@/lib/date';
 import { formatINR } from '@/lib/currency';
 
 export const revalidate = 0;
@@ -140,7 +140,7 @@ export default async function EventDetailPage({ params }: { params: { id: string
   } = await supabase.auth.getUser();
 
   const isLoggedIn = !!user;
-  const todayString = new Date().toISOString().slice(0, 10);
+  const todayString = getISTDateYYYYMMDD();
   const dateAllowsRegistration = typeof event.event_date === 'string' ? event.event_date > todayString : true;
   const registrationOpen = event.is_registration_open && remaining > 0 && dateAllowsRegistration;
 

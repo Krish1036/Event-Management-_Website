@@ -6,6 +6,7 @@ import { getSupabaseBrowserClient } from '@/lib/supabase-browser';
 import { Search, Filter, Grid3X3, Menu, List } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import AdminEventCard from './AdminEventCard';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export default function AdminEventsPage() {
   const [events, setEvents] = useState<any[]>([]);
@@ -221,7 +222,7 @@ export default function AdminEventsPage() {
           title: `${fullEvent.title} (Copy)`,
           description: fullEvent.description,
           location: fullEvent.location,
-          event_date: new Date().toISOString().split('T')[0],
+          event_date: getISTDateYYYYMMDD(),
           start_time: fullEvent.start_time,
           end_time: fullEvent.end_time,
           capacity: fullEvent.capacity,

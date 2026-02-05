@@ -16,7 +16,7 @@ import {
 import Link from "next/link";
 import { getSupabaseBrowserClient } from "@/lib/supabase-browser";
 import PublicNavbar from "./PublicNavbar";
-import { formatToIST, formatDateIST } from "@/lib/date";
+import { formatToIST, formatDateIST, getISTDateYYYYMMDD } from "@/lib/date";
 import { formatINR } from "@/lib/currency";
 
 interface Event {
@@ -76,13 +76,10 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
       const supabase = getSupabaseBrowserClient();
       if (!supabase) return;
 
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      const todayString = today.toISOString().split('T')[0];
+      const todayString = getISTDateYYYYMMDD();
 
       console.log('[DEBUG] Auto-close registration check:', {
         todayString,
-        today: today.toISOString(),
         timestamp: new Date().toISOString()
       });
 
@@ -307,7 +304,7 @@ export default function EventsClient({ initialEvents }: EventsClientProps) {
   };
 
   const getEffectiveRegistrationOpen = (event: Event) => {
-    const todayString = new Date().toISOString().slice(0, 10);
+    const todayString = getISTDateYYYYMMDD();
     const dateAllowsRegistration = typeof event.event_date === 'string' ? event.event_date > todayString : true;
     return Boolean(event.is_registration_open) && dateAllowsRegistration;
   };

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { rateLimit } from '@/lib/rate-limit';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export async function POST(request: NextRequest) {
   const supabaseUser = getSupabaseServerClient();
@@ -45,7 +46,7 @@ export async function POST(request: NextRequest) {
       throw new Error('Event not found');
     }
 
-    const todayString = new Date().toISOString().slice(0, 10);
+    const todayString = getISTDateYYYYMMDD();
     const dateAllowsRegistration = typeof (event as any).event_date === 'string' ? (event as any).event_date > todayString : true;
 
     if ((event as any).status !== 'approved') {

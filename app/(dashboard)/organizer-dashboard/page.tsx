@@ -1,6 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { Calendar, Users, ListChecks, Clock, PieChart } from 'lucide-react';
 import { format, subDays } from 'date-fns';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export const revalidate = 0;
 
@@ -47,7 +48,7 @@ async function getOrganizerOverviewMetrics(organizerId: string) {
     .from('events')
     .select('id', { count: 'exact', head: true })
     .or(`created_by.eq.${organizerId},assigned_organizer.eq.${organizerId}`)
-    .gte('event_date', new Date().toISOString().split('T')[0])
+    .gte('event_date', getISTDateYYYYMMDD())
     .eq('status', 'approved');
 
   const totalEvents = (events ?? []).length;

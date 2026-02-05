@@ -1,6 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { redirect } from 'next/navigation';
 import { Users, Calendar, CheckCircle, IndianRupee, UserCheck, TrendingUp } from 'lucide-react';
+import { getISTStartOfDayUTCISOString } from '@/lib/date';
 
 export const revalidate = 0;
 
@@ -41,7 +42,7 @@ async function getAdminOverviewMetrics() {
       supabase
         .from('attendance')
         .select('*', { count: 'exact', head: true })
-        .gte('checked_in_at', new Date(new Date().setHours(0,0,0,0)).toISOString())
+        .gte('checked_in_at', getISTStartOfDayUTCISOString())
     ]);
 
   const totalEvents = (events ?? []).length;

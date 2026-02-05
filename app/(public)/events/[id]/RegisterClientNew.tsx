@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { formatINR } from '@/lib/currency';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 const PAYMENTS_ENABLED = process.env.NEXT_PUBLIC_PAYMENTS_ENABLED === 'true';
 const FILES_BUCKET = 'registration-files';
@@ -50,7 +51,7 @@ export function RegisterClient({ eventId, formFields, event, pricingOptions }: R
   const [pricingError, setPricingError] = useState<string>('');
 
   // Check if registration is open
-  const todayString = new Date().toISOString().slice(0, 10);
+  const todayString = getISTDateYYYYMMDD();
   const dateAllowsRegistration = typeof event?.event_date === 'string' ? event.event_date > todayString : true;
   const isRegistrationOpen = event?.is_registration_open === true && dateAllowsRegistration;
 

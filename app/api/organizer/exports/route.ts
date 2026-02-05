@@ -1,7 +1,7 @@
 import { getSupabaseServerClient } from '@/lib/supabase-server';
 import { getSupabaseAdminClient } from '@/lib/supabase-admin';
 import { NextRequest } from 'next/server';
-import { formatToIST, formatDateIST } from '@/lib/date';
+import { formatToIST, formatDateIST, getISTDateYYYYMMDD } from '@/lib/date';
 import { formatINR } from '@/lib/currency';
 
 function escapeCSVField(field: any): string {
@@ -459,15 +459,15 @@ export async function POST(req: NextRequest) {
   switch (exportType) {
     case 'registrations':
       csvData = await exportRegistrations(admin, eventIds);
-      filename = `organizer-registrations-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `organizer-registrations-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'attendance':
       csvData = await exportAttendance(admin, eventIds);
-      filename = `organizer-attendance-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `organizer-attendance-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'payments':
       csvData = await exportPayments(admin, eventIds);
-      filename = `organizer-payments-${new Date().toISOString().split('T')[0]}.csv`;
+      filename = `organizer-payments-${getISTDateYYYYMMDD()}.csv`;
       break;
     case 'event_detailed':
       if (!eventId) return new Response('Missing eventId', { status: 400 });
@@ -477,7 +477,7 @@ export async function POST(req: NextRequest) {
           return new Response('Forbidden', { status: 403 });
         }
         csvData = (result as any).csv;
-        filename = `organizer-event-${eventId}-detailed-${new Date().toISOString().split('T')[0]}.csv`;
+        filename = `organizer-event-${eventId}-detailed-${getISTDateYYYYMMDD()}.csv`;
       }
       break;
     default:

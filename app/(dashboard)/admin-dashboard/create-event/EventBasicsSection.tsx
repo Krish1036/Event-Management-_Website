@@ -3,6 +3,7 @@
 import { useCreateEvent } from './CreateEventProvider';
 import { ImageUpload } from '@/components/ui/ImageUpload';
 import { AdvancedRichTextEditor } from '@/components/AdvancedRichTextEditor';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'light' }) {
   const { state, updateField, setError, clearError } = useCreateEvent();
@@ -168,7 +169,7 @@ export function EventBasicsSection({ variant = 'dark' }: { variant?: 'dark' | 'l
             id="event_date"
             value={state.data.event_date}
             onChange={(e) => handleDateChange(e.target.value)}
-            min={new Date().toISOString().split('T')[0]}
+            min={getISTDateYYYYMMDD()}
             className={`${inputBase} ${state.errors.event_date ? 'border-red-500' : (isLight ? 'border-gray-300' : 'border-slate-600')}`}
           />
           {state.errors.event_date && (

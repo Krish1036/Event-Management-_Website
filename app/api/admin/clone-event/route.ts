@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSupabaseServerClient } from '@/lib/supabase-server';
+import { getISTDateYYYYMMDD } from '@/lib/date';
 
 export async function POST(request: NextRequest) {
   try {
@@ -62,7 +63,7 @@ export async function POST(request: NextRequest) {
       title: body?.title || `${fullEvent.title} (Copy)`,
       description: fullEvent.description,
       location: fullEvent.location,
-      event_date: body?.event_date || new Date().toISOString().split('T')[0], // Default to today or provided date
+      event_date: body?.event_date || getISTDateYYYYMMDD(), // Default to today or provided date
       start_time: fullEvent.start_time,
       end_time: fullEvent.end_time,
       capacity: fullEvent.capacity,
